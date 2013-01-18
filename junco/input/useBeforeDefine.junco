@@ -1,0 +1,10 @@
+box main {
+    const nickels <- 11;
+    const pennies <- 5 + undefinedvariable;
+    
+    const value <- 
+    			 nickels * 5 +
+    			 pennies;
+    print value $;
+
+}

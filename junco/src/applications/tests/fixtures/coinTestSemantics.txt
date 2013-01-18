@@ -1,0 +1,50 @@
+ProgramNode (BOX)  [scope:23 bytes] 
+    BoxBodyNode (OPEN_BRACE)  
+        DeclarationNode (CONST) INTEGER 
+            IdentifierNode (identifier, quarters) INTEGER 
+            IntNumberNode (number, 5) INTEGER 
+        DeclarationNode (CONST) INTEGER 
+            IdentifierNode (identifier, dimes) INTEGER 
+            IntNumberNode (number, 3) INTEGER 
+        DeclarationNode (CONST) INTEGER 
+            IdentifierNode (identifier, nickels) INTEGER 
+            IntNumberNode (number, 7) INTEGER 
+        DeclarationNode (CONST) INTEGER 
+            IdentifierNode (identifier, pennies) INTEGER 
+            IntNumberNode (number, 17) INTEGER 
+        DeclarationNode (CONST) INTEGER 
+            IdentifierNode (identifier, value) INTEGER 
+            BinaryOperatorNode (ADD) INTEGER 
+                BinaryOperatorNode (ADD) INTEGER 
+                    BinaryOperatorNode (ADD) INTEGER 
+                        BinaryOperatorNode (MULTIPLY) INTEGER 
+                            IdentifierNode (identifier, quarters) INTEGER 
+                            IntNumberNode (number, 25) INTEGER 
+                        BinaryOperatorNode (MULTIPLY) INTEGER 
+                            IdentifierNode (identifier, dimes) INTEGER 
+                            IntNumberNode (number, 10) INTEGER 
+                    BinaryOperatorNode (MULTIPLY) INTEGER 
+                        IdentifierNode (identifier, nickels) INTEGER 
+                        IntNumberNode (number, 5) INTEGER 
+                IdentifierNode (identifier, pennies) INTEGER 
+        PrintStatementNode (PRINT)  
+            IdentifierNode (identifier, value) INTEGER 
+        DeclarationNode (CONST) BOOLEAN 
+            IdentifierNode (identifier, moredimes) BOOLEAN 
+            BinaryOperatorNode (GREATER) BOOLEAN 
+                IdentifierNode (identifier, dimes) INTEGER 
+                IdentifierNode (identifier, nickels) INTEGER 
+        PrintStatementNode (PRINT)  
+            IdentifierNode (identifier, moredimes) BOOLEAN 
+        DeclarationNode (CONST) BOOLEAN 
+            IdentifierNode (identifier, boot) BOOLEAN 
+            BooleanConstantNode (TRUE) BOOLEAN 
+        DeclarationNode (CONST) BOOLEAN 
+            IdentifierNode (identifier, boof) BOOLEAN 
+            BooleanConstantNode (FALSE) BOOLEAN 
+        PrintStatementNode (PRINT)  
+            IdentifierNode (identifier, boot) BOOLEAN 
+            IdentifierNode (identifier, boof) BOOLEAN 
+        PrintStatementNode (PRUNT)  
+            IdentifierNode (identifier, boot) BOOLEAN 
+            IdentifierNode (identifier, boof) BOOLEAN 

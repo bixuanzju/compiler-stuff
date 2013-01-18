@@ -1,0 +1,12 @@
+box main {
+    const nickels <- 11;
+    const pennies <- 5;
+    const value <- 
+    			 nickels * 5 +
+    			 pennies;
+    print value $;
+    const bad <- 25 * true;
+    prunt bad $;
+}
+
+
