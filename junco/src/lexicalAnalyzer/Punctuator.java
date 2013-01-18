@@ -3,10 +3,12 @@ package lexicalAnalyzer;
 import tokens.LextantToken;
 import tokens.Token;
 
-//TODO 2. add more punctuation and operators 
+
 public enum Punctuator implements Lextant {
 	ADD("+"),
+	MINUS("-"),
 	MULTIPLY("*"),
+	DIVIDE("/"),
 	ASSIGN("<-"),
 	GREATER(">"),
 	SPLICE(","),
@@ -14,6 +16,8 @@ public enum Punctuator implements Lextant {
 	PRINT_NEWLINE("$"),
 	OPEN_BRACE("{"),
 	CLOSE_BRACE("}"),
+	OPEN_BRACKT("("),
+	CLOSE_BRACKT(")"),
 	NULL_PUNCTUATOR("");
 
 	private String lexeme;

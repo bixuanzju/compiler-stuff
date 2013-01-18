@@ -106,7 +106,7 @@ public class JuncoParser {
 	///////////////////////////////////////////////////////////
 	// statements
 	
-	// statement-> declaration | printStmt
+	// statement-> declaration | printStmt | updateStmt
 	private ParseNode parseStatement() {
 		if(!startsStatement(nowReading)) {
 			return syntaxErrorNode("statement");
@@ -117,14 +117,18 @@ public class JuncoParser {
 		if(startsPrintStatement(nowReading)) {
 			return parsePrintStatement();
 		}
+		if(startsUpdateStatement(nowReading)) {
+			return parseUpdateStatement();
+		}
 		assert false : "bad token " + nowReading + " in parseStatement()";
 		return null;
 	}
 	private boolean startsStatement(Token token) {
 		return startsPrintStatement(token) ||
-			   startsDeclaration(token);
+			   startsDeclaration(token) ||
+			   startsUpdateStatement(token);
 	}
-	
+	   
 	// printStmt -> (PRINT | PRUNT) expressionList $?;
 	private ParseNode parsePrintStatement() {
 		if(!startsPrintStatement(nowReading)) {
@@ -190,7 +194,24 @@ public class JuncoParser {
 		return token.isLextant(Keyword.CONST);
 	}
 
-
+	// updateStmt -> UPDATE identifier <- expression ;
+	private ParseNode parseUpdateStatement() {
+		if(!startsUpdateStatement(nowReading)) {
+			return syntaxErrorNode("updateStatement");
+		}
+		Token declarationToken = nowReading;
+		readToken();
+		
+		ParseNode identifier = parseIdentifier();
+		expect(Punctuator.ASSIGN);
+		ParseNode initializer = parseExpression();
+		expect(Punctuator.TERMINATOR);
+		
+		return DeclarationNode.withChildren(declarationToken, identifier, initializer);
+	}
+	private boolean startsUpdateStatement(Token token) {
+		return token.isLextant(Keyword.UPDATE);
+	}
 	
 	///////////////////////////////////////////////////////////
 	// expressions

@@ -42,8 +42,8 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 		else if (isEndOfInput(ch)) {
 			nextToken = NullToken.make(ch.getLocation());
 		}
-		// TODO 3. add comment token scan
-		// TODO 6. add character cons scan
+		
+		
 		else {
 			lexicalError(ch);
 			findNextToken();
@@ -78,11 +78,11 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 		input.pushback(c);
 	}
 	
-	// TODO 5. add floating number lexical analysis
+	
 
 	// ////////////////////////////////////////////////////////////////////////////
 	// Identifier and keyword lexical analysis
-	// TODO 4. modify scanIdentifier method
+	
 	private void scanIdentifier(LocatedChar firstChar) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(firstChar.getCharacter());
