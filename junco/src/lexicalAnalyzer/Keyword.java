@@ -3,7 +3,7 @@ package lexicalAnalyzer;
 import tokens.LextantToken;
 import tokens.Token;
 
-
+//TODO 1. add more keywords
 public enum Keyword implements Lextant {
 	CONST("const"),
 	PRINT("print"),

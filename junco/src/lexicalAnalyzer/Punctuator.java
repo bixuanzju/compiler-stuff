@@ -3,7 +3,7 @@ package lexicalAnalyzer;
 import tokens.LextantToken;
 import tokens.Token;
 
-
+//TODO 2. add more punctuation and operators 
 public enum Punctuator implements Lextant {
 	ADD("+"),
 	MULTIPLY("*"),
