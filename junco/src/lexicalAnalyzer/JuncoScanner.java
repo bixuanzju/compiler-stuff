@@ -9,7 +9,6 @@ import inputHandler.TextLocation;
 import tokens.IdentifierToken;
 import tokens.LextantToken;
 import tokens.NullToken;
-import tokens.CommentToken;
 import tokens.NumberToken;
 import static lexicalAnalyzer.PunctuatorScanningAids.*;
 
@@ -27,18 +26,13 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 	// ////////////////////////////////////////////////////////////////////////////
 	// Token-finding main dispatch
 
+	// TODO add float number analysis
 	@Override
 	protected void findNextToken() {
 		LocatedChar ch = nextNonWhitespaceChar();
-
-		if (ch.isDigit()) {
-			scanNumber(ch);
-		}
-		else if (ch.isLowerCase()) {
-			scanIdentifier(ch);
-		}
+		
 		// deal with comment
-		else if (ch.getCharacter() == '*' && input.peek().getCharacter() == '*') {
+		while (ch.getCharacter() == '*' && input.peek().getCharacter() == '*') {
 			// eat the second '*'
 			ch = input.next();
 			do {
@@ -49,8 +43,17 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 				// eat the second '*'
 				ch = input.next();
 			}
-			nextToken = CommentToken.make(ch.getLocation());
+			ch = nextNonWhitespaceChar();
 		}
+		
+		if (ch.isDigit()) {
+			scanNumber(ch);
+		}
+		else if (ch.isLowerCase()) {
+			scanIdentifier(ch);
+		}
+
+		
 		else if (isPunctuatorStart(ch)) {
 			nextToken = PunctuatorScanner.scan(ch, input);
 		}
@@ -75,6 +78,7 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 	// ////////////////////////////////////////////////////////////////////////////
 	// Integer lexical analysis
 
+	// TODO modify int number to accommodate negative
 	private void scanNumber(LocatedChar firstChar) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(firstChar.getCharacter());
@@ -97,6 +101,7 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 	// ////////////////////////////////////////////////////////////////////////////
 	// Identifier and keyword lexical analysis
 	
+	// TODO modify identifier analysis
 	private void scanIdentifier(LocatedChar firstChar) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(firstChar.getCharacter());
