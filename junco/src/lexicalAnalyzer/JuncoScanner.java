@@ -9,6 +9,7 @@ import inputHandler.TextLocation;
 import tokens.IdentifierToken;
 import tokens.LextantToken;
 import tokens.NullToken;
+import tokens.CommentToken;
 import tokens.NumberToken;
 import static lexicalAnalyzer.PunctuatorScanningAids.*;
 
@@ -36,18 +37,31 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 		else if (ch.isLowerCase()) {
 			scanIdentifier(ch);
 		}
+		// deal with comment
+		else if (ch.getCharacter() == '*' && input.peek().getCharacter() == '*') {
+			// eat the second '*'
+			ch = input.next();
+			do {
+				ch = input.next();
+			}
+			while ((ch.getCharacter() != '*' || input.peek().getCharacter() != '*') && ch.getCharacter() != '\n');
+			if (ch.getCharacter() == '*') {
+				// eat the second '*'
+				ch = input.next();
+			}
+			nextToken = CommentToken.make(ch.getLocation());
+		}
 		else if (isPunctuatorStart(ch)) {
 			nextToken = PunctuatorScanner.scan(ch, input);
 		}
 		else if (isEndOfInput(ch)) {
 			nextToken = NullToken.make(ch.getLocation());
 		}
-		
-		
 		else {
 			lexicalError(ch);
 			findNextToken();
 		}
+		
 	}
 
 	private LocatedChar nextNonWhitespaceChar() {
