@@ -52,7 +52,7 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 		else if (isPunctuatorStart(ch)) {
 			nextToken = PunctuatorScanner.scan(ch, input);
 		}
-		else if (ch.isLetter()) {
+		else if (ch.isLetter() || ch.getCharacter() == '_' || ch.getCharacter() == '#') {
 			scanIdentifier(ch);
 		}
 
@@ -104,7 +104,7 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 	private void scanIdentifier(LocatedChar firstChar) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(firstChar.getCharacter());
-		appendSubsequentLowercase(buffer);
+		appendSubsequentChar(buffer);
 
 		String lexeme = buffer.toString();
 		if (Keyword.isAKeyword(lexeme)) {
@@ -116,9 +116,9 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 		}
 	}
 
-	private void appendSubsequentLowercase(StringBuffer buffer) {
+	private void appendSubsequentChar(StringBuffer buffer) {
 		LocatedChar c = input.next();
-		while (c.isLowerCase()) {
+		while (c.isLetter() || c.getCharacter() == '_' || c.getCharacter() == '#' || c.getCharacter() == '-' || c.isDigit()) {
 			buffer.append(c.getCharacter());
 			c = input.next();
 		}
