@@ -297,6 +297,13 @@ public class JuncoParser {
 			
 			left = BinaryOperatorNode.withChildren(multiplicativeToken, left, right);
 		}
+		while(nowReading.isLextant(Punctuator.DIVIDE)) {
+			Token divideToken = nowReading;
+			readToken();
+			ParseNode right = parseExpression4();
+			
+			left = BinaryOperatorNode.withChildren(divideToken, left, right);
+		}
 		return left;
 	}
 	private boolean startsExpression3(Token token) {
