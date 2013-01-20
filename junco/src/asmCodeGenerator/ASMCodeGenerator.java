@@ -285,37 +285,31 @@ public class ASMCodeGenerator {
 			code.add(Label, subLabel);
 			code.add(Subtract);
 			
-			if (operator == Punctuator.GREATER) {
-		
+
+			switch ((Punctuator)operator) {
+			case GREATER:
 				code.add(JumpPos, trueLabel);
 				code.add(Jump, falseLabel);
-
-			}
-			else if (operator == Punctuator.GREATEREQ) {
+				break;
+			case GREATEREQ:
 				code.add(JumpNeg, falseLabel);
 				code.add(Jump, trueLabel);
-			
-			}
-			else if (operator == Punctuator.LESS) {
+			case LESS:
 				code.add(JumpNeg, trueLabel);
 				code.add(Jump, falseLabel);
-		
-			}
-			else if (operator == Punctuator.LESSEQ) {
+			case LESSEQ:
 				code.add(JumpPos, falseLabel);
 				code.add(Jump, trueLabel);
-				
-			}
-			else if (operator == Punctuator.EQUAL) {
+			case EQUAL:
 				code.add(JumpFalse, trueLabel);
 				code.add(Jump, falseLabel);
-				
-			}
-			else if (operator == Punctuator.UNEQUAL) {
+			case UNEQUAL:
 				code.add(JumpTrue, trueLabel);
 				code.add(Jump, falseLabel);
-				
+			default:
+				break;
 			}
+			
 			
 			code.add(Label, trueLabel);
 			code.add(PushI, 1);

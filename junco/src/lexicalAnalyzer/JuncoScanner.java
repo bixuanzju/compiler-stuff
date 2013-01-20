@@ -52,7 +52,7 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 		else if (isPunctuatorStart(ch)) {
 			nextToken = PunctuatorScanner.scan(ch, input);
 		}
-		else if (ch.isLowerCase()) {
+		else if (ch.isLetter()) {
 			scanIdentifier(ch);
 		}
 

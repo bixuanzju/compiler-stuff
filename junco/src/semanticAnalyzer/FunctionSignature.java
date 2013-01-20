@@ -1,5 +1,6 @@
 package semanticAnalyzer;
 
+import parseTree.ParseNode;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 
@@ -54,8 +55,10 @@ class FunctionSignature {
 	private static FunctionSignature greatereqSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature lessSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature lesseqSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
-	private static FunctionSignature equalSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
-	private static FunctionSignature unequalSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
+	private static FunctionSignature equalSignature1 = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
+	private static FunctionSignature equalSignature2 = new FunctionSignature(1, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN);
+	private static FunctionSignature unequalSignature1 = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
+	private static FunctionSignature unequalSignature2 = new FunctionSignature(1, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN);
 	private static FunctionSignature neverMatchedSignature = new FunctionSignature(1, PrimitiveType.ERROR) {
 		public boolean accepts(Type ...types) {
 			return false;
@@ -63,7 +66,7 @@ class FunctionSignature {
 	};
 	
 	// the switch here is ugly compared to polymorphism.  This should perhaps be a method on Lextant.
-	public static FunctionSignature signatureOf(Lextant lextant) {
+	public static FunctionSignature signatureOf(Lextant lextant, ParseNode node) {
 		assert(lextant instanceof Punctuator);	
 		Punctuator punctuator = (Punctuator)lextant;
 		
@@ -76,8 +79,16 @@ class FunctionSignature {
 		case GREATEREQ:	return greatereqSignature;
 		case LESS:	return lessSignature;
 		case LESSEQ:	return lesseqSignature;
-		case EQUAL:	return equalSignature;
-		case UNEQUAL:	return unequalSignature;
+		case EQUAL:	
+			if (node.getType() == PrimitiveType.INTEGER)
+			return equalSignature1;
+			else if (node.getType() == PrimitiveType.BOOLEAN)
+				return equalSignature2;
+		case UNEQUAL:	
+			if (node.getType() == PrimitiveType.INTEGER)
+				return unequalSignature1;
+			else if (node.getType() == PrimitiveType.BOOLEAN)
+				return unequalSignature2;
 
 		default:
 			return neverMatchedSignature;

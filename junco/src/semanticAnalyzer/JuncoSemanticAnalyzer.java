@@ -85,7 +85,7 @@ public class JuncoSemanticAnalyzer {
 			ParseNode right = node.child(1);
 			
 			Lextant operator = operatorFor(node);
-			FunctionSignature signature = FunctionSignature.signatureOf(operator);
+			FunctionSignature signature = FunctionSignature.signatureOf(operator, left);
 			
 			if(signature.accepts(left.getType(), right.getType())) {
 				node.setType(signature.resultType());
