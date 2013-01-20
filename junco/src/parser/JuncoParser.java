@@ -261,13 +261,22 @@ public class JuncoParser {
 		}
 		
 		ParseNode left = parseExpression3();
-		while(nowReading.isLextant(Punctuator.ADD)) {
+		while (nowReading.isLextant(Punctuator.ADD)) {
 			Token additiveToken = nowReading;
 			readToken();
 			ParseNode right = parseExpression3();
-			
+
 			left = BinaryOperatorNode.withChildren(additiveToken, left, right);
 		}
+
+		while (nowReading.isLextant(Punctuator.MINUS)) {
+			Token minusToken = nowReading;
+			readToken();
+			ParseNode right = parseExpression3();
+
+			left = BinaryOperatorNode.withChildren(minusToken, left, right);
+		}
+
 		return left;
 	}
 	private boolean startsExpression2(Token token) {

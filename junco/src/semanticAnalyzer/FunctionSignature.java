@@ -47,6 +47,7 @@ class FunctionSignature {
 	
 	// signature definitions for integer add, multiply, and greater-than.
 	private static FunctionSignature addSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
+	private static FunctionSignature minusSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
 	private static FunctionSignature multiplySignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
 	private static FunctionSignature greaterSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature neverMatchedSignature = new FunctionSignature(1, PrimitiveType.ERROR) {
@@ -62,6 +63,7 @@ class FunctionSignature {
 		
 		switch(punctuator) {
 		case ADD:		return addSignature;
+		case MINUS:	return minusSignature;
 		case MULTIPLY:	return multiplySignature;
 		case GREATER:	return greaterSignature;
 

@@ -46,17 +46,16 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 			ch = nextNonWhitespaceChar();
 		}
 		
-		if (ch.isDigit()) {
+		if ((ch.getCharacter() == '-' && input.peek().isDigit()) || ch.isDigit()) {
 			scanNumber(ch);
+		}
+		else if (isPunctuatorStart(ch)) {
+			nextToken = PunctuatorScanner.scan(ch, input);
 		}
 		else if (ch.isLowerCase()) {
 			scanIdentifier(ch);
 		}
 
-		
-		else if (isPunctuatorStart(ch)) {
-			nextToken = PunctuatorScanner.scan(ch, input);
-		}
 		else if (isEndOfInput(ch)) {
 			nextToken = NullToken.make(ch.getLocation());
 		}
@@ -78,7 +77,7 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 	// ////////////////////////////////////////////////////////////////////////////
 	// Integer lexical analysis
 
-	// TODO modify int number to accommodate negative
+	// TODO modify int number to accommodate negative and float type
 	private void scanNumber(LocatedChar firstChar) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(firstChar.getCharacter());

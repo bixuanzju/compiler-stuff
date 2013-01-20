@@ -311,6 +311,7 @@ public class ASMCodeGenerator {
 			Punctuator punctuator = (Punctuator)lextant;
 			switch(punctuator) {
 			case ADD: 	   		return Add;				// type-dependent!
+			case MINUS:				return Subtract;
 			case MULTIPLY: 		return Multiply;		// type-dependent!
 			default:
 				assert false : "unimplemented operator in opcodeForOperator";
