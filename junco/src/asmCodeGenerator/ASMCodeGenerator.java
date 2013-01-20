@@ -255,7 +255,9 @@ public class ASMCodeGenerator {
 		public void visitLeave(BinaryOperatorNode node) {
 			Lextant operator = node.getOperator();
 
-			if(operator == Punctuator.GREATER) {
+			if((operator == Punctuator.GREATER) || (operator == Punctuator.GREATEREQ)
+					|| (operator == Punctuator.LESS) || (operator == Punctuator.LESSEQ)
+					|| (operator == Punctuator.EQUAL) || (operator == Punctuator.UNEQUAL)) {
 				visitComparisonOperatorNode(node, operator);
 			}
 			else {
@@ -283,9 +285,38 @@ public class ASMCodeGenerator {
 			code.add(Label, subLabel);
 			code.add(Subtract);
 			
-			code.add(JumpPos, trueLabel);
-			code.add(Jump, falseLabel);
+			if (operator == Punctuator.GREATER) {
+		
+				code.add(JumpPos, trueLabel);
+				code.add(Jump, falseLabel);
 
+			}
+			else if (operator == Punctuator.GREATEREQ) {
+				code.add(JumpNeg, falseLabel);
+				code.add(Jump, trueLabel);
+			
+			}
+			else if (operator == Punctuator.LESS) {
+				code.add(JumpNeg, trueLabel);
+				code.add(Jump, falseLabel);
+		
+			}
+			else if (operator == Punctuator.LESSEQ) {
+				code.add(JumpPos, falseLabel);
+				code.add(Jump, trueLabel);
+				
+			}
+			else if (operator == Punctuator.EQUAL) {
+				code.add(JumpFalse, trueLabel);
+				code.add(Jump, falseLabel);
+				
+			}
+			else if (operator == Punctuator.UNEQUAL) {
+				code.add(JumpTrue, trueLabel);
+				code.add(Jump, falseLabel);
+				
+			}
+			
 			code.add(Label, trueLabel);
 			code.add(PushI, 1);
 			code.add(Jump, joinLabel);
@@ -293,7 +324,6 @@ public class ASMCodeGenerator {
 			code.add(PushI, 0);
 			code.add(Jump, joinLabel);
 			code.add(Label, joinLabel);
-
 		}
 		private void visitNormalBinaryOperatorNode(BinaryOperatorNode node) {
 			newValueCode(node);

@@ -247,6 +247,41 @@ public class JuncoParser {
 			
 			return BinaryOperatorNode.withChildren(compareToken, left, right);
 		}
+		else if(nowReading.isLextant(Punctuator.GREATEREQ)) {
+			Token compareToken = nowReading;
+			readToken();
+			ParseNode right = parseExpression2();
+			
+			return BinaryOperatorNode.withChildren(compareToken, left, right);
+		}
+		else if(nowReading.isLextant(Punctuator.LESS)) {
+			Token compareToken = nowReading;
+			readToken();
+			ParseNode right = parseExpression2();
+			
+			return BinaryOperatorNode.withChildren(compareToken, left, right);
+		}
+		else if(nowReading.isLextant(Punctuator.LESSEQ)) {
+			Token compareToken = nowReading;
+			readToken();
+			ParseNode right = parseExpression2();
+			
+			return BinaryOperatorNode.withChildren(compareToken, left, right);
+		}
+		else if(nowReading.isLextant(Punctuator.EQUAL)) {
+			Token compareToken = nowReading;
+			readToken();
+			ParseNode right = parseExpression2();
+			
+			return BinaryOperatorNode.withChildren(compareToken, left, right);
+		}
+		else if(nowReading.isLextant(Punctuator.UNEQUAL)) {
+			Token compareToken = nowReading;
+			readToken();
+			ParseNode right = parseExpression2();
+			
+			return BinaryOperatorNode.withChildren(compareToken, left, right);
+		}
 		return left;
 
 	}
