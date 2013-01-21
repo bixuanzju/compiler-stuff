@@ -166,6 +166,10 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 					Keyword.forLexeme(lexeme));
 		}
 		else {
+			if (buffer.length() > 39) {
+				JuncoLogger log = JuncoLogger.getLogger("compiler.lexicalAnalyzer");
+				log.severe("Lexical error: too long identifier " + buffer);
+			}
 			nextToken = IdentifierToken.make(firstChar.getLocation(), lexeme);
 		}
 	}
