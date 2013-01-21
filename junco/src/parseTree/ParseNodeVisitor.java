@@ -5,6 +5,7 @@ import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
+import parseTree.nodeTypes.FloatNumberNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
@@ -38,6 +39,7 @@ public interface ParseNodeVisitor {
 	void visit(ErrorNode node);
 	void visit(IdentifierNode node);
 	void visit(IntNumberNode node);
+	void visit(FloatNumberNode node);
 
 	
 	public static class Default implements ParseNodeVisitor
@@ -100,6 +102,9 @@ public interface ParseNodeVisitor {
 			defaultVisitForLeaf(node);
 		}
 		public void visit(IntNumberNode node) {
+			defaultVisitForLeaf(node);
+		}
+		public void visit(FloatNumberNode node) {
 			defaultVisitForLeaf(node);
 		}
 	}

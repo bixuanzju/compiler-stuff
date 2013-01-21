@@ -6,6 +6,7 @@ import inputHandler.LocatedChar;
 import inputHandler.LocatedCharStream;
 import inputHandler.PushbackCharStream;
 import inputHandler.TextLocation;
+import tokens.FloatingToken;
 import tokens.IdentifierToken;
 import tokens.LextantToken;
 import tokens.NullToken;
@@ -26,7 +27,7 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 	// ////////////////////////////////////////////////////////////////////////////
 	// Token-finding main dispatch
 
-	// TODO add float number analysis
+
 	@Override
 	protected void findNextToken() {
 		LocatedChar ch = nextNonWhitespaceChar();
@@ -75,32 +76,80 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////
-	// Integer lexical analysis
+	// Integer and float number lexical analysis
 
-	// TODO modify int number to accommodate negative and float type
 	private void scanNumber(LocatedChar firstChar) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(firstChar.getCharacter());
-		appendSubsequentDigits(buffer);
-
-		nextToken = NumberToken.make(firstChar.getLocation(), buffer.toString());
-	}
-
-	private void appendSubsequentDigits(StringBuffer buffer) {
 		LocatedChar c = input.next();
+		
 		while (c.isDigit()) {
 			buffer.append(c.getCharacter());
 			c = input.next();
 		}
-		input.pushback(c);
+
+		if (c.getCharacter() == '.') {
+			buffer.append(c.getCharacter());
+			c = input.next();
+			while (c.isDigit()) {
+				buffer.append(c.getCharacter());
+				c = input.next();
+			}
+			if (c.getCharacter() == 'e') {
+				buffer.append(c.getCharacter());
+				c = input.next();
+				if ((c.getCharacter() == '-' && input.peek().isDigit()) || c.isDigit()) {
+					buffer.append(c.getCharacter());
+					c = input.next();
+					while (c.isDigit()) {
+						buffer.append(c.getCharacter());
+						c = input.next();
+					}
+				}
+			}
+			input.pushback(c);
+			nextToken = FloatingToken.make(firstChar.getLocation(), buffer.toString());
+		}
+		else {
+			input.pushback(c);
+			nextToken = NumberToken.make(firstChar.getLocation(), buffer.toString());
+		}
 	}
-	
+
+//	private void appendSubsequentDigits(StringBuffer buffer) {
+//		LocatedChar c = input.next();
+//		while (c.isDigit()) {
+//			buffer.append(c.getCharacter());
+//			c = input.next();
+//		}
+//		if (c.getCharacter() == '.') {
+//			buffer.append(c.getCharacter());
+//			c = input.next();
+//			while (c.isDigit()) {
+//				buffer.append(c.getCharacter());
+//				c = input.next();
+//			}
+//			if (c.getCharacter() == 'e') {
+//				c = input.next();
+//				if ((c.getCharacter() == '-' && input.peek().isDigit()) || c.isDigit()) {
+//					buffer.append(c.getCharacter());
+//					c = input.next();
+//					while (c.isDigit()) {
+//						buffer.append(c.getCharacter());
+//						c = input.next();
+//					}
+//				}
+//			}
+//		}
+//		input.pushback(c);
+//	}
+//	
 	
 
 	// ////////////////////////////////////////////////////////////////////////////
 	// Identifier and keyword lexical analysis
 	
-	// TODO modify identifier analysis
+
 	private void scanIdentifier(LocatedChar firstChar) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(firstChar.getCharacter());

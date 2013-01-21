@@ -4,6 +4,7 @@ import static asmCodeGenerator.ASMCodeFragment.CodeType.*;
 public class RunTime {
 	public static final String EAT_LOCATION_ZERO    = "$eat-location-zero";		// helps us distinguish null pointers from real ones.
 	public static final String INTEGER_PRINT_FORMAT = "$print-format-integer";
+	public static final String FLOAT_PRINT_FORMAT = "$print-format-float";
 	public static final String BOOLEAN_PRINT_FORMAT = "$print-format-boolean";
 	public static final String NEWLINE_PRINT_FORMAT = "$print-format-newline";
 	public static final String BOOLEAN_TRUE_STRING  = "$boolean-true-string";
@@ -33,6 +34,8 @@ public class RunTime {
 		frag.add(DataZ, 8);
 		frag.add(DLabel, INTEGER_PRINT_FORMAT);
 		frag.add(DataS, "%d");
+		frag.add(DLabel, FLOAT_PRINT_FORMAT);
+		frag.add(DataS, "%f");
 		frag.add(DLabel, BOOLEAN_PRINT_FORMAT);
 		frag.add(DataS, "%s");
 		frag.add(DLabel, NEWLINE_PRINT_FORMAT);

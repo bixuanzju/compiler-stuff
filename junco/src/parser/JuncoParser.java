@@ -9,6 +9,7 @@ import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
+import parseTree.nodeTypes.FloatNumberNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
@@ -240,48 +241,15 @@ public class JuncoParser {
 		}
 		
 		ParseNode left = parseExpression2();
-		if(nowReading.isLextant(Punctuator.GREATER)) {
+		if(nowReading.isLextant(Punctuator.GREATER, Punctuator.GREATEREQ, Punctuator.LESS, Punctuator.LESSEQ,
+				Punctuator.EQUAL, Punctuator.UNEQUAL)) {
 			Token compareToken = nowReading;
 			readToken();
 			ParseNode right = parseExpression2();
 			
 			return BinaryOperatorNode.withChildren(compareToken, left, right);
 		}
-		else if(nowReading.isLextant(Punctuator.GREATEREQ)) {
-			Token compareToken = nowReading;
-			readToken();
-			ParseNode right = parseExpression2();
-			
-			return BinaryOperatorNode.withChildren(compareToken, left, right);
-		}
-		else if(nowReading.isLextant(Punctuator.LESS)) {
-			Token compareToken = nowReading;
-			readToken();
-			ParseNode right = parseExpression2();
-			
-			return BinaryOperatorNode.withChildren(compareToken, left, right);
-		}
-		else if(nowReading.isLextant(Punctuator.LESSEQ)) {
-			Token compareToken = nowReading;
-			readToken();
-			ParseNode right = parseExpression2();
-			
-			return BinaryOperatorNode.withChildren(compareToken, left, right);
-		}
-		else if(nowReading.isLextant(Punctuator.EQUAL)) {
-			Token compareToken = nowReading;
-			readToken();
-			ParseNode right = parseExpression2();
-			
-			return BinaryOperatorNode.withChildren(compareToken, left, right);
-		}
-		else if(nowReading.isLextant(Punctuator.UNEQUAL)) {
-			Token compareToken = nowReading;
-			readToken();
-			ParseNode right = parseExpression2();
-			
-			return BinaryOperatorNode.withChildren(compareToken, left, right);
-		}
+		
 		return left;
 
 	}
@@ -365,6 +333,9 @@ public class JuncoParser {
 		if(startsIntNumber(nowReading)) {
 			return parseIntNumber();
 		}
+		if(startsFloatNumber(nowReading)) {
+			return parseFloatNumber();
+		}
 		if(startsIdentifier(nowReading)) {
 			return parseIdentifier();
 		}
@@ -375,7 +346,7 @@ public class JuncoParser {
 		return null;
 	}
 	private boolean startsLiteral(Token token) {
-		return startsIntNumber(token) || startsIdentifier(token) || startsBooleanConstant(token);
+		return startsIntNumber(token) || startsFloatNumber(token) ||  startsIdentifier(token) || startsBooleanConstant(token);
 	}
 
 	// number (terminal)
@@ -388,6 +359,18 @@ public class JuncoParser {
 	}
 	private boolean startsIntNumber(Token token) {
 		return token instanceof NumberToken;
+	}
+	
+	// floating number (terminal)
+	private ParseNode parseFloatNumber() {
+		if(!startsFloatNumber(nowReading)) {
+			return syntaxErrorNode("floating number constant");
+		}
+		readToken();
+		return new FloatNumberNode(previouslyRead);
+	}
+	private boolean startsFloatNumber(Token token) {
+		return token instanceof FloatingToken;
 	}
 
 	// identifier (terminal)

@@ -11,6 +11,7 @@ import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
+import parseTree.nodeTypes.FloatNumberNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
@@ -106,6 +107,10 @@ public class JuncoSemanticAnalyzer {
 		@Override
 		public void visit(BooleanConstantNode node) {
 			node.setType(PrimitiveType.BOOLEAN);
+		}
+		@Override
+		public void visit(FloatNumberNode node) {
+			node.setType(PrimitiveType.FLOATNUM);
 		}
 		@Override
 		public void visit(ErrorNode node) {
