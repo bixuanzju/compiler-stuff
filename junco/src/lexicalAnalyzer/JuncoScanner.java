@@ -6,6 +6,7 @@ import inputHandler.LocatedChar;
 import inputHandler.LocatedCharStream;
 import inputHandler.PushbackCharStream;
 import inputHandler.TextLocation;
+import tokens.CharacterToken;
 import tokens.FloatingToken;
 import tokens.IdentifierToken;
 import tokens.LextantToken;
@@ -49,6 +50,10 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 		
 		if ((ch.getCharacter() == '-' && input.peek().isDigit()) || ch.isDigit()) {
 			scanNumber(ch);
+		}
+		else if (ch.getCharacter() == '\'' && input.peek().getCharacter() >= 32 && input.peek().getCharacter() <= 126) {
+			ch = input.next();
+			nextToken = CharacterToken.make(ch.getLocation(), ch.getCharacter().toString());
 		}
 		else if (isPunctuatorStart(ch)) {
 			nextToken = PunctuatorScanner.scan(ch, input);

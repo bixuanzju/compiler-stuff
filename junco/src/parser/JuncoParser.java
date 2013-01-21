@@ -7,6 +7,7 @@ import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
+import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatNumberNode;
@@ -342,11 +343,15 @@ public class JuncoParser {
 		if(startsBooleanConstant(nowReading)) {
 			return parseBooleanConstant();
 		}
+		if(startsCharacterConstant(nowReading)) {
+			return parseCharacterConstant();
+		}
 		assert false : "bad token " + nowReading + " in parseLiteral()";
 		return null;
 	}
 	private boolean startsLiteral(Token token) {
-		return startsIntNumber(token) || startsFloatNumber(token) ||  startsIdentifier(token) || startsBooleanConstant(token);
+		return startsIntNumber(token) || startsFloatNumber(token) ||  startsIdentifier(token) || 
+				startsBooleanConstant(token) || startsCharacterConstant(token);
 	}
 
 	// number (terminal)
@@ -373,6 +378,18 @@ public class JuncoParser {
 		return token instanceof FloatingToken;
 	}
 
+	// character (terminal)
+	private ParseNode parseCharacterConstant() {
+		if(!startsCharacterConstant(nowReading)) {
+			return syntaxErrorNode("character constant");
+		}
+		readToken();
+		return new CharacterNode(previouslyRead);
+	}
+	private boolean startsCharacterConstant(Token token) {
+		return token instanceof CharacterToken;
+	}
+	
 	// identifier (terminal)
 	private ParseNode parseIdentifier() {
 		if(!startsIdentifier(nowReading)) {
