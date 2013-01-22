@@ -222,7 +222,7 @@ public class JuncoParser {
 	// expr2 -> expr3 [+ expr3]*  (left-assoc)
 	// expr3 -> expr4 [MULT expr4]*  (left-assoc)
 	// expr4 -> literal
-	// literal -> intNumber | identifier | booleanConstant
+	// literal -> intNumber | identifier | booleanConstant | characterConstant
 
 	// expr  -> expr1
 	private ParseNode parseExpression() {		
@@ -284,7 +284,7 @@ public class JuncoParser {
 		return left;
 	}
 	private boolean startsExpression2(Token token) {
-		return startsLiteral(token);
+		return startsExpression3(token);
 	}	
 
 	// expr3 -> expr4 [MULT expr4]*  (left-assoc)
@@ -319,15 +319,22 @@ public class JuncoParser {
 		if(!startsExpression4(nowReading)) {
 			return syntaxErrorNode("expression<4>");
 		}
-		return parseLiteral();
+		if (nowReading.isLextant(Punctuator.OPEN_BRACKET)) {
+			readToken();
+			ParseNode node = parseExpression1();
+			expect(Punctuator.CLOSE_BRACKET);
+			return node;
+		}
+		else
+			return parseLiteral();
 	}
 	private boolean startsExpression4(Token token) {
-		return startsLiteral(token);
+		return startsLiteralOrBracket(token);
 	}
 	
 	// literal -> number | identifier | booleanConstant
 	private ParseNode parseLiteral() {
-		if(!startsLiteral(nowReading)) {
+		if(!startsLiteralOrBracket(nowReading)) {
 			return syntaxErrorNode("literal");
 		}
 		
@@ -349,9 +356,9 @@ public class JuncoParser {
 		assert false : "bad token " + nowReading + " in parseLiteral()";
 		return null;
 	}
-	private boolean startsLiteral(Token token) {
+	private boolean startsLiteralOrBracket(Token token) {
 		return startsIntNumber(token) || startsFloatNumber(token) ||  startsIdentifier(token) || 
-				startsBooleanConstant(token) || startsCharacterConstant(token);
+				startsBooleanConstant(token) || startsCharacterConstant(token) || (token.isLextant(Punctuator.OPEN_BRACKET));
 	}
 
 	// number (terminal)
