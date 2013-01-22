@@ -9,6 +9,7 @@ import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
+import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatNumberNode;
@@ -111,6 +112,10 @@ public class JuncoSemanticAnalyzer {
 		@Override
 		public void visit(FloatNumberNode node) {
 			node.setType(PrimitiveType.FLOATNUM);
+		}
+		@Override
+		public void visit(CharacterNode node) {
+			node.setType(PrimitiveType.CHARACTER);
 		}
 		@Override
 		public void visit(ErrorNode node) {

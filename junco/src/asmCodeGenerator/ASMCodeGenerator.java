@@ -9,6 +9,7 @@ import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
+import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatNumberNode;
 import parseTree.nodeTypes.IdentifierNode;
@@ -149,6 +150,9 @@ public class ASMCodeGenerator {
 			else if (node.getType() == PrimitiveType.BOOLEAN) {
 				code.add(LoadC);
 			}
+			else if (node.getType() == PrimitiveType.CHARACTER) {
+				code.add(LoadC);
+			}
 			else {
 				assert false : "node " + node;
 			}
@@ -241,6 +245,8 @@ public class ASMCodeGenerator {
 				return RunTime.BOOLEAN_PRINT_FORMAT;
 			case FLOATNUM:
 				return RunTime.FLOAT_PRINT_FORMAT;
+			case CHARACTER:
+				return RunTime.CHARACTER_PRINT_FORMAT;
 			default:
 				assert false : "Type " + type
 						+ " unimplemented in ASMCodeGenerator.printFormat()";
@@ -268,6 +274,9 @@ public class ASMCodeGenerator {
 				return StoreF;
 			}
 			if (type == PrimitiveType.BOOLEAN) {
+				return StoreC;
+			}
+			if (type == PrimitiveType.CHARACTER) {
 				return StoreC;
 			}
 			assert false : "Type " + type + " unimplemented in opcodeForStore()";
@@ -321,18 +330,23 @@ public class ASMCodeGenerator {
 				case GREATEREQ:
 					code.add(JumpFNeg, falseLabel);
 					code.add(Jump, trueLabel);
+					break;
 				case LESS:
 					code.add(JumpFNeg, trueLabel);
 					code.add(Jump, falseLabel);
+					break;
 				case LESSEQ:
 					code.add(JumpFPos, falseLabel);
 					code.add(Jump, trueLabel);
+					break;
 				case EQUAL:
 					code.add(JumpFZero, trueLabel);
 					code.add(Jump, falseLabel);
+					break;
 				case UNEQUAL:
 					code.add(JumpFZero, falseLabel);
 					code.add(Jump, trueLabel);
+					break;
 				default:
 					break;
 				}
@@ -348,18 +362,23 @@ public class ASMCodeGenerator {
 				case GREATEREQ:
 					code.add(JumpNeg, falseLabel);
 					code.add(Jump, trueLabel);
+					break;
 				case LESS:
 					code.add(JumpNeg, trueLabel);
 					code.add(Jump, falseLabel);
+					break;
 				case LESSEQ:
 					code.add(JumpPos, falseLabel);
 					code.add(Jump, trueLabel);
+					break;
 				case EQUAL:
 					code.add(JumpFalse, trueLabel);
 					code.add(Jump, falseLabel);
+					break;
 				case UNEQUAL:
 					code.add(JumpTrue, trueLabel);
 					code.add(Jump, falseLabel);
+					break;
 				default:
 					break;
 				}
@@ -423,6 +442,12 @@ public class ASMCodeGenerator {
 			newValueCode(node);
 			code.add(PushI, node.getValue() ? 1 : 0);
 		}
+
+		public void visit(CharacterNode node) {
+			newValueCode(node);
+			code.add(PushI, node.getValue());
+		}
+
 
 		public void visit(IdentifierNode node) {
 			newAddressCode(node);

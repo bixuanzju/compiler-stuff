@@ -17,7 +17,7 @@ public class CharacterNode extends ParseNode {
 ////////////////////////////////////////////////////////////
 // attributes
 	
-	public String getValue() {
+	public char getValue() {
 		return characterToken().getValue();
 	}
 

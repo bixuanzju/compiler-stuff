@@ -96,10 +96,16 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 		if (c.getCharacter() == '.') {
 			buffer.append(c.getCharacter());
 			c = input.next();
+			if (c.isDigit())
 			while (c.isDigit()) {
 				buffer.append(c.getCharacter());
 				c = input.next();
 			}
+			else {
+				JuncoLogger log = JuncoLogger.getLogger("compiler.lexicalAnalyzer");
+				log.severe("Lexical error: invalid floating number " + buffer);
+			}
+			
 			if (c.getCharacter() == 'e') {
 				buffer.append(c.getCharacter());
 				c = input.next();

@@ -57,18 +57,24 @@ class FunctionSignature {
 	private static FunctionSignature divideSignature2 = new FunctionSignature(1, PrimitiveType.FLOATNUM, PrimitiveType.FLOATNUM, PrimitiveType.FLOATNUM);
 	private static FunctionSignature greaterSignature1 = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature greaterSignature2 = new FunctionSignature(1, PrimitiveType.FLOATNUM, PrimitiveType.FLOATNUM, PrimitiveType.BOOLEAN);
+	private static FunctionSignature greaterSignature3 = new FunctionSignature(1, PrimitiveType.CHARACTER, PrimitiveType.CHARACTER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature greatereqSignature1 = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature greatereqSignature2 = new FunctionSignature(1, PrimitiveType.FLOATNUM, PrimitiveType.FLOATNUM, PrimitiveType.BOOLEAN);
+	private static FunctionSignature greatereqSignature3 = new FunctionSignature(1, PrimitiveType.CHARACTER, PrimitiveType.CHARACTER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature lessSignature1 = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature lessSignature2 = new FunctionSignature(1, PrimitiveType.FLOATNUM, PrimitiveType.FLOATNUM, PrimitiveType.BOOLEAN);
+	private static FunctionSignature lessSignature3 = new FunctionSignature(1, PrimitiveType.CHARACTER, PrimitiveType.CHARACTER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature lesseqSignature1 = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature lesseqSignature2 = new FunctionSignature(1, PrimitiveType.FLOATNUM, PrimitiveType.FLOATNUM, PrimitiveType.BOOLEAN);
+	private static FunctionSignature lesseqSignature3 = new FunctionSignature(1, PrimitiveType.CHARACTER, PrimitiveType.CHARACTER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature equalSignature1 = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature equalSignature2 = new FunctionSignature(1, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN);
 	private static FunctionSignature equalSignature3 = new FunctionSignature(1, PrimitiveType.FLOATNUM, PrimitiveType.FLOATNUM, PrimitiveType.BOOLEAN);
+	private static FunctionSignature equalSignature4 = new FunctionSignature(1, PrimitiveType.CHARACTER, PrimitiveType.CHARACTER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature unequalSignature1 = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature unequalSignature2 = new FunctionSignature(1, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN);
 	private static FunctionSignature unequalSignature3 = new FunctionSignature(1, PrimitiveType.FLOATNUM, PrimitiveType.FLOATNUM, PrimitiveType.BOOLEAN);
+	private static FunctionSignature unequalSignature4 = new FunctionSignature(1, PrimitiveType.CHARACTER, PrimitiveType.CHARACTER, PrimitiveType.BOOLEAN);
 	private static FunctionSignature neverMatchedSignature = new FunctionSignature(1, PrimitiveType.ERROR) {
 		public boolean accepts(Type ...types) {
 			return false;
@@ -80,61 +86,83 @@ class FunctionSignature {
 		assert(lextant instanceof Punctuator);	
 		Punctuator punctuator = (Punctuator)lextant;
 		
-		switch(punctuator) {
-		case ADD:		
+		switch (punctuator) {
+		case ADD:
 			if (node.getType() == PrimitiveType.INTEGER)
 				return addSignature1;
-				else if (node.getType() == PrimitiveType.FLOATNUM)
-					return addSignature2;
-		case MINUS:	
+			else if (node.getType() == PrimitiveType.FLOATNUM)
+				return addSignature2;
+			else return neverMatchedSignature;
+		case MINUS:
 			if (node.getType() == PrimitiveType.INTEGER)
 				return minusSignature1;
-				else if (node.getType() == PrimitiveType.FLOATNUM)
-					return minusSignature2;
-		case MULTIPLY:	
+			else if (node.getType() == PrimitiveType.FLOATNUM)
+				return minusSignature2;
+			else return neverMatchedSignature;
+		case MULTIPLY:
 			if (node.getType() == PrimitiveType.INTEGER)
 				return multiplySignature1;
-				else if (node.getType() == PrimitiveType.FLOATNUM)
-					return multiplySignature2;
-		case DIVIDE:	
+			else if (node.getType() == PrimitiveType.FLOATNUM)
+				return multiplySignature2;
+			else return neverMatchedSignature;
+		case DIVIDE:
 			if (node.getType() == PrimitiveType.INTEGER)
 				return divideSignature1;
-				else if (node.getType() == PrimitiveType.FLOATNUM)
-					return divideSignature2;
-		case GREATER:	
+			else if (node.getType() == PrimitiveType.FLOATNUM)
+				return divideSignature2;
+			else return neverMatchedSignature;
+		case GREATER:
 			if (node.getType() == PrimitiveType.INTEGER)
 				return greaterSignature1;
-				else if (node.getType() == PrimitiveType.FLOATNUM)
-					return greaterSignature2;
-		case GREATEREQ:	
+			else if (node.getType() == PrimitiveType.FLOATNUM)
+				return greaterSignature2;
+			else if (node.getType() == PrimitiveType.CHARACTER)
+				return greaterSignature3;
+			else return neverMatchedSignature;
+		case GREATEREQ:
 			if (node.getType() == PrimitiveType.INTEGER)
 				return greatereqSignature1;
-				else if (node.getType() == PrimitiveType.FLOATNUM)
-			return greatereqSignature2;
-		case LESS:	
+			else if (node.getType() == PrimitiveType.FLOATNUM)
+				return greatereqSignature2;
+			else if (node.getType() == PrimitiveType.CHARACTER)
+				return greatereqSignature3;
+			else return neverMatchedSignature;
+		case LESS:
 			if (node.getType() == PrimitiveType.INTEGER)
 				return lessSignature1;
-				else if (node.getType() == PrimitiveType.FLOATNUM)
-			return lessSignature2;
+			else if (node.getType() == PrimitiveType.FLOATNUM)
+				return lessSignature2;
+			else if (node.getType() == PrimitiveType.CHARACTER)
+				return lessSignature3;
+			else return neverMatchedSignature;
 		case LESSEQ:
 			if (node.getType() == PrimitiveType.INTEGER)
 				return lesseqSignature1;
-				else if (node.getType() == PrimitiveType.FLOATNUM)
-			return lesseqSignature2;
-		case EQUAL:	
+			else if (node.getType() == PrimitiveType.FLOATNUM)
+				return lesseqSignature2;
+			else if (node.getType() == PrimitiveType.CHARACTER)
+				return lesseqSignature3;
+			else return neverMatchedSignature;
+		case EQUAL:
 			if (node.getType() == PrimitiveType.INTEGER)
-			return equalSignature1;
+				return equalSignature1;
 			else if (node.getType() == PrimitiveType.BOOLEAN)
 				return equalSignature2;
 			else if (node.getType() == PrimitiveType.FLOATNUM)
 				return equalSignature3;
-		case UNEQUAL:	
+			else if (node.getType() == PrimitiveType.CHARACTER)
+				return equalSignature4;
+			else return neverMatchedSignature;
+		case UNEQUAL:
 			if (node.getType() == PrimitiveType.INTEGER)
 				return unequalSignature1;
 			else if (node.getType() == PrimitiveType.BOOLEAN)
 				return unequalSignature2;
 			else if (node.getType() == PrimitiveType.FLOATNUM)
 				return unequalSignature3;
+			else if (node.getType() == PrimitiveType.CHARACTER)
+				return unequalSignature4;
+			else return neverMatchedSignature;
 
 		default:
 			return neverMatchedSignature;
