@@ -48,6 +48,11 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 			ch = nextNonWhitespaceChar();
 		}
 		
+//		if (ch.getCharacter() == 'b' || ch.getCharacter() == 'c' || ch.getCharacter() == 'i' ||
+//				ch.getCharacter() == 'f') {
+//			return 
+//		}
+		
 		if ((ch.getCharacter() == '-' && input.peek().isDigit()) || ch.isDigit()) {
 			scanNumber(ch);
 		}

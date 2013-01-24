@@ -15,6 +15,7 @@ import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.UpdateStatementNode;
 import tokens.*;
 
 import lexicalAnalyzer.Keyword;
@@ -201,15 +202,15 @@ public class JuncoParser {
 		if(!startsUpdateStatement(nowReading)) {
 			return syntaxErrorNode("updateStatement");
 		}
-		Token declarationToken = nowReading;
+		Token updateToken = nowReading;
 		readToken();
 		
-		ParseNode identifier = parseIdentifier();
+		ParseNode target = parseIdentifier();
 		expect(Punctuator.ASSIGN);
-		ParseNode initializer = parseExpression();
+		ParseNode updateValue = parseExpression();
 		expect(Punctuator.TERMINATOR);
 		
-		return DeclarationNode.withChildren(declarationToken, identifier, initializer);
+		return UpdateStatementNode.withChildren(updateToken, target, updateValue);
 	}
 	private boolean startsUpdateStatement(Token token) {
 		return token.isLextant(Keyword.UPDATE);
