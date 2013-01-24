@@ -194,7 +194,7 @@ public class JuncoParser {
 		return DeclarationNode.withChildren(declarationToken, identifier, initializer);
 	}
 	private boolean startsDeclaration(Token token) {
-		return token.isLextant(Keyword.CONST);
+		return token.isLextant(Keyword.CONST, Keyword.INIT);
 	}
 
 	// updateStmt -> UPDATE identifier <- expression ;
