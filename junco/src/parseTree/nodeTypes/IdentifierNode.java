@@ -11,6 +11,7 @@ import tokens.Token;
 public class IdentifierNode extends ParseNode {
 	private Binding binding;
 	private Scope declarationScope;
+	private ParseNode localScopeNode;
 
 	public IdentifierNode(Token token) {
 		super(token);
@@ -51,6 +52,7 @@ public class IdentifierNode extends ParseNode {
 		for(ParseNode current : pathToRoot()) {
 			if(current.containsBindingOf(identifier)) {
 				declarationScope = current.getScope();
+				localScopeNode = current;
 				return current.bindingOf(identifier);
 			}
 		}
@@ -58,6 +60,10 @@ public class IdentifierNode extends ParseNode {
 		return Binding.nullInstance();
 	}
 
+	public ParseNode findScopeNode() {
+		return localScopeNode;
+	}
+	
 	public Scope getDeclarationScope() {
 		findVariableBinding();
 		return declarationScope;

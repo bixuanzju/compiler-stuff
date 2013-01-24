@@ -16,6 +16,7 @@ import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.UpdateStatementNode;
 import semanticAnalyzer.PrimitiveType;
 import semanticAnalyzer.Type;
 import symbolTable.Binding;
@@ -255,6 +256,18 @@ public class ASMCodeGenerator {
 		}
 
 		public void visitLeave(DeclarationNode node) {
+			newVoidCode(node);
+			ASMCodeFragment lvalue = removeAddressCode(node.child(0));
+			ASMCodeFragment rvalue = removeValueCode(node.child(1));
+
+			code.append(lvalue);
+			code.append(rvalue);
+
+			Type type = node.getType();
+			code.add(opcodeForStore(type));
+		}
+		
+		public void visitLeave(UpdateStatementNode node) {
 			newVoidCode(node);
 			ASMCodeFragment lvalue = removeAddressCode(node.child(0));
 			ASMCodeFragment rvalue = removeValueCode(node.child(1));

@@ -1,7 +1,7 @@
 package semanticAnalyzer;
 
 import java.util.Arrays;
-
+import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import logging.JuncoLogger;
 
@@ -17,6 +17,7 @@ import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.UpdateStatementNode;
 import symbolTable.Binding;
 import symbolTable.Scope;
 import tokens.LextantToken;
@@ -51,7 +52,7 @@ public class JuncoSemanticAnalyzer {
 		// constructs larger than statements
 		@Override
 		public void visitEnter(ProgramNode node) {
-			Scopes.enterStaticScope(node);
+			Scopes.enterStaticScope(node);				//TODO that's where scope is
 		}
 		public void visitLeave(ProgramNode node) {
 			Scopes.leaveScope();
@@ -77,6 +78,7 @@ public class JuncoSemanticAnalyzer {
 			identifier.setType(declarationType);
 			addBinding(identifier, declarationType);
 		}
+		
 
 		///////////////////////////////////////////////////////////////////////////
 		// expressions
@@ -126,13 +128,51 @@ public class JuncoSemanticAnalyzer {
 			node.setType(PrimitiveType.INTEGER);
 		}
 
+		@Override
+		public void visitLeave(UpdateStatementNode node) {
+			IdentifierNode target = (IdentifierNode) node.child(0);
+			ParseNode updateValue = node.child(1);
+			
+			if (!isBeingDeclared(target)) {
+				Binding binding = target.findVariableBinding();
+				target.setType(binding.getType());
+				node.setType(binding.getType());
+				
+				if (target.getType() != updateValue.getType())
+					typeCheckError(node, updateValue.getType());
+				
+				if (!findDeclaredNode(target.findScopeNode(), target).getParent().getToken().isLextant(Keyword.INIT))
+					logError("immutable identifier " + target.getToken().getLexeme()
+							+ " cannot change value " + " at "
+							+ target.getToken().getLocation());
+				
+			}
+		
+		}
+		
+		private ParseNode findDeclaredNode(ParseNode node, ParseNode target) {
+			ParseNode want = null;
+			if (node.getChildren() != null)
+				for (ParseNode iterator : node.getChildren())
+					if (iterator.getToken().getLexeme() != target.getToken().getLexeme()) {
+						want = findDeclaredNode(iterator, target);
+						if (want != null)
+							break;
+					}
+					else {
+						want = iterator;
+						break;
+					}
+
+			return want;
+
+		}
 		///////////////////////////////////////////////////////////////////////////
 		// IdentifierNodes, with helper methods
 		@Override
 		public void visit(IdentifierNode node) {
 			if(!isBeingDeclared(node)) {		
 				Binding binding = node.findVariableBinding();
-				
 				node.setType(binding.getType());
 				node.setBinding(binding);
 			}
@@ -153,9 +193,13 @@ public class JuncoSemanticAnalyzer {
 
 		private void typeCheckError(ParseNode node, Type ...operandTypes) {
 			Token token = node.getToken();
-			
-			logError("operator " + token.getLexeme() + " not defined for types " 
-					 + Arrays.toString(operandTypes)  + " at " + token.getLocation());	
+			if (token.isLextant(Keyword.UPDATE))
+				logError("identifier " + node.child(0).getToken().getLexeme()
+						+ " cannot be assigned " + Arrays.toString(operandTypes) + " value "
+						+ " at " + token.getLocation());
+			else
+				logError("operator " + token.getLexeme() + " not defined for types "
+						+ Arrays.toString(operandTypes) + " at " + token.getLocation());
 		}
 		private void logError(String message) {
 			JuncoLogger log = JuncoLogger.getLogger("compiler.semanticAnalyzer");
