@@ -3,12 +3,14 @@ package semanticAnalyzer;
 import java.util.Arrays;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
+import lexicalAnalyzer.Punctuator;
 import logging.JuncoLogger;
 
 import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
+import parseTree.nodeTypes.CastingNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
@@ -104,6 +106,35 @@ public class JuncoSemanticAnalyzer {
 			return token.getLextant();
 		}
 
+		public void visitLeave(CastingNode node) {
+			ParseNode child = node.child(0);
+			
+			if (node.getToken().isLextant(Punctuator.CASTTOBOOL)) {
+				if (child.getType() != PrimitiveType.BOOLEAN) {
+					logError("cannot convert to boolean type");
+				}
+				node.setType(PrimitiveType.BOOLEAN);
+			}
+			else if (node.getToken().isLextant(Punctuator.CASTTOCHAR)) {
+				if (child.getType() == PrimitiveType.BOOLEAN || child.getType() == PrimitiveType.FLOATNUM) {
+					logError("cannot convert to character type");
+				}
+				node.setType(PrimitiveType.CHARACTER);
+				
+			}
+			else if (node.getToken().isLextant(Punctuator.CASTTOINT)) {
+				if (child.getType() == PrimitiveType.BOOLEAN) {
+					logError("cannot convert to integer type");
+				}
+				node.setType(PrimitiveType.INTEGER);
+			}
+			else if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
+				if (child.getType() == PrimitiveType.BOOLEAN || child.getType() == PrimitiveType.CHARACTER) {
+					logError("cannot convert to floating type");
+				}
+				node.setType(PrimitiveType.FLOATNUM);
+			}
+		}
 
 		///////////////////////////////////////////////////////////////////////////
 		// simple leaf nodes

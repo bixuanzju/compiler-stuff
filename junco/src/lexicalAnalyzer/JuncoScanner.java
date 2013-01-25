@@ -18,7 +18,7 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 	public static JuncoScanner make(String filename) {
 		InputHandler handler = InputHandler.fromFilename(filename);
 		PushbackCharStream charStream = PushbackCharStream.make(handler);
-		return new JuncoScanner(charStream);
+		return new JuncoS(charStream);
 	}
 
 	public JuncoScanner(PushbackCharStream input) {
