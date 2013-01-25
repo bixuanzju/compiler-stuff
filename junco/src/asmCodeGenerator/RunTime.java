@@ -16,6 +16,7 @@ public class RunTime {
 	public static final String MAIN_PROGRAM_LABEL   = "$$main";
 	public static final String DIVIDE_BY_ZERO   = "$divede-by-zero";
 	public static final String NOT_DIVIDE_BY_ZERO   = "$not-divede-by-zero";
+	public static final String ERROR_MESSAGE_IF_DIVIDE_BY_ZERO   = "$print-error-message";
 	
 
 	private ASMCodeFragment environmentASM() {
@@ -52,6 +53,8 @@ public class RunTime {
 		frag.add(DataS, "false");
 		frag.add(DLabel, PRINT_SPACER_STRING);
 		frag.add(DataS, " ");
+		frag.add(DLabel, ERROR_MESSAGE_IF_DIVIDE_BY_ZERO);
+		frag.add(DataS, "Damn error! you must divided by zero!!!\n");
 		
 		return frag;
 	}
