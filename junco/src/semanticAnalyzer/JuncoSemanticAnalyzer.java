@@ -133,11 +133,12 @@ public class JuncoSemanticAnalyzer {
 			IdentifierNode target = (IdentifierNode) node.child(0);
 			ParseNode updateValue = node.child(1);
 			
-			if (!isBeingDeclared(target)) {
-				Binding binding = target.findVariableBinding();
-				target.setType(binding.getType());
-				node.setType(binding.getType());
-				
+//			if (!isBeingDeclared(target)) {
+//				Binding binding = target.findVariableBinding();
+//				target.setType(binding.getType());
+//				node.setType(binding.getType());
+			
+				node.setType(target.getType());
 				if (target.getType() != updateValue.getType())
 					typeCheckError(node, updateValue.getType());
 				
@@ -146,7 +147,7 @@ public class JuncoSemanticAnalyzer {
 							+ " cannot change value " + " at "
 							+ target.getToken().getLocation());
 				
-			}
+//			}
 		
 		}
 		

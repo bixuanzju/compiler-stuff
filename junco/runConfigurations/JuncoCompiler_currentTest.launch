@@ -10,6 +10,6 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="applications.JuncoCompiler"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="input/currentTest.junco"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="input/lessCoins.junco"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="junco"/>
 </launchConfiguration>
