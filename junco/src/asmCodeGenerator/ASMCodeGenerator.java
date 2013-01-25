@@ -9,6 +9,7 @@ import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
+import parseTree.nodeTypes.CastingNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatNumberNode;
@@ -64,6 +65,12 @@ public class ASMCodeGenerator {
 
 		code.add(Label, RunTime.MAIN_PROGRAM_LABEL);
 		code.append(programCode());
+		code.add(Jump, RunTime.NOT_DIVIDE_BY_ZERO);
+		
+		code.add(Label, RunTime.DIVIDE_BY_ZERO);
+		// print error message
+		
+		code.add(Label, RunTime.NOT_DIVIDE_BY_ZERO);
 		code.add(Halt);
 
 		return code;
@@ -267,6 +274,25 @@ public class ASMCodeGenerator {
 			code.add(opcodeForStore(type));
 		}
 		
+		public void visitLeave(CastingNode node) {
+			newVoidCode(node);
+			ASMCodeFragment value = null;
+			if (node.child(0) instanceof IdentifierNode) {
+				value = removeAddressCode(node.child(0));
+			}
+			else value = removeValueCode(node.child(0));
+			
+
+			code.append(value);
+			if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
+				code.add(ConvertF);
+			}
+			else if (node.getToken().isLextant(Punctuator.CASTTOINT)) {
+				code.add(ConvertI);
+			}
+		
+		}
+		
 		public void visitLeave(UpdateStatementNode node) {
 			newVoidCode(node);
 			ASMCodeFragment lvalue = removeAddressCode(node.child(0));
@@ -414,13 +440,14 @@ public class ASMCodeGenerator {
 			code.append(arg1);
 			code.append(arg2);
 			
-//			code.add(Duplicate);
-//			if (node.getType() == PrimitiveType.INTEGER)
-//				code.add(JumpFalse, divideByZero);
-//			else code.add(JumpFZero, divideByZero);
+			code.add(Duplicate);
+			if (node.getType() == PrimitiveType.INTEGER)
+				code.add(JumpFalse, RunTime.DIVIDE_BY_ZERO);
+			else code.add(JumpFZero, RunTime.DIVIDE_BY_ZERO);
 			
 			ASMOpcode opcode = opcodeForOperator(node.getOperator(), node.getType());
 			code.add(opcode); // type-dependent!
+			
 		}
 
 		private ASMOpcode opcodeForOperator(Lextant lextant, Type type) {

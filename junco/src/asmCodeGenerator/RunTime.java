@@ -14,6 +14,9 @@ public class RunTime {
 	public static final String GLOBAL_MEMORY_BLOCK  = "$global-memory-block";
 	public static final String USABLE_MEMORY_START  = "$usable-memory-start";
 	public static final String MAIN_PROGRAM_LABEL   = "$$main";
+	public static final String DIVIDE_BY_ZERO   = "$divede-by-zero";
+	public static final String NOT_DIVIDE_BY_ZERO   = "$not-divede-by-zero";
+	
 
 	private ASMCodeFragment environmentASM() {
 		ASMCodeFragment result = new ASMCodeFragment(GENERATES_VOID);

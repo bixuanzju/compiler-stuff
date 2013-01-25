@@ -267,20 +267,12 @@ public class JuncoParser {
 		}
 		
 		ParseNode left = parseExpression3();
-		while (nowReading.isLextant(Punctuator.ADD)) {
-			Token additiveToken = nowReading;
+		while (nowReading.isLextant(Punctuator.ADD, Punctuator.MINUS)) {
+			Token operatorToken = nowReading;
 			readToken();
 			ParseNode right = parseExpression3();
 
-			left = BinaryOperatorNode.withChildren(additiveToken, left, right);
-		}
-
-		while (nowReading.isLextant(Punctuator.MINUS)) {
-			Token minusToken = nowReading;
-			readToken();
-			ParseNode right = parseExpression3();
-
-			left = BinaryOperatorNode.withChildren(minusToken, left, right);
+			left = BinaryOperatorNode.withChildren(operatorToken, left, right);
 		}
 
 		return left;
@@ -296,20 +288,14 @@ public class JuncoParser {
 		}
 		
 		ParseNode left = parseExpression4();
-		while(nowReading.isLextant(Punctuator.MULTIPLY)) {
-			Token multiplicativeToken = nowReading;
+		while(nowReading.isLextant(Punctuator.MULTIPLY, Punctuator.DIVIDE)) {
+			Token operatorToken = nowReading;
 			readToken();
 			ParseNode right = parseExpression4();
 			
-			left = BinaryOperatorNode.withChildren(multiplicativeToken, left, right);
+			left = BinaryOperatorNode.withChildren(operatorToken, left, right);
 		}
-		while(nowReading.isLextant(Punctuator.DIVIDE)) {
-			Token divideToken = nowReading;
-			readToken();
-			ParseNode right = parseExpression4();
-			
-			left = BinaryOperatorNode.withChildren(divideToken, left, right);
-		}
+		
 		return left;
 	}
 	private boolean startsExpression3(Token token) {
