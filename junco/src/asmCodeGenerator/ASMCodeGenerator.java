@@ -413,7 +413,12 @@ public class ASMCodeGenerator {
 
 			code.append(arg1);
 			code.append(arg2);
-
+			
+//			code.add(Duplicate);
+//			if (node.getType() == PrimitiveType.INTEGER)
+//				code.add(JumpFalse, divideByZero);
+//			else code.add(JumpFZero, divideByZero);
+			
 			ASMOpcode opcode = opcodeForOperator(node.getOperator(), node.getType());
 			code.add(opcode); // type-dependent!
 		}

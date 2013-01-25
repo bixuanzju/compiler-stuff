@@ -24,7 +24,11 @@ public enum Punctuator implements Lextant {
 	OPEN_BRACKET("("),
 	CLOSE_BRACKET(")"),
 	COLON(":"),
-	NULL_PUNCTUATOR("");
+	NULL_PUNCTUATOR(""),
+	CASTTOINT(":i"),
+	CASTTOFLAOT(":f"),
+	CASTTOCHAR(":c"),
+	CASTTOBOOL(":b");
 
 	private String lexeme;
 	private Token prototype;

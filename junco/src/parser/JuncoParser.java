@@ -7,6 +7,7 @@ import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
+import parseTree.nodeTypes.CastingNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
@@ -315,9 +316,32 @@ public class JuncoParser {
 		return startsExpression4(token);
 	}
 	
-	// expr4 -> literal
+	
 	private ParseNode parseExpression4() {
-		if(!startsExpression4(nowReading)) {
+		if (!startsExpression4(nowReading)) {
+			return syntaxErrorNode("expression<4>");
+		}
+
+		ParseNode left = parseExpression5();
+	
+		if (nowReading.isLextant(Punctuator.CASTTOBOOL, Punctuator.CASTTOCHAR,
+				Punctuator.CASTTOFLAOT, Punctuator.CASTTOINT)) {
+			// syntaxError(nowReading, " expecting type indicator");
+			
+			Token typeIndicatorToken = nowReading;
+			left = CastingNode.withChildren(left, typeIndicatorToken);
+			readToken();
+		}
+		return left;
+	}
+	
+	private boolean startsExpression4(Token token) {
+		return startsExpression5(token);
+	}
+	
+	// expr4 -> literal
+	private ParseNode parseExpression5() {
+		if(!startsExpression5(nowReading)) {
 			return syntaxErrorNode("expression<4>");
 		}
 		if (nowReading.isLextant(Punctuator.OPEN_BRACKET)) {
@@ -329,7 +353,7 @@ public class JuncoParser {
 		else
 			return parseLiteral();
 	}
-	private boolean startsExpression4(Token token) {
+	private boolean startsExpression5(Token token) {
 		return startsLiteralOrBracket(token);
 	}
 	
