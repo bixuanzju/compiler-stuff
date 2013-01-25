@@ -278,16 +278,21 @@ public class ASMCodeGenerator {
 		
 		public void visitLeave(CastingNode node) {
 			newValueCode(node);
-			ASMCodeFragment value = null;
+			ASMCodeFragment value = removeValueCode(node.child(0));;
 			
-			value = removeValueCode(node.child(0));
 			code.append(value);
 			
 			if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
 				code.add(ConvertF);
 			}
 			else if (node.getToken().isLextant(Punctuator.CASTTOINT)) {
-				code.add(ConvertI);
+				if (node.child(0).getType() == PrimitiveType.FLOATNUM)
+						code.add(ConvertI);
+				
+			}
+			else if (node.getToken().isLextant(Punctuator.CASTTOCHAR)) {
+				code.add(PushI, 127);
+				code.add(BTAnd);
 			}
 		
 		}
