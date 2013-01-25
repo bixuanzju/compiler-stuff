@@ -277,15 +277,12 @@ public class ASMCodeGenerator {
 		}
 		
 		public void visitLeave(CastingNode node) {
-			newVoidCode(node);
+			newValueCode(node);
 			ASMCodeFragment value = null;
-			if (node.child(0) instanceof IdentifierNode) {
-				value = removeAddressCode(node.child(0));
-			}
-			else value = removeValueCode(node.child(0));
 			
-
+			value = removeValueCode(node.child(0));
 			code.append(value);
+			
 			if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
 				code.add(ConvertF);
 			}
