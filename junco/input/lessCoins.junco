@@ -1,8 +1,0 @@
-box main {
-	init a <- 22.0;
-	update a <- 22.3;
-    print a $;
-}
-
-	
-    
