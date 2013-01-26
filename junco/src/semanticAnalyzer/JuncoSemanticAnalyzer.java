@@ -110,26 +110,29 @@ public class JuncoSemanticAnalyzer {
 			ParseNode child = node.child(0);
 			
 			if (node.getToken().isLextant(Punctuator.CASTTOBOOL)) {
-				if (child.getType() != PrimitiveType.BOOLEAN) {
-					logError("cannot convert to boolean type");
-				}
+				logError("cannot convert to boolean type");
 				node.setType(PrimitiveType.BOOLEAN);
 			}
 			else if (node.getToken().isLextant(Punctuator.CASTTOCHAR)) {
-				if (child.getType() == PrimitiveType.BOOLEAN || child.getType() == PrimitiveType.FLOATNUM) {
+				if (child.getType() == PrimitiveType.BOOLEAN
+						|| child.getType() == PrimitiveType.FLOATNUM
+						|| child.getType() == PrimitiveType.CHARACTER) {
 					logError("cannot convert to character type");
 				}
 				node.setType(PrimitiveType.CHARACTER);
-				
+
 			}
 			else if (node.getToken().isLextant(Punctuator.CASTTOINT)) {
-				if (child.getType() == PrimitiveType.BOOLEAN) {
+				if (child.getType() == PrimitiveType.BOOLEAN
+						|| child.getType() == PrimitiveType.INTEGER) {
 					logError("cannot convert to integer type");
 				}
 				node.setType(PrimitiveType.INTEGER);
 			}
 			else if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
-				if (child.getType() == PrimitiveType.BOOLEAN || child.getType() == PrimitiveType.CHARACTER) {
+				if (child.getType() == PrimitiveType.BOOLEAN
+						|| child.getType() == PrimitiveType.CHARACTER
+						|| child.getType() == PrimitiveType.FLOATNUM) {
 					logError("cannot convert to floating type");
 				}
 				node.setType(PrimitiveType.FLOATNUM);
