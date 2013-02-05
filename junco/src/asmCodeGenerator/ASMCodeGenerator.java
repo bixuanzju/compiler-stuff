@@ -65,14 +65,13 @@ public class ASMCodeGenerator {
 
 		code.add(Label, RunTime.MAIN_PROGRAM_LABEL);
 		code.append(programCode());
-		code.add(Jump, RunTime.NOT_DIVIDE_BY_ZERO);
+		code.add(Halt);
 		
 		code.add(Label, RunTime.DIVIDE_BY_ZERO);
 		// print error message
 		code.add(PushD, RunTime.ERROR_MESSAGE_IF_DIVIDE_BY_ZERO);
 		code.add(Printf);
 		
-		code.add(Label, RunTime.NOT_DIVIDE_BY_ZERO);
 		code.add(Halt);
 
 		return code;
