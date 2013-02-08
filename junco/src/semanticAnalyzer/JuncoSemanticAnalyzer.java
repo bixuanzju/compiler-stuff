@@ -9,6 +9,7 @@ import logging.JuncoLogger;
 import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BooleanConstantNode;
+import parseTree.nodeTypes.BooleanNotNode;
 import parseTree.nodeTypes.BoxBodyNode;
 import parseTree.nodeTypes.CastingNode;
 import parseTree.nodeTypes.CharacterNode;
@@ -104,6 +105,14 @@ public class JuncoSemanticAnalyzer {
 		private Lextant operatorFor(BinaryOperatorNode node) {
 			LextantToken token = (LextantToken) node.getToken();
 			return token.getLextant();
+		}
+		
+		public void visitLeave(BooleanNotNode node) {
+			ParseNode child = node.child(0);
+			if (child.getType() != PrimitiveType.BOOLEAN) {
+				logError("must be boolean type");
+			}
+			node.setType(PrimitiveType.BOOLEAN);
 		}
 
 		public void visitLeave(CastingNode node) {

@@ -14,8 +14,9 @@ public enum Keyword implements Lextant {
 	MAIN("main"),
 	NULL_KEYWORD(""),
 	INIT("init"),
+	IF("if"),
+	WHILE("while"),
 	UPDATE("update");
-
 	private String lexeme;
 	private Token prototype;
 	

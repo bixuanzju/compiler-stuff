@@ -75,6 +75,10 @@ class FunctionSignature {
 	private static FunctionSignature unequalSignature2 = new FunctionSignature(1, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN);
 	private static FunctionSignature unequalSignature3 = new FunctionSignature(1, PrimitiveType.FLOATNUM, PrimitiveType.FLOATNUM, PrimitiveType.BOOLEAN);
 	private static FunctionSignature unequalSignature4 = new FunctionSignature(1, PrimitiveType.CHARACTER, PrimitiveType.CHARACTER, PrimitiveType.BOOLEAN);
+	private static FunctionSignature andSignature = new FunctionSignature(1, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN);
+	private static FunctionSignature orSignature = new FunctionSignature(1, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN);
+//	private static FunctionSignature notSignature = new FunctionSignature(1, PrimitiveType.BOOLEAN, PrimitiveType.BOOLEAN);
+	
 	private static FunctionSignature neverMatchedSignature = new FunctionSignature(1, PrimitiveType.ERROR) {
 		public boolean accepts(Type ...types) {
 			return false;
@@ -163,6 +167,12 @@ class FunctionSignature {
 			else if (node.getType() == PrimitiveType.CHARACTER)
 				return unequalSignature4;
 			else return neverMatchedSignature;
+		case AND:
+			return andSignature;
+		case OR:
+			return orSignature;
+//		case NOT:
+//			return notSignature;
 
 		default:
 			return neverMatchedSignature;
