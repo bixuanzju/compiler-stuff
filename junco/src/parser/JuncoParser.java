@@ -5,6 +5,7 @@ import logging.JuncoLogger;
 
 import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
+import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BooleanNotNode;
 import parseTree.nodeTypes.BoxBodyNode;
@@ -14,10 +15,12 @@ import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatNumberNode;
 import parseTree.nodeTypes.IdentifierNode;
+import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.UpdateStatementNode;
+import parseTree.nodeTypes.WhileStatementNode;
 import tokens.*;
 
 import lexicalAnalyzer.Keyword;
@@ -88,6 +91,8 @@ public class JuncoParser {
 		return token.isLextant(Keyword.BOX);
 	}
 	
+
+	
 	// boxBody -> { statement* }
 	private ParseNode parseBoxBody() {
 		if(!startsBoxBody(nowReading)) {
@@ -125,13 +130,94 @@ public class JuncoParser {
 		if(startsUpdateStatement(nowReading)) {
 			return parseUpdateStatement();
 		}
+		if (startsIfStatement(nowReading)) {
+			return parseIfStatement();
+		}
+		if (startsWhileStatement(nowReading)) {
+			return parseWhileStatement();
+		}
 		assert false : "bad token " + nowReading + " in parseStatement()";
 		return null;
 	}
 	private boolean startsStatement(Token token) {
 		return startsPrintStatement(token) ||
 			   startsDeclaration(token) ||
-			   startsUpdateStatement(token);
+			   startsUpdateStatement(token) ||
+			   startsIfStatement(token) ||
+			   startsWhileStatement(token);
+	}
+	
+	private ParseNode parseIfStatement() {
+		if (!startsIfStatement(nowReading)) {
+			syntaxErrorNode("if statement");
+		}
+		
+		IfStatementNode result = new IfStatementNode(nowReading);
+		readToken();
+		expect(Punctuator.OPEN_BRACKET);
+		ParseNode whileExpression = parseExpression();
+		result.appendChild(whileExpression);
+		expect(Punctuator.CLOSE_BRACKET);
+		
+		ParseNode body = parseBody();
+		result.appendChild(body);	
+		
+		if (startsElseBody(nowReading)) {
+			expect(Keyword.ELSE);
+			body = parseBody();
+			result.appendChild(body);
+		}
+		
+		return result;
+	}
+	
+	private boolean startsElseBody(Token token) {
+		return token.isLextant(Keyword.ELSE);
+	}
+	
+	private boolean startsIfStatement(Token token) {
+		return token.isLextant(Keyword.IF);
+	}	
+	
+	private ParseNode parseWhileStatement() {
+		if (!startsWhileStatement(nowReading)) {
+			return syntaxErrorNode("while statement");
+		}
+		WhileStatementNode result = new WhileStatementNode(nowReading);
+		readToken();
+		expect(Punctuator.OPEN_BRACKET);
+		ParseNode whileExpression = parseExpression();
+		result.appendChild(whileExpression);
+		expect(Punctuator.CLOSE_BRACKET);
+	
+		ParseNode body = parseBody();
+		result.appendChild(body);	
+		return result;
+		
+	}
+	
+	private ParseNode parseBody() {
+		if (!startsBody(nowReading)) {
+			syntaxErrorNode("while body");
+		}
+		ParseNode body = new BodyNode(nowReading);
+		
+		expect(Punctuator.OPEN_BRACE);
+		while(startsStatement(nowReading)) {
+			ParseNode statement = parseStatement();
+			body.appendChild(statement);
+		}
+		
+		expect(Punctuator.CLOSE_BRACE);
+		return body;
+	}
+	
+	private boolean startsBody(Token token) {
+		return token.isLextant(Punctuator.OPEN_BRACE);
+	}
+	
+	private boolean startsWhileStatement(Token token) {
+		return token.isLextant(Keyword.WHILE);
 	}
 	   
 	// printStmt -> (PRINT | PRUNT) expressionList $?;
