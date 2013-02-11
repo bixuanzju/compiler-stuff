@@ -8,6 +8,7 @@ import logging.JuncoLogger;
 
 import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
+import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BooleanNotNode;
 import parseTree.nodeTypes.BoxBodyNode;
@@ -90,6 +91,13 @@ public class JuncoSemanticAnalyzer {
 		public void visitLeave(IfStatementNode node) {
 		}
 		
+		public void visitEnter(BodyNode node) {
+			Scopes.enterStaticScope(node);	
+		}
+		
+		public void visitLeave(BodyNode node) {
+			Scopes.leaveScope();
+		}
 
 		///////////////////////////////////////////////////////////////////////////
 		// expressions
