@@ -6,6 +6,8 @@ import lexicalAnalyzer.Keyword;
 import tokens.Token;
 
 public class IfStatementNode extends ParseNode {
+	
+	private boolean flag = false;
 
 	public IfStatementNode(Token token) {
 		super(token);
@@ -16,6 +18,13 @@ public class IfStatementNode extends ParseNode {
 		super(node);
 	}
 	
+	public void setElse(boolean flag) {
+		this.flag = flag;
+	}
+	
+	public boolean hasElse() {
+		return flag;
+	}
 	
 	////////////////////////////////////////////////////////////
 	// attributes

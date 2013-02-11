@@ -17,10 +17,12 @@ import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatNumberNode;
 import parseTree.nodeTypes.IdentifierNode;
+import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.UpdateStatementNode;
+import parseTree.nodeTypes.WhileStatementNode;
 import symbolTable.Binding;
 import symbolTable.Scope;
 import tokens.LextantToken;
@@ -80,6 +82,12 @@ public class JuncoSemanticAnalyzer {
 			
 			identifier.setType(declarationType);
 			addBinding(identifier, declarationType);
+		}
+		
+		public void visitLeave(WhileStatementNode node) {
+		}
+		
+		public void visitLeave(IfStatementNode node) {
 		}
 		
 

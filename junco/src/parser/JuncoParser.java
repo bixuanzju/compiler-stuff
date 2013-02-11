@@ -136,6 +136,9 @@ public class JuncoParser {
 		if (startsWhileStatement(nowReading)) {
 			return parseWhileStatement();
 		}
+		if (startsBody(nowReading)) {
+			return parseBody();
+		}
 		assert false : "bad token " + nowReading + " in parseStatement()";
 		return null;
 	}
@@ -144,7 +147,8 @@ public class JuncoParser {
 			   startsDeclaration(token) ||
 			   startsUpdateStatement(token) ||
 			   startsIfStatement(token) ||
-			   startsWhileStatement(token);
+			   startsWhileStatement(token) ||
+			   startsBody(token);
 	}
 	
 	private ParseNode parseIfStatement() {
@@ -164,6 +168,7 @@ public class JuncoParser {
 		
 		if (startsElseBody(nowReading)) {
 			expect(Keyword.ELSE);
+			result.setElse(true);
 			body = parseBody();
 			result.appendChild(body);
 		}
@@ -455,7 +460,7 @@ public class JuncoParser {
 		
 		if (nowReading.isLextant(Punctuator.NOT)) {
 			readToken();
-			left = parseExpression();
+			left = parseExpression5();
 			left = BooleanNotNode.withChildren(left, BoolenaNotToken);
 		}
 		else left = parseExpression5();

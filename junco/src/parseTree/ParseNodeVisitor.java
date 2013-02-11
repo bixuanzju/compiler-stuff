@@ -1,6 +1,7 @@
 package parseTree;
 
 import parseTree.nodeTypes.BinaryOperatorNode;
+import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BooleanNotNode;
 import parseTree.nodeTypes.BoxBodyNode;
@@ -10,10 +11,12 @@ import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatNumberNode;
 import parseTree.nodeTypes.IdentifierNode;
+import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.UpdateStatementNode;
+import parseTree.nodeTypes.WhileStatementNode;
 
 // Visitor pattern with pre- and post-order visits
 public interface ParseNodeVisitor {
@@ -30,6 +33,15 @@ public interface ParseNodeVisitor {
 	
 	void visitEnter(UpdateStatementNode node);
 	void visitLeave(UpdateStatementNode node);
+
+	void visitEnter(IfStatementNode node);
+	void visitLeave(IfStatementNode node);
+	
+	void visitEnter(WhileStatementNode node);
+	void visitLeave(WhileStatementNode node);
+	
+	void visitEnter(BodyNode node);
+	void visitLeave(BodyNode node);
 	
 	void visitEnter(ParseNode node);
 	void visitLeave(ParseNode node);
@@ -81,6 +93,12 @@ public interface ParseNodeVisitor {
 		public void visitLeave(BoxBodyNode node) {
 			defaultVisitLeave(node);
 		}	
+		public void visitEnter(BodyNode node) {
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(BodyNode node) {
+			defaultVisitLeave(node);
+		}	
 		public void visitEnter(DeclarationNode node) {
 			defaultVisitEnter(node);
 		}
@@ -109,6 +127,18 @@ public interface ParseNodeVisitor {
 			defaultVisitEnter(node);
 		}
 		public void visitLeave(PrintStatementNode node) {
+			defaultVisitLeave(node);
+		}
+		public void visitEnter(IfStatementNode node) {
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(IfStatementNode node) {
+			defaultVisitLeave(node);
+		}
+		public void visitEnter(WhileStatementNode node) {
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(WhileStatementNode node) {
 			defaultVisitLeave(node);
 		}
 		public void visitEnter(ProgramNode node) {

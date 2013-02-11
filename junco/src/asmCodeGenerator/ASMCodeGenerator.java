@@ -7,6 +7,7 @@ import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
+import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BooleanNotNode;
 import parseTree.nodeTypes.BoxBodyNode;
@@ -15,10 +16,12 @@ import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatNumberNode;
 import parseTree.nodeTypes.IdentifierNode;
+import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.UpdateStatementNode;
+import parseTree.nodeTypes.WhileStatementNode;
 import semanticAnalyzer.PrimitiveType;
 import semanticAnalyzer.Type;
 import symbolTable.Binding;
@@ -277,6 +280,59 @@ public class ASMCodeGenerator {
 			code.add(opcodeForStore(type));
 		}
 
+		public void visitLeave(WhileStatementNode node) {
+			newVoidCode(node);
+			String startlabel = labeller.newLabel("-while-start-", "");
+			String endlabel = labeller.newLabelSameNumber("-while-end-", "");
+
+			code.add(Label, startlabel);
+			ASMCodeFragment expr = removeValueCode(node.child(0));
+			code.append(expr);
+			code.add(JumpFalse, endlabel);
+			ASMCodeFragment body = removeVoidCode(node.child(1));
+			code.append(body);
+			code.add(Jump, startlabel);
+
+			code.add(Label, endlabel);
+
+		}
+
+		public void visitLeave(IfStatementNode node) {
+			newVoidCode(node);
+			String startlabel = labeller.newLabel("-if-start-", "");
+			String endlabel = labeller.newLabelSameNumber("-if-end-", "");
+			String elselabel = labeller.newLabelSameNumber("-if-else-", "");
+
+			code.add(Label, startlabel);
+			ASMCodeFragment expr = removeValueCode(node.child(0));
+			code.append(expr);
+			if (node.hasElse()) {
+				code.add(JumpFalse, elselabel);
+			}
+			else {
+				code.add(JumpFalse, endlabel);
+			}
+			
+			ASMCodeFragment ifBody = removeVoidCode(node.child(1));
+			code.append(ifBody);
+			code.add(Jump, endlabel);
+			if (node.hasElse()) {
+				code.add(Label, elselabel);
+				ASMCodeFragment elseBody = removeVoidCode(node.child(2));
+				code.append(elseBody);
+				code.add(Jump, endlabel);
+			}
+			code.add(Label, endlabel);
+		}
+
+		public void visitLeave(BodyNode node) {
+			newVoidCode(node);
+			for (ParseNode child : node.getChildren()) {
+				ASMCodeFragment childCode = removeVoidCode(child);
+				code.append(childCode);
+			}
+		}
+
 		public void visitLeave(CastingNode node) {
 			newValueCode(node);
 			ASMCodeFragment value = removeValueCode(node.child(0));
@@ -346,22 +402,22 @@ public class ASMCodeGenerator {
 				visitNormalBinaryOperatorNode(node);
 			}
 		}
-		
+
 		public void visitLeave(BooleanNotNode node) {
 			newValueCode(node);
 			String startLabel = labeller.newLabel("-not-arg1-", "");
 			String endLabel = labeller.newLabelSameNumber("-not-end-", "");
-			
+
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
 			code.add(Label, startLabel);
 			code.append(arg1);
-			
+
 			code.add(BNegate);
 			code.add(Duplicate);
 			code.add(JumpFalse, endLabel);
 			code.add(Pop);
 			code.add(PushI, 1);
-			
+
 			code.add(Label, endLabel);
 		}
 
@@ -407,7 +463,6 @@ public class ASMCodeGenerator {
 			code.add(Label, endLabel);
 
 		}
-		
 
 		private void visitComparisonOperatorNode(BinaryOperatorNode node,
 				Lextant operator) {
