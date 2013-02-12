@@ -86,9 +86,15 @@ public class JuncoSemanticAnalyzer {
 		}
 		
 		public void visitLeave(WhileStatementNode node) {
+			if (node.child(0).getType() != PrimitiveType.BOOLEAN) {
+				logError("not boolean expression");
+			}
 		}
 		
 		public void visitLeave(IfStatementNode node) {
+			if (node.child(0).getType() != PrimitiveType.BOOLEAN) {
+				logError("not boolean expression");
+			}
 		}
 		
 		public void visitEnter(BodyNode node) {

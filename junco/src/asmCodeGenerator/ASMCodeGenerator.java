@@ -425,12 +425,6 @@ public class ASMCodeGenerator {
 			newValueCode(node);
 			String startLabel = labeller.newLabel("-boolean-arg1-", "");
 			String arg2Label = labeller.newLabelSameNumber("-boolean-arg2-", "");
-
-			// String trueLabel = labeller
-			// .newLabelSameNumber("-boolean-true-", "");
-			// String falseLabel =
-			// labeller.newLabelSameNumber("-boolean-false-","");
-
 			String endLabel = labeller.newLabel("-boolean-end-", "");
 
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
@@ -449,17 +443,6 @@ public class ASMCodeGenerator {
 			ASMCodeFragment arg2 = removeValueCode(node.child(1));
 			code.add(Label, arg2Label);
 			code.append(arg2);
-
-			// code.add(JumpFalse, falseLabel);
-			// code.add(Jump, trueLabel);
-			// code.add(Label, falseLabel);
-
-			// code.add(PushI, 0);
-			// code.add(Jump, endLabel);
-			// code.add(Label, trueLabel);
-			//
-			// code.add(PushI, 1);
-			// code.add(Jump, endLabel);
 			code.add(Label, endLabel);
 
 		}
