@@ -1,0 +1,4 @@
+box main {
+  const result <- 'N / 1.4;
+  print result $;
+}

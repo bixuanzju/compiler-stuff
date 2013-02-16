@@ -1,0 +1,4 @@
+box main {
+  const result <- 'D < 'A;
+  print result $;
+}

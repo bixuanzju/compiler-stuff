@@ -1,0 +1,4 @@
+box main {
+  const result <- 50 <> 'Y;
+  print result $;
+}

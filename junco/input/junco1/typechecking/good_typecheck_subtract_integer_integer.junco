@@ -1,0 +1,4 @@
+box main {
+  const result <- 46 - 16;
+  print result $;
+}

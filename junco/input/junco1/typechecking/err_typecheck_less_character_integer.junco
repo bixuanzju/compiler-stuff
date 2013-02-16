@@ -1,0 +1,4 @@
+box main {
+  const result <- 'B < 32;
+  print result $;
+}

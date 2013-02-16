@@ -1,0 +1,5 @@
+box main {
+  init result <- 25 :i ;
+  
+  print result $;
+}

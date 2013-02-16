@@ -1,0 +1,4 @@
+box main {
+  const result <- false + 7.5;
+  print result $;
+}

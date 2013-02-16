@@ -1,0 +1,4 @@
+box main {
+  const result <- 'v * 8.7;
+  print result $;
+}

@@ -1,0 +1,4 @@
+box main {
+  const result <- 8.5 + 'W;
+  print result $;
+}

@@ -1,0 +1,41 @@
+box main {
+  print 96 :f >= 1.2 $;
+  print 72 :f >= 3.0 $;
+  print 19 :f >= 9.5 $;
+  print 48 :f >= 4.8 $;
+  print 21 :f >= 8.3 $;
+  print 52 :f >= 4.9 $;
+  print 73 :f >= 2.4 $;
+  print 97 :f >= 2.3 $;
+  print 20 :f >= 8.3 $;
+  print 83 :f >= 9.4 $;
+  print 25 :f >= 1.1 $;
+  print 8 :f >= 9.5 $;
+
+  print 2.4 >= 75 :f $;
+  print 1.6 >= 97 :f $;
+  print 7.2 >= 17 :f $;
+  print 2.4 >= 87 :f $;
+  print 2.3 >= 13 :f $;
+  print 2.8 >= 95 :f $;
+  print 9.8 >= 57 :f $;
+  print 5.4 >= 71 :f $;
+  print 4.5 >= 11 :f $;
+  print 8.9 >= 15 :f $;
+  print 6.0 >= 59 :f $;
+  print 9.6 >= 97 :f $;
+
+  print 61 :f >= 1 :f $;
+  print 12 :f >= 76 :f $;
+  print 56 :f >= 40 :f $;
+  print 96 :f >= 52 :f $;
+  print 58 :f >= 90 :f $;
+  print 50 :f >= 45 :f $;
+  print 43 :f >= 60 :f $;
+  print 3 :f >= 15 :f $;
+  print 81 :f >= 6 :f $;
+  print 42 :f >= 97 :f $;
+  print 30 :f >= 94 :f $;
+  print 7 :f >= 24 :f $;
+
+}

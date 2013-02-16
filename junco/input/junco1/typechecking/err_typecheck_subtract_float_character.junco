@@ -1,0 +1,4 @@
+box main {
+  const result <- 8.3 - 'C;
+  print result $;
+}

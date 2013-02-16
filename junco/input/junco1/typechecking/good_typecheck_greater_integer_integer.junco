@@ -1,0 +1,4 @@
+box main {
+  const result <- 21 > 79;
+  print result $;
+}

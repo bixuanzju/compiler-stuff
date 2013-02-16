@@ -1,0 +1,4 @@
+box main {
+  const result <- 'p <> 0.3;
+  print result $;
+}

@@ -1,0 +1,4 @@
+box main {
+  const result <- 'm == 19;
+  print result $;
+}

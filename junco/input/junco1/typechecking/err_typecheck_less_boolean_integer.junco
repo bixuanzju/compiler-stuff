@@ -1,0 +1,4 @@
+box main {
+  const result <- false < 68;
+  print result $;
+}

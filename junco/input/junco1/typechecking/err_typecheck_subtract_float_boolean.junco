@@ -1,0 +1,4 @@
+box main {
+  const result <- 5.9 - true;
+  print result $;
+}

@@ -1,0 +1,5 @@
+box main {
+    const nega <- - 20;
+    print nega $;
+}
+

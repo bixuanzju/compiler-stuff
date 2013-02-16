@@ -1,0 +1,41 @@
+box main {
+  print 64 :c > '1 $;
+  print 82 :c > 'r $;
+  print 41 :c > ': $;
+  print 83 :c > ': $;
+  print 22 :c > 'w $;
+  print 12 :c > 'F $;
+  print 6 :c > 'P $;
+  print 71 :c > '% $;
+  print 40 :c > 'a $;
+  print 56 :c > 'p $;
+  print 42 :c > 'w $;
+  print 78 :c > 'O $;
+
+  print 'v > 74 :c $;
+  print '/ > 19 :c $;
+  print '\ > 9 :c $;
+  print 'W > 52 :c $;
+  print '$ > 73 :c $;
+  print 'x > 73 :c $;
+  print '$ > 70 :c $;
+  print 'g > 98 :c $;
+  print '" > 99 :c $;
+  print '/ > 73 :c $;
+  print '  > 27 :c $;
+  print 'E > 43 :c $;
+
+  print 8 :c > 98 :c $;
+  print 79 :c > 69 :c $;
+  print 21 :c > 11 :c $;
+  print 77 :c > 42 :c $;
+  print 77 :c > 81 :c $;
+  print 55 :c > 2 :c $;
+  print 30 :c > 75 :c $;
+  print 32 :c > 65 :c $;
+  print 46 :c > 43 :c $;
+  print 24 :c > 34 :c $;
+  print 60 :c > 25 :c $;
+  print 51 :c > 16 :c $;
+
+}

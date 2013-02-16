@@ -1,0 +1,9 @@
+box main {
+	const v <- -2.0000;
+    const w <- 12.3e-2;
+    const x <- -12.34567e4;
+    const y <- -123.4567;
+    const z <- 0.0e1;
+    
+    print v, w, x, y, z $;
+}

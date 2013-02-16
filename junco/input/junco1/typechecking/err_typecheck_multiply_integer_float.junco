@@ -1,0 +1,4 @@
+box main {
+  const result <- 31 * 0.3;
+  print result $;
+}

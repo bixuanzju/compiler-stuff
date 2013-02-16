@@ -1,0 +1,4 @@
+box main {
+  const result <- 66 == 1.7;
+  print result $;
+}

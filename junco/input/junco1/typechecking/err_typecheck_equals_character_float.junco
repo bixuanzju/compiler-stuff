@@ -1,0 +1,4 @@
+box main {
+  const result <- 'V == 9.9;
+  print result $;
+}

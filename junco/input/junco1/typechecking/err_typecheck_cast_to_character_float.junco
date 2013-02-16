@@ -1,0 +1,5 @@
+box main {
+  init result <- 6.1 :c ;
+  
+  print result $;
+}

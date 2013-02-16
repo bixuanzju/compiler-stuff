@@ -1,0 +1,4 @@
+box main {
+  const result <- true / 6.3;
+  print result $;
+}

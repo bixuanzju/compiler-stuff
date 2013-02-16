@@ -1,0 +1,4 @@
+box main {
+  const result <- 'g <> 8;
+  print result $;
+}

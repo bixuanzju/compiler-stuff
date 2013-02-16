@@ -1,0 +1,5 @@
+box main {
+	const v <- 3.7;
+	const ratio <- 88.2 / v;
+	print ratio;
+}

@@ -1,0 +1,41 @@
+box main {
+  print 58 :f / 2.1 $;
+  print 12 :f / 0.8 $;
+  print 39 :f / 1.9 $;
+  print 99 :f / 4.7 $;
+  print 12 :f / 9.3 $;
+  print 85 :f / 8.7 $;
+  print 69 :f / 5.5 $;
+  print 38 :f / 7.5 $;
+  print 27 :f / 3.4 $;
+  print 76 :f / 0.3 $;
+  print 26 :f / 1.0 $;
+  print 81 :f / 5.4 $;
+
+  print 4.0 / 89 :f $;
+  print 0.1 / 59 :f $;
+  print 2.1 / 87 :f $;
+  print 5.4 / 66 :f $;
+  print 9.4 / 78 :f $;
+  print 8.1 / 62 :f $;
+  print 8.0 / 94 :f $;
+  print 8.4 / 61 :f $;
+  print 3.2 / 82 :f $;
+  print 7.6 / 81 :f $;
+  print 7.3 / 10 :f $;
+  print 0.6 / 96 :f $;
+
+  print 81 :f / 74 :f $;
+  print 59 :f / 96 :f $;
+  print 49 :f / 45 :f $;
+  print 10 :f / 9 :f $;
+  print 74 :f / 55 :f $;
+  print 95 :f / 2 :f $;
+  print 39 :f / 76 :f $;
+  print 45 :f / 86 :f $;
+  print 97 :f / 1 :f $;
+  print 10 :f / 80 :f $;
+  print 84 :f / 85 :f $;
+  print 45 :f / 40 :f $;
+
+}

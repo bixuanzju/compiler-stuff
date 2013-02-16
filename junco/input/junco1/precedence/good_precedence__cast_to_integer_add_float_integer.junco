@@ -1,0 +1,41 @@
+box main {
+  print 4.1 :i + 31 $;
+  print 8.4 :i + 10 $;
+  print 9.4 :i + 11 $;
+  print 2.3 :i + 85 $;
+  print 8.9 :i + 3 $;
+  print 8.0 :i + 74 $;
+  print 5.9 :i + 85 $;
+  print 9.8 :i + 20 $;
+  print 0.8 :i + 71 $;
+  print 6.7 :i + 86 $;
+  print 9.4 :i + 77 $;
+  print 7.8 :i + 80 $;
+
+  print 47 + 7.2 :i $;
+  print 41 + 0.9 :i $;
+  print 21 + 0.6 :i $;
+  print 82 + 9.3 :i $;
+  print 13 + 5.5 :i $;
+  print 68 + 4.9 :i $;
+  print 73 + 4.3 :i $;
+  print 30 + 4.3 :i $;
+  print 62 + 1.9 :i $;
+  print 31 + 6.0 :i $;
+  print 52 + 2.7 :i $;
+  print 83 + 7.5 :i $;
+
+  print 8.4 :i + 0.3 :i $;
+  print 9.9 :i + 2.3 :i $;
+  print 7.4 :i + 7.0 :i $;
+  print 8.6 :i + 9.7 :i $;
+  print 8.4 :i + 3.0 :i $;
+  print 4.7 :i + 1.0 :i $;
+  print 4.9 :i + 9.9 :i $;
+  print 7.1 :i + 2.7 :i $;
+  print 4.6 :i + 1.6 :i $;
+  print 1.9 :i + 3.8 :i $;
+  print 7.8 :i + 0.2 :i $;
+  print 9.2 :i + 0.7 :i $;
+
+}

@@ -1,0 +1,6 @@
+box main {
+    const fahrenheit <- -20;
+    const centigrade <- (fahrenheit - 32) * 5 / 9;
+    print fahrenheit, centigrade $;
+}
+

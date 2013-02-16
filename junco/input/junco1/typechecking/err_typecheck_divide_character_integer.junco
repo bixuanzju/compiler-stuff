@@ -1,0 +1,4 @@
+box main {
+  const result <- 'M / 3;
+  print result $;
+}

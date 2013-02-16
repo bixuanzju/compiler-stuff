@@ -1,0 +1,4 @@
+box main {
+  const result <- 'J + '_;
+  print result $;
+}

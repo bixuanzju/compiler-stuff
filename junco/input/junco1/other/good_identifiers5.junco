@@ -1,0 +1,13 @@
+box main {
+    const a23456789012345678901234567890123456789 <- 10;
+    const abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLM <- 11;
+    const abcdefghijklmnopqrstuvwxyzABCDEFGHIJKL# <- 12;
+    const a2345678900 <- 13;
+    const mnopqrstuvwxyzABCDEFG <- 14;
+    
+    print a23456789012345678901234567890123456789, 
+          abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLM,
+          abcdefghijklmnopqrstuvwxyzABCDEFGHIJKL#,
+          a2345678900,
+          mnopqrstuvwxyzABCDEFG $;
+}

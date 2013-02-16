@@ -1,0 +1,4 @@
+box main {
+  const result <- 5.5 / 'm;
+  print result $;
+}

@@ -1,0 +1,3 @@
+box main {
+	const v <- 2.1e+1;
+}

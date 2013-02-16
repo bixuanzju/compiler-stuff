@@ -1,0 +1,4 @@
+box main {
+  const result <- true > 4.5;
+  print result $;
+}

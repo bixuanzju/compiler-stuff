@@ -1,0 +1,4 @@
+box main {
+  const result <- 16 - 'Y;
+  print result $;
+}

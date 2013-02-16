@@ -1,0 +1,4 @@
+box main {
+  const result <- 76 <= 7.1;
+  print result $;
+}

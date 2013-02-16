@@ -1,0 +1,41 @@
+box main {
+  print '; :i == 10 $;
+  print '+ :i == 56 $;
+  print '? :i == 33 $;
+  print 'n :i == 11 $;
+  print 'A :i == 52 $;
+  print '  :i == 68 $;
+  print 'v :i == 35 $;
+  print 'k :i == 9 $;
+  print 'm :i == 15 $;
+  print 'A :i == 62 $;
+  print '0 :i == 15 $;
+  print 'w :i == 29 $;
+
+  print 73 == '8 :i $;
+  print 9 == '@ :i $;
+  print 18 == 'p :i $;
+  print 65 == 'd :i $;
+  print 54 == ': :i $;
+  print 88 == '2 :i $;
+  print 14 == 'D :i $;
+  print 44 == 'j :i $;
+  print 9 == '. :i $;
+  print 94 == 'd :i $;
+  print 58 == ', :i $;
+  print 90 == 't :i $;
+
+  print 'h :i == '* :i $;
+  print '6 :i == 'z :i $;
+  print 'W :i == '] :i $;
+  print '( :i == 'A :i $;
+  print 'i :i == '7 :i $;
+  print 'H :i == '^ :i $;
+  print '2 :i == ') :i $;
+  print '' :i == '] :i $;
+  print 'I :i == '_ :i $;
+  print '$ :i == '+ :i $;
+  print '3 :i == '> :i $;
+  print '@ :i == '4 :i $;
+
+}

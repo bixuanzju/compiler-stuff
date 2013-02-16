@@ -1,0 +1,5 @@
+box main {
+	const v <- 3.1415;
+	const vapprox <- v:i;
+	print v, vapprox;
+}

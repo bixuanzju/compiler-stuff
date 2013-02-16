@@ -1,0 +1,4 @@
+box main {
+  const result <- 0.6 <> '5;
+  print result $;
+}

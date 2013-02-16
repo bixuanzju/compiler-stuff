@@ -1,0 +1,4 @@
+box main {
+  const result <- 0.3 >= 28;
+  print result $;
+}

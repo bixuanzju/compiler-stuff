@@ -1,0 +1,5 @@
+box main {
+  init result <- 8.7;
+  update result <- '?;
+  print result $;
+}

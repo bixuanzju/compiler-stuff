@@ -1,0 +1,4 @@
+box main {
+  const result <- 97 / 67;
+  print result $;
+}

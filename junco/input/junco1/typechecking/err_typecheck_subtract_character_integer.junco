@@ -1,0 +1,4 @@
+box main {
+  const result <- '{ - 99;
+  print result $;
+}

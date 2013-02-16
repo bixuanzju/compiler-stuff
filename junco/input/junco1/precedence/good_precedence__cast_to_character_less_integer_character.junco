@@ -1,0 +1,41 @@
+box main {
+  print 57 :c < '6 $;
+  print 80 :c < 'J $;
+  print 82 :c < 'Y $;
+  print 58 :c < 'D $;
+  print 65 :c < '@ $;
+  print 1 :c < 'X $;
+  print 11 :c < '= $;
+  print 42 :c < 's $;
+  print 19 :c < '4 $;
+  print 90 :c < '< $;
+  print 69 :c < '3 $;
+  print 27 :c < '! $;
+
+  print 'X < 85 :c $;
+  print '( < 5 :c $;
+  print 'G < 72 :c $;
+  print 'J < 52 :c $;
+  print '; < 45 :c $;
+  print 'B < 86 :c $;
+  print 'd < 51 :c $;
+  print '} < 2 :c $;
+  print '= < 12 :c $;
+  print '" < 77 :c $;
+  print 'Q < 97 :c $;
+  print 'm < 19 :c $;
+
+  print 96 :c < 50 :c $;
+  print 21 :c < 20 :c $;
+  print 1 :c < 55 :c $;
+  print 40 :c < 56 :c $;
+  print 10 :c < 51 :c $;
+  print 44 :c < 64 :c $;
+  print 56 :c < 15 :c $;
+  print 50 :c < 64 :c $;
+  print 89 :c < 70 :c $;
+  print 43 :c < 55 :c $;
+  print 10 :c < 17 :c $;
+  print 73 :c < 73 :c $;
+
+}

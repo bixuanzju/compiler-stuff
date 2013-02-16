@@ -1,0 +1,41 @@
+box main {
+  print 74 :c == 'T $;
+  print 13 :c == '+ $;
+  print 27 :c == '} $;
+  print 88 :c == '1 $;
+  print 96 :c == 'o $;
+  print 87 :c == 'r $;
+  print 63 :c == '( $;
+  print 74 :c == '9 $;
+  print 83 :c == '$ $;
+  print 9 :c == 'K $;
+  print 99 :c == 'u $;
+  print 2 :c == 'P $;
+
+  print 'x == 82 :c $;
+  print '} == 98 :c $;
+  print 'T == 97 :c $;
+  print 'g == 69 :c $;
+  print '! == 10 :c $;
+  print 'q == 10 :c $;
+  print 'e == 65 :c $;
+  print 'J == 26 :c $;
+  print '" == 65 :c $;
+  print 'R == 33 :c $;
+  print 'k == 23 :c $;
+  print '\ == 46 :c $;
+
+  print 7 :c == 46 :c $;
+  print 77 :c == 68 :c $;
+  print 35 :c == 69 :c $;
+  print 91 :c == 72 :c $;
+  print 6 :c == 33 :c $;
+  print 36 :c == 35 :c $;
+  print 56 :c == 48 :c $;
+  print 52 :c == 32 :c $;
+  print 1 :c == 85 :c $;
+  print 8 :c == 66 :c $;
+  print 71 :c == 49 :c $;
+  print 50 :c == 36 :c $;
+
+}

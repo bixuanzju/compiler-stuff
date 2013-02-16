@@ -1,0 +1,4 @@
+box main {
+  const result <- 'z <= 7.6;
+  print result $;
+}

@@ -1,0 +1,4 @@
+box main {
+  const result <- 69 < '+;
+  print result $;
+}

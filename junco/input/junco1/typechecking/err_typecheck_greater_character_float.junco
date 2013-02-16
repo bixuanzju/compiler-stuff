@@ -1,0 +1,4 @@
+box main {
+  const result <- 'H > 1.1;
+  print result $;
+}

@@ -1,0 +1,11 @@
+box main {
+    const vara <- 10;
+    const var# <- 11;
+    const var9 <- 12;
+    const var- <- 13;
+    const var_ <- 14;
+    const varZ <- 15;
+    
+    print vara, var#, var9, var-, var_, varZ $;
+}
+

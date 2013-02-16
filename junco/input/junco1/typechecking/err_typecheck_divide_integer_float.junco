@@ -1,0 +1,4 @@
+box main {
+  const result <- 81 / 2.8;
+  print result $;
+}

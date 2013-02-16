@@ -1,0 +1,4 @@
+box main {
+  const result <- 'A + 33;
+  print result $;
+}

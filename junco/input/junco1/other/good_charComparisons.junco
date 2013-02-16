@@ -1,0 +1,16 @@
+box main {
+	
+	prunt '=, '= $;
+	print ' , 'x == 'y $;
+	print ' , 'y == 'y $;
+	print ' , 'z == 'y $;
+	print $;
+		
+	prunt '<, '> $;
+	print ' , 'x <> 'y $;
+	print ' , 'y <> 'y $;
+	print ' , 'z <> 'y $;
+	print $;
+	
+}
+

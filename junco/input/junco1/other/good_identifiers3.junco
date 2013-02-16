@@ -1,0 +1,11 @@
+box main {
+    const Var <- 10;
+    const Zar <- 11;
+    const Aar <- 12;
+    const _ar <- 13;
+    const #ar <- 14;
+    const aar <- 15;
+    
+    print Var, Zar, Aar, _ar, #ar, aar $;
+}
+

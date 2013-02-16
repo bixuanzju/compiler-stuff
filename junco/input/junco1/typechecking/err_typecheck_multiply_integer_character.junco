@@ -1,0 +1,4 @@
+box main {
+  const result <- 81 * 'y;
+  print result $;
+}

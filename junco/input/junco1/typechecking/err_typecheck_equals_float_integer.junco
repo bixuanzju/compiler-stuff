@@ -1,0 +1,4 @@
+box main {
+  const result <- 4.1 == 52;
+  print result $;
+}

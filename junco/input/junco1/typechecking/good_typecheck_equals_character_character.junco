@@ -1,0 +1,4 @@
+box main {
+  const result <- 'V == '.;
+  print result $;
+}

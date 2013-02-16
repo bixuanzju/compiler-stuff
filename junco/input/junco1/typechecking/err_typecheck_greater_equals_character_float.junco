@@ -1,0 +1,4 @@
+box main {
+  const result <- ': >= 2.2;
+  print result $;
+}

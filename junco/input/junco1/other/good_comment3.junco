@@ -1,0 +1,7 @@
+** comment starting a file
+box main {
+	const c <- 3 + 4 * 5;  
+	const d <- 6 * 5;
+	const e <- 7 * 5;
+	print c, d, e $;
+}

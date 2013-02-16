@@ -1,0 +1,5 @@
+box main {
+  init result <- 5;
+  update result <- 'T;
+  print result $;
+}

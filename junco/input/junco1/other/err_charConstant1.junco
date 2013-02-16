@@ -1,0 +1,6 @@
+box main {
+    const w <- '
+    ;
+    
+    prunt w $;
+}

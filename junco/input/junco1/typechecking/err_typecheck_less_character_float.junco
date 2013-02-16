@@ -1,0 +1,4 @@
+box main {
+  const result <- '' < 8.8;
+  print result $;
+}

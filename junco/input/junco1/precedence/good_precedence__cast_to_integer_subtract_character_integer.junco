@@ -1,0 +1,41 @@
+box main {
+  print 'N :i - 13 $;
+  print 'I :i - 99 $;
+  print '# :i - 30 $;
+  print '# :i - 73 $;
+  print 'y :i - 97 $;
+  print 'h :i - 82 $;
+  print '9 :i - 54 $;
+  print 'R :i - 43 $;
+  print 'k :i - 75 $;
+  print 'W :i - 96 $;
+  print 'C :i - 63 $;
+  print 'A :i - 98 $;
+
+  print 95 - 'e :i $;
+  print 30 - '8 :i $;
+  print 25 - 'Z :i $;
+  print 80 - '[ :i $;
+  print 77 - 'S :i $;
+  print 22 - 'q :i $;
+  print 38 - 'K :i $;
+  print 1 - 'b :i $;
+  print 83 - 'd :i $;
+  print 13 - 'G :i $;
+  print 16 - '( :i $;
+  print 83 - 'Z :i $;
+
+  print '> :i - '( :i $;
+  print 'n :i - '" :i $;
+  print '4 :i - 'C :i $;
+  print 'y :i - 't :i $;
+  print '] :i - 'l :i $;
+  print '$ :i - 'K :i $;
+  print 'g :i - 'W :i $;
+  print 'C :i - 'M :i $;
+  print '8 :i - 'P :i $;
+  print '( :i - 'E :i $;
+  print '% :i - 'O :i $;
+  print '  :i - 'T :i $;
+
+}

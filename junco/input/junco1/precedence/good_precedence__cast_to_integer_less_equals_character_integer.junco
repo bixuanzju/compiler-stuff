@@ -1,0 +1,41 @@
+box main {
+  print '? :i <= 93 $;
+  print '  :i <= 66 $;
+  print ': :i <= 30 $;
+  print 'V :i <= 24 $;
+  print 'n :i <= 70 $;
+  print 'h :i <= 22 $;
+  print 'U :i <= 79 $;
+  print '* :i <= 52 $;
+  print '. :i <= 89 $;
+  print '( :i <= 9 $;
+  print 'g :i <= 21 $;
+  print '| :i <= 39 $;
+
+  print 6 <= '% :i $;
+  print 90 <= ', :i $;
+  print 98 <= 'v :i $;
+  print 21 <= 'B :i $;
+  print 49 <= 'z :i $;
+  print 9 <= 'y :i $;
+  print 70 <= ': :i $;
+  print 18 <= 'd :i $;
+  print 67 <= '. :i $;
+  print 35 <= 'l :i $;
+  print 55 <= 'M :i $;
+  print 96 <= 'K :i $;
+
+  print '{ :i <= '! :i $;
+  print 'D :i <= 'h :i $;
+  print 'j :i <= 'e :i $;
+  print 'R :i <= 'F :i $;
+  print 'K :i <= 'U :i $;
+  print '' :i <= '* :i $;
+  print '' :i <= '* :i $;
+  print '] :i <= 'D :i $;
+  print 'z :i <= 'Q :i $;
+  print 'o :i <= 'r :i $;
+  print 'A :i <= 'Q :i $;
+  print '  :i <= 'O :i $;
+
+}

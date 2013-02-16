@@ -1,0 +1,5 @@
+box main {
+	const c <- 2;
+	const d <- c:f + 41.21;
+	print c, d;
+}

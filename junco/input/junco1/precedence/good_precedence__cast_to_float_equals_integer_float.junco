@@ -1,0 +1,41 @@
+box main {
+  print 4 :f == 7.6 $;
+  print 75 :f == 1.7 $;
+  print 23 :f == 8.1 $;
+  print 62 :f == 2.3 $;
+  print 37 :f == 2.4 $;
+  print 92 :f == 3.6 $;
+  print 41 :f == 4.3 $;
+  print 68 :f == 2.6 $;
+  print 1 :f == 4.8 $;
+  print 65 :f == 6.4 $;
+  print 29 :f == 4.7 $;
+  print 85 :f == 8.2 $;
+
+  print 1.3 == 39 :f $;
+  print 6.5 == 68 :f $;
+  print 8.1 == 45 :f $;
+  print 3.8 == 1 :f $;
+  print 0.1 == 10 :f $;
+  print 8.4 == 28 :f $;
+  print 6.9 == 64 :f $;
+  print 4.8 == 40 :f $;
+  print 0.4 == 99 :f $;
+  print 3.4 == 89 :f $;
+  print 8.3 == 94 :f $;
+  print 9.5 == 73 :f $;
+
+  print 67 :f == 19 :f $;
+  print 47 :f == 7 :f $;
+  print 30 :f == 96 :f $;
+  print 25 :f == 5 :f $;
+  print 36 :f == 36 :f $;
+  print 56 :f == 79 :f $;
+  print 61 :f == 89 :f $;
+  print 85 :f == 82 :f $;
+  print 64 :f == 56 :f $;
+  print 43 :f == 34 :f $;
+  print 86 :f == 1 :f $;
+  print 9 :f == 72 :f $;
+
+}

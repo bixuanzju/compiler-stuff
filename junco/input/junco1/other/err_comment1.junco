@@ -1,0 +1,6 @@
+box main {
+	const c <- 3 + 4 * 5;  
+	const d <- 6 * *** 5;	** three stars are not a comment. **
+	const e <- 7 * 5;
+	print c, d, e $;
+}

@@ -1,0 +1,5 @@
+box main {
+  init result <- false :c ;
+  
+  print result $;
+}

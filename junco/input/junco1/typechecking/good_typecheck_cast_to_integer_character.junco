@@ -1,0 +1,5 @@
+box main {
+  init result <- 'O :i ;
+  update result <- result + 95;
+  print result $;
+}

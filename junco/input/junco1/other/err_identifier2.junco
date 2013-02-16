@@ -1,0 +1,5 @@
+box main {
+    const -abc <- 10;
+    
+    print -abc $;
+}

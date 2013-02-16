@@ -1,0 +1,4 @@
+box main {
+  const result <- 1.9 == '^;
+  print result $;
+}

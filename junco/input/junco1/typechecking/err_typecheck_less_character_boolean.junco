@@ -1,0 +1,4 @@
+box main {
+  const result <- 'o < true;
+  print result $;
+}

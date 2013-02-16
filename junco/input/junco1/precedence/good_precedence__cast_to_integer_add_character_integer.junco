@@ -1,0 +1,41 @@
+box main {
+  print 'O :i + 71 $;
+  print 'T :i + 45 $;
+  print '8 :i + 57 $;
+  print '1 :i + 17 $;
+  print 'q :i + 61 $;
+  print 'T :i + 57 $;
+  print 'D :i + 28 $;
+  print '7 :i + 4 $;
+  print '/ :i + 43 $;
+  print 'B :i + 82 $;
+  print '! :i + 11 $;
+  print '< :i + 28 $;
+
+  print 58 + 'B :i $;
+  print 86 + '2 :i $;
+  print 33 + 'V :i $;
+  print 83 + 'U :i $;
+  print 8 + '= :i $;
+  print 28 + '@ :i $;
+  print 1 + 'V :i $;
+  print 50 + '{ :i $;
+  print 49 + 'b :i $;
+  print 24 + 'y :i $;
+  print 32 + '_ :i $;
+  print 77 + '+ :i $;
+
+  print 'g :i + 'A :i $;
+  print 'U :i + 'r :i $;
+  print 'h :i + 'V :i $;
+  print '> :i + '< :i $;
+  print '2 :i + 'U :i $;
+  print 'P :i + ', :i $;
+  print 'A :i + 'E :i $;
+  print '! :i + '6 :i $;
+  print 'g :i + 'n :i $;
+  print 'G :i + '( :i $;
+  print 'j :i + 'r :i $;
+  print '4 :i + 'O :i $;
+
+}

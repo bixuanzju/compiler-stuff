@@ -1,0 +1,11 @@
+box main {
+    const ##_## <- 10;
+    const Zar11 <- 11;
+    const A#_-# <- 12;
+    const _x-09 <- 13;
+    const #314 <- 14;
+    const a-#10a <- 15;
+    
+    print ##_##, Zar11, A#_-#, _x-09, #314, a-#10a $;
+}
+

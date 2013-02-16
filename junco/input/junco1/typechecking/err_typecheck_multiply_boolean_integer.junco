@@ -1,0 +1,4 @@
+box main {
+  const result <- true * 51;
+  print result $;
+}

@@ -1,0 +1,5 @@
+box main {
+  init result <- 49;
+  update result <- 94;
+  print result $;
+}
