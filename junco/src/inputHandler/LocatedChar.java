@@ -59,4 +59,8 @@ public class LocatedChar {
 	public boolean isWhitespace() {
 		return Character.isWhitespace(character);
 	}
+
+	public boolean isLetter() {
+		return Character.isLetter(character);
+	}
 }

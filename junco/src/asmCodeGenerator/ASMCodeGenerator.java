@@ -312,7 +312,7 @@ public class ASMCodeGenerator {
 			else {
 				code.add(JumpFalse, endlabel);
 			}
-			
+
 			ASMCodeFragment ifBody = removeVoidCode(node.child(1));
 			code.append(ifBody);
 			code.add(Jump, endlabel);
@@ -550,10 +550,15 @@ public class ASMCodeGenerator {
 			code.append(arg2);
 
 			code.add(Duplicate);
-			if (node.getType() == PrimitiveType.INTEGER)
-				code.add(JumpFalse, RunTime.DIVIDE_BY_ZERO);
-			else
-				code.add(JumpFZero, RunTime.DIVIDE_BY_ZERO);
+			if (node.getOperator() == Punctuator.DIVIDE) {
+				if (node.getType() == PrimitiveType.INTEGER)
+					code.add(JumpFalse, RunTime.DIVIDE_BY_ZERO);
+				else
+					code.add(JumpFZero, RunTime.DIVIDE_BY_ZERO);
+			}
+			else {
+				code.add(Pop);
+			}
 
 			ASMOpcode opcode = opcodeForOperator(node.getOperator(), node.getType());
 			code.add(opcode); // type-dependent!

@@ -373,13 +373,13 @@ public class JuncoParser {
 		}
 		
 		ParseNode left = parseExpression2();
-		if(nowReading.isLextant(Punctuator.GREATER, Punctuator.GREATEREQ, Punctuator.LESS, Punctuator.LESSEQ,
+		while(nowReading.isLextant(Punctuator.GREATER, Punctuator.GREATEREQ, Punctuator.LESS, Punctuator.LESSEQ,
 				Punctuator.EQUAL, Punctuator.UNEQUAL)) {
 			Token compareToken = nowReading;
 			readToken();
 			ParseNode right = parseExpression2();
 			
-			return BinaryOperatorNode.withChildren(compareToken, left, right);
+			left = BinaryOperatorNode.withChildren(compareToken, left, right);
 		}
 		
 		return left;
