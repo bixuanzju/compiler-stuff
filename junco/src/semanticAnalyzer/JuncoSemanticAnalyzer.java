@@ -58,7 +58,7 @@ public class JuncoSemanticAnalyzer {
 		// constructs larger than statements
 		@Override
 		public void visitEnter(ProgramNode node) {
-			Scopes.enterStaticScope(node);				//TODO that's where scope is
+			Scopes.enterStaticScope(node);				
 		}
 		public void visitLeave(ProgramNode node) {
 			Scopes.leaveScope();

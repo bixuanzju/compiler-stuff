@@ -24,6 +24,10 @@ public class LocatedChar {
 	public TextLocation getLocation() {
 		return location;
 	}
+	public boolean isChar(char c) {
+		return character == c;
+	}
+	
 	
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -54,8 +58,5 @@ public class LocatedChar {
 	}
 	public boolean isWhitespace() {
 		return Character.isWhitespace(character);
-	}
-	public boolean isLetter() {
-		return Character.isLetter(character);
 	}
 }

@@ -1,33 +1,59 @@
 package applications;
 
-public class JuncoApplication {
+import java.io.File;
 
+public class JuncoApplication {
 	private static final int EXIT_CODE_FOR_ERROR = 1;
-	private static final String outputDirectory = "output/";
+	private static String outputDirectory = "output/";
 
 	public JuncoApplication() {
 		super();
 	}
-	
-	
+
 	protected static void checkArguments(String[] args, String applicationName) {
-		if(args.length != 1) {
-			printUsageMessage(applicationName);
+		if(!correctNumArguments(args)) {
+			printUsageMessage(applicationName, "");
 		}
+	
+		ensureSourceFileExists(args, applicationName); 			// first arg
+		ensureTargetDirectoryExists(args, applicationName);		// second (optional) arg
 	}
-	private static void printUsageMessage(String applicationName) {
-		System.err.println("usage: " + applicationName + " filename");
-		System.err.println("    (use exactly one filename argument)");
-		System.exit(EXIT_CODE_FOR_ERROR);
+
+	
+	protected static boolean correctNumArguments(String[] args) {
+		return  1 <= args.length && args.length <= 2;
+	}
+	protected static void ensureSourceFileExists(String[] args, String applicationName) {
+		if(!fileExists(args[0])) {
+			printUsageMessage(applicationName, "Source file does not exist.");
+		}
+	}	
+	protected static void ensureTargetDirectoryExists(String[] args, String applicationName) {
+		if(args.length > 1) {
+			outputDirectory  = args[1];
+		}
+		
+		if(!makeDirectoryIfNecessary(outputDirectory)) {
+			printUsageMessage(applicationName, "Target directory cannot be created.");
+		}
+		outputDirectory = ensureEndsWithSeparator(outputDirectory);
 	}
 
 
+	
+	protected static String ensureEndsWithSeparator(String string) {
+		return string + 
+			   (endsWithSeparator(string) ? File.separator : "");
+	}
+	protected static boolean endsWithSeparator(String filePath) {
+		return (!filePath.endsWith(File.separator));
+	}
 	protected static String outputFilename(String filename) {
 		return outputDirectory + basename(filename) + ".asm";
 	}
 	// removes preceding directory names and the file extension
 	// e.g. /usr/root/tricks/bigBag.cpp  ->  bigBag
-	private static String basename(String filename) {
+	protected static String basename(String filename) {
 		int lastSlash = filename.lastIndexOf('/');
 		int lastBackslash = filename.lastIndexOf('\\');
 		int start = Math.max(lastSlash, lastBackslash) + 1;
@@ -38,6 +64,25 @@ public class JuncoApplication {
 		}
 		return filename.substring(start, end);
 	}
+	
+
+	protected static boolean makeDirectoryIfNecessary(String directoryName) {
+		return directoryExists(directoryName) || createDirectory(directoryName);
+	}
+	protected static boolean fileExists(String filePath) {
+		return (new File(filePath)).exists();
+	}
+	protected static boolean directoryExists(String filePath) {
+		return fileExists(filePath) && (new File(filePath)).isDirectory();
+	}
+	protected static boolean createDirectory(String filePath) {
+		return (new File(filePath)).mkdirs();
+	}
 
 
+	protected static void printUsageMessage(String applicationName, String errorMessage) {
+		System.err.println("usage: " + applicationName + " filename" + " [target output directory]");
+		System.err.println(errorMessage);
+		System.exit(EXIT_CODE_FOR_ERROR);
+	}
 }
