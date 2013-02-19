@@ -28,11 +28,10 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 	// ////////////////////////////////////////////////////////////////////////////
 	// Token-finding main dispatch
 
-
 	@Override
 	protected void findNextToken() {
 		LocatedChar ch = nextNonWhitespaceChar();
-		
+
 		// deal with comment
 		while (ch.getCharacter() == '*' && input.peek().getCharacter() == '*') {
 			// eat the second '*'
@@ -40,30 +39,35 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 			do {
 				ch = input.next();
 			}
-			while ((ch.getCharacter() != '*' || input.peek().getCharacter() != '*') && ch.getCharacter() != '\n');
+			while ((ch.getCharacter() != '*' || input.peek().getCharacter() != '*')
+					&& ch.getCharacter() != '\n');
 			if (ch.getCharacter() == '*') {
 				// eat the second '*'
 				ch = input.next();
 			}
 			ch = nextNonWhitespaceChar();
 		}
-		
-//		if (ch.getCharacter() == 'b' || ch.getCharacter() == 'c' || ch.getCharacter() == 'i' ||
-//				ch.getCharacter() == 'f') {
-//			return 
-//		}
-		
+
+		// if (ch.getCharacter() == 'b' || ch.getCharacter() == 'c' ||
+		// ch.getCharacter() == 'i' ||
+		// ch.getCharacter() == 'f') {
+		// return
+		// }
+
 		if ((ch.getCharacter() == '-' && input.peek().isDigit()) || ch.isDigit()) {
 			scanNumber(ch);
 		}
-		else if (ch.getCharacter() == '\'' && input.peek().getCharacter() >= 32 && input.peek().getCharacter() <= 126) {
+		else if (ch.getCharacter() == '\'' && input.peek().getCharacter() >= 32
+				&& input.peek().getCharacter() <= 126) {
 			ch = input.next();
-			nextToken = CharacterToken.make(ch.getLocation(), ch.getCharacter().toString());
+			nextToken = CharacterToken.make(ch.getLocation(), ch.getCharacter()
+					.toString());
 		}
 		else if (isPunctuatorStart(ch)) {
 			nextToken = PunctuatorScanner.scan(ch, input);
 		}
-		else if (ch.isLetter() || ch.getCharacter() == '_' || ch.getCharacter() == '#') {
+		else if (ch.isLetter() || ch.getCharacter() == '_'
+				|| ch.getCharacter() == '#') {
 			scanIdentifier(ch);
 		}
 
@@ -74,7 +78,7 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 			lexicalError(ch);
 			findNextToken();
 		}
-		
+
 	}
 
 	private LocatedChar nextNonWhitespaceChar() {
@@ -92,7 +96,7 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(firstChar.getCharacter());
 		LocatedChar c = input.next();
-		
+
 		while (c.isDigit()) {
 			buffer.append(c.getCharacter());
 			c = input.next();
@@ -102,15 +106,15 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 			buffer.append(c.getCharacter());
 			c = input.next();
 			if (c.isDigit())
-			while (c.isDigit()) {
-				buffer.append(c.getCharacter());
-				c = input.next();
-			}
+				while (c.isDigit()) {
+					buffer.append(c.getCharacter());
+					c = input.next();
+				}
 			else {
 				JuncoLogger log = JuncoLogger.getLogger("compiler.lexicalAnalyzer");
 				log.severe("Lexical error: invalid floating number " + buffer);
 			}
-			
+
 			if (c.getCharacter() == 'e') {
 				buffer.append(c.getCharacter());
 				c = input.next();
@@ -121,10 +125,21 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 						buffer.append(c.getCharacter());
 						c = input.next();
 					}
+					input.pushback(c);
+					nextToken = FloatingToken.make(firstChar.getLocation(),
+							buffer.toString());
+				}
+				else {
+					JuncoLogger log = JuncoLogger.getLogger("compiler.lexicalAnalyzer");
+					log.severe("Lexical error: invalid floating number " + buffer);
 				}
 			}
-			input.pushback(c);
-			nextToken = FloatingToken.make(firstChar.getLocation(), buffer.toString());
+			else {
+				input.pushback(c);
+				nextToken = FloatingToken.make(firstChar.getLocation(),
+						buffer.toString());
+			}
+
 		}
 		else {
 			input.pushback(c);
@@ -132,39 +147,37 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 		}
 	}
 
-//	private void appendSubsequentDigits(StringBuffer buffer) {
-//		LocatedChar c = input.next();
-//		while (c.isDigit()) {
-//			buffer.append(c.getCharacter());
-//			c = input.next();
-//		}
-//		if (c.getCharacter() == '.') {
-//			buffer.append(c.getCharacter());
-//			c = input.next();
-//			while (c.isDigit()) {
-//				buffer.append(c.getCharacter());
-//				c = input.next();
-//			}
-//			if (c.getCharacter() == 'e') {
-//				c = input.next();
-//				if ((c.getCharacter() == '-' && input.peek().isDigit()) || c.isDigit()) {
-//					buffer.append(c.getCharacter());
-//					c = input.next();
-//					while (c.isDigit()) {
-//						buffer.append(c.getCharacter());
-//						c = input.next();
-//					}
-//				}
-//			}
-//		}
-//		input.pushback(c);
-//	}
-//	
-	
+	// private void appendSubsequentDigits(StringBuffer buffer) {
+	// LocatedChar c = input.next();
+	// while (c.isDigit()) {
+	// buffer.append(c.getCharacter());
+	// c = input.next();
+	// }
+	// if (c.getCharacter() == '.') {
+	// buffer.append(c.getCharacter());
+	// c = input.next();
+	// while (c.isDigit()) {
+	// buffer.append(c.getCharacter());
+	// c = input.next();
+	// }
+	// if (c.getCharacter() == 'e') {
+	// c = input.next();
+	// if ((c.getCharacter() == '-' && input.peek().isDigit()) || c.isDigit()) {
+	// buffer.append(c.getCharacter());
+	// c = input.next();
+	// while (c.isDigit()) {
+	// buffer.append(c.getCharacter());
+	// c = input.next();
+	// }
+	// }
+	// }
+	// }
+	// input.pushback(c);
+	// }
+	//
 
 	// ////////////////////////////////////////////////////////////////////////////
 	// Identifier and keyword lexical analysis
-	
 
 	private void scanIdentifier(LocatedChar firstChar) {
 		StringBuffer buffer = new StringBuffer();
@@ -187,7 +200,8 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 
 	private void appendSubsequentChar(StringBuffer buffer) {
 		LocatedChar c = input.next();
-		while (c.isLetter() || c.getCharacter() == '_' || c.getCharacter() == '#' || c.getCharacter() == '-' || c.isDigit()) {
+		while (c.isLetter() || c.getCharacter() == '_' || c.getCharacter() == '#'
+				|| c.getCharacter() == '-' || c.isDigit()) {
 			buffer.append(c.getCharacter());
 			c = input.next();
 		}
