@@ -483,6 +483,15 @@ public class JuncoParser {
 			expect(Punctuator.CLOSE_BRACKET);
 			return node;
 		}
+		else if (nowReading.isLextant(Punctuator.OPEN_SQUARE)) {
+			Token token = nowReading;
+			readToken();
+			ParseNode left = parseExpression();
+			expect(Punctuator.SPLICE);
+			ParseNode right = parseExpression();
+			expect(Punctuator.CLOSE_SQUARE);
+			return BinaryOperatorNode.withChildren(token, left, right);
+		}
 		else
 			return parseLiteral();
 	}
@@ -517,7 +526,7 @@ public class JuncoParser {
 	private boolean startsLiteralOrBracket(Token token) {
 		return startsIntNumber(token) || startsFloatNumber(token) ||  startsIdentifier(token) || 
 				startsBooleanConstant(token) || startsCharacterConstant(token) || 
-				(token.isLextant(Punctuator.OPEN_BRACKET, Punctuator.NOT));
+				(token.isLextant(Punctuator.OPEN_BRACKET, Punctuator.NOT, Punctuator.OPEN_SQUARE));
 	}
 
 	// number (terminal)
