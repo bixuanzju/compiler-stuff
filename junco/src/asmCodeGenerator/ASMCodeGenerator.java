@@ -78,7 +78,11 @@ public class ASMCodeGenerator {
 		// print error message
 		code.add(PushD, RunTime.ERROR_MESSAGE_IF_DIVIDE_BY_ZERO);
 		code.add(Printf);
-
+		code.add(Halt);
+		
+		code.add(Label, RunTime.GENERAL_RUNTIME_ERROR);
+		code.add(PushD, RunTime.RUNTIME_ERROR_MESSAGE);
+		code.add(Printf);
 		code.add(Halt);
 
 		return code;

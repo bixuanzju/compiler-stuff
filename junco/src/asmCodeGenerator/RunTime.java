@@ -14,9 +14,10 @@ public class RunTime {
 	public static final String GLOBAL_MEMORY_BLOCK  = "$global-memory-block";
 	public static final String USABLE_MEMORY_START  = "$usable-memory-start";
 	public static final String MAIN_PROGRAM_LABEL   = "$$main";
-	public static final String DIVIDE_BY_ZERO   = "$divede-by-zero";
-	public static final String NOT_DIVIDE_BY_ZERO   = "$not-divede-by-zero";
+	public static final String DIVIDE_BY_ZERO   = "$$divede-by-zero";
 	public static final String ERROR_MESSAGE_IF_DIVIDE_BY_ZERO   = "$print-error-message";
+	public static final String GENERAL_RUNTIME_ERROR  = "$$general-runtime-error";
+	public static final String RUNTIME_ERROR_MESSAGE  = "$print-runtime-error-message";
 	
 
 	private ASMCodeFragment environmentASM() {

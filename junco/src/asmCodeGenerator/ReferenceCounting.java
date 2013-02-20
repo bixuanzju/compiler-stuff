@@ -3,7 +3,6 @@ package asmCodeGenerator;
 import static asmCodeGenerator.ASMHelper.*;
 import static asmCodeGenerator.ASMCodeFragment.CodeType.*;
 import static asmCodeGenerator.ASMOpcode.*;
-import asmCodeGenerator.ASMCodeGenerator;
 import asmCodeGenerator.ASMCodeFragment;
 
 public class ReferenceCounting {
@@ -124,6 +123,10 @@ public class ReferenceCounting {
 		
 		frag.add(Label, REF_COUNTER_STACK_SIZE_EXCEEDED_ERROR);
 		frag.add(PushD, REF_COUNTER_STACK_SIZE_EXCEEDED_MESSAGE);
+		
+		frag.add(DLabel, RunTime.RUNTIME_ERROR_MESSAGE);
+		frag.add(DataS, "Runtime error: " + REF_COUNTER_STACK_SIZE_EXCEEDED_MESSAGE);
+		
 		frag.add(Jump, RunTime.GENERAL_RUNTIME_ERROR);
 		// repair the above to print  "Runtime error:" + REF_COUNTER_STACK_SIZE_EXCEEDED_MESSAGE,  and then halt.			
 	}
