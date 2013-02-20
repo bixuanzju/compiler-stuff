@@ -45,10 +45,13 @@ public class ASMCodeGenerator {
 	public ASMCodeFragment makeASM() {
 		ASMCodeFragment code = new ASMCodeFragment(GENERATES_VOID);
 
+		code.append(MemoryManager.codeForInitialization());
+		code.append(ReferenceCounting.codeForInitialization());
+
 		code.append(RunTime.getEnvironment());
 		code.append(globalVariableBlockASM());
 		code.append(programASM());
-		// code.append( MemoryManager.codeForAfterApplication() );
+		code.append(MemoryManager.codeForAfterApplication());
 
 		return code;
 	}

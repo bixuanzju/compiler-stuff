@@ -105,42 +105,43 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 		if (c.getCharacter() == '.') {
 			buffer.append(c.getCharacter());
 			c = input.next();
-			if (c.isDigit())
+			if (c.isDigit()) {
 				while (c.isDigit()) {
 					buffer.append(c.getCharacter());
 					c = input.next();
 				}
-			else {
-				JuncoLogger log = JuncoLogger.getLogger("compiler.lexicalAnalyzer");
-				log.severe("Lexical error: invalid floating number " + buffer);
-			}
-
-			if (c.getCharacter() == 'e') {
-				buffer.append(c.getCharacter());
-				c = input.next();
-				if ((c.getCharacter() == '-' && input.peek().isDigit()) || c.isDigit()) {
+				if (c.getCharacter() == 'e') {
 					buffer.append(c.getCharacter());
 					c = input.next();
-					while (c.isDigit()) {
+					if ((c.getCharacter() == '-' && input.peek().isDigit())
+							|| c.isDigit()) {
 						buffer.append(c.getCharacter());
 						c = input.next();
+						while (c.isDigit()) {
+							buffer.append(c.getCharacter());
+							c = input.next();
+						}
+						input.pushback(c);
+						nextToken = FloatingToken.make(firstChar.getLocation(),
+								buffer.toString());
 					}
+					else {
+						JuncoLogger log = JuncoLogger.getLogger("compiler.lexicalAnalyzer");
+						log.severe("Lexical error: invalid floating number " + buffer);
+					}
+				}
+				else {
 					input.pushback(c);
 					nextToken = FloatingToken.make(firstChar.getLocation(),
 							buffer.toString());
 				}
-				else {
-					JuncoLogger log = JuncoLogger.getLogger("compiler.lexicalAnalyzer");
-					log.severe("Lexical error: invalid floating number " + buffer);
-				}
 			}
 			else {
-				input.pushback(c);
-				nextToken = FloatingToken.make(firstChar.getLocation(),
-						buffer.toString());
+				JuncoLogger log = JuncoLogger.getLogger("compiler.lexicalAnalyzer");
+				log.severe("Lexical error: invalid floating number " + buffer);
 			}
-
 		}
+
 		else {
 			input.pushback(c);
 			nextToken = NumberToken.make(firstChar.getLocation(), buffer.toString());
