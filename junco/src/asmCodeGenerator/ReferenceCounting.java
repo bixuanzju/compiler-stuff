@@ -125,7 +125,9 @@ public class ReferenceCounting {
 		frag.add(PushD, REF_COUNTER_STACK_SIZE_EXCEEDED_MESSAGE);
 		
 		frag.add(DLabel, RunTime.RUNTIME_ERROR_MESSAGE);
-		frag.add(DataS, "Runtime error: " + REF_COUNTER_STACK_SIZE_EXCEEDED_MESSAGE);
+		frag.add(DataS, "Runtime error: ");
+		
+		frag.add(PushD, RunTime.RUNTIME_ERROR_MESSAGE);
 		
 		frag.add(Jump, RunTime.GENERAL_RUNTIME_ERROR);
 		// repair the above to print  "Runtime error:" + REF_COUNTER_STACK_SIZE_EXCEEDED_MESSAGE,  and then halt.			

@@ -8,8 +8,13 @@ public class RunTime {
 	public static final String CHARACTER_PRINT_FORMAT = "$print-format-character";
 	public static final String BOOLEAN_PRINT_FORMAT = "$print-format-boolean";
 	public static final String NEWLINE_PRINT_FORMAT = "$print-format-newline";
+	public static final String RANGE_PRINT_FORMAT = "$print-format-newline";
 	public static final String BOOLEAN_TRUE_STRING  = "$boolean-true-string";
 	public static final String BOOLEAN_FALSE_STRING = "$boolean-false-string";
+	public static final String OPEN_SQUARE_STRING = "$open-square-string";
+	public static final String CLOSE_SQUARE_STRING = "$close-square-string";
+	public static final String SPLICE_STRING = "$splice-string";
+	// public static final String SPACE_STRING = "$space-string";
 	public static final String PRINT_SPACER_STRING  = "$print-spacer-string";
 	public static final String GLOBAL_MEMORY_BLOCK  = "$global-memory-block";
 	public static final String USABLE_MEMORY_START  = "$usable-memory-start";
@@ -48,6 +53,14 @@ public class RunTime {
 		frag.add(DataS, "%s");
 		frag.add(DLabel, NEWLINE_PRINT_FORMAT);
 		frag.add(DataS, "\n");
+		frag.add(DLabel, OPEN_SQUARE_STRING);
+		frag.add(DataS, "[");
+		frag.add(DLabel, CLOSE_SQUARE_STRING);
+		frag.add(DataS, "]");
+		frag.add(DLabel, SPLICE_STRING);
+		frag.add(DataS, ", ");
+//		frag.add(DLabel, SPACE_STRING);
+//		frag.add(DataS, " ");
 		frag.add(DLabel, BOOLEAN_TRUE_STRING);
 		frag.add(DataS, "true");
 		frag.add(DLabel, BOOLEAN_FALSE_STRING);
@@ -56,6 +69,8 @@ public class RunTime {
 		frag.add(DataS, " ");
 		frag.add(DLabel, ERROR_MESSAGE_IF_DIVIDE_BY_ZERO);
 		frag.add(DataS, "Damn error! you must divided by zero!!!\n");
+//		frag.add(DLabel, RunTime.RUNTIME_ERROR_MESSAGE);
+//		frag.add(DataS, "Runtime error: ");
 		
 		return frag;
 	}

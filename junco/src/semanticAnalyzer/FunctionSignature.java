@@ -178,5 +178,10 @@ class FunctionSignature {
 			return neverMatchedSignature;
 		}
 	}
+	
+	// TODO Type variable
+	public Boolean RangeSignature(Type type1, Type type2) {
+		return true;
+	}
 
 }

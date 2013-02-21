@@ -23,6 +23,7 @@ import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.UpdateStatementNode;
 import parseTree.nodeTypes.WhileStatementNode;
 import semanticAnalyzer.PrimitiveType;
+import semanticAnalyzer.RangeType;
 import semanticAnalyzer.Type;
 import symbolTable.Binding;
 import symbolTable.Scope;
@@ -79,9 +80,9 @@ public class ASMCodeGenerator {
 		code.add(PushD, RunTime.ERROR_MESSAGE_IF_DIVIDE_BY_ZERO);
 		code.add(Printf);
 		code.add(Halt);
-		
+
 		code.add(Label, RunTime.GENERAL_RUNTIME_ERROR);
-		code.add(PushD, RunTime.RUNTIME_ERROR_MESSAGE);
+		code.add(Printf);
 		code.add(Printf);
 		code.add(Halt);
 
@@ -173,6 +174,9 @@ public class ASMCodeGenerator {
 			else if (node.getType() == PrimitiveType.CHARACTER) {
 				code.add(LoadC);
 			}
+			else if (node.getType() instanceof RangeType) {
+				code.add(LoadI);
+			}
 			else {
 				assert false : "node " + node;
 			}
@@ -232,12 +236,138 @@ public class ASMCodeGenerator {
 		}
 
 		private void appendPrintCode(ParseNode node) {
-			String format = printFormat(node.getType());
 
-			code.append(removeValueCode(node));
-			convertToStringIfBoolean(node);
-			code.add(PushD, format);
-			code.add(Printf);
+			if (node.getType() instanceof RangeType) {
+				String startlabel = labeller.newLabel("-range-start-", "");
+				String falselabel = labeller.newLabelSameNumber("-false-end-", "");
+				String notfloatlabel = labeller
+						.newLabelSameNumber("-notfloat-end-", "");
+				String charlabel = labeller.newLabelSameNumber("-char-end-", "");
+				String endlabel = labeller.newLabelSameNumber("-range-end-", "");
+				
+				code.append(removeValueCode(node));
+				
+				code.add(Call, startlabel);
+				code.add(Jump, endlabel);
+
+				code.add(Label, startlabel);
+				code.add(Exchange);	// [... pc ptr]
+				code.add(PushD, RunTime.OPEN_SQUARE_STRING);
+				code.add(Printf);
+
+				// I need to know the type identifier
+				code.add(Duplicate);
+				code.add(PushI, 4); // [... ptr ptr 4]
+				code.add(Add); // [... ptr ptr+4]
+				code.add(LoadI); // [... ptr id]
+				code.add(PushI, 2); // [... ptr id 2]
+				code.add(Subtract); // [... ptr id-2]
+				code.add(JumpFalse, falselabel); // [... ptr]
+				// god, it's range type, how can I print
+				code.add(Duplicate); // [... ptr ptr]
+				code.add(PushI, 12); // [... ptr ptr 12]
+				code.add(Add); // [... ptr ptr+12]
+				code.add(LoadI); // [... ptr lptr]
+				code.add(Exchange); // [... lptr ptr]
+				code.add(PushI, 16);
+				code.add(Add);
+				code.add(LoadI); // [... lptr hptr]
+				code.add(Exchange); // [... hptr lptr]
+				// what to do?
+				code.add(Call, startlabel);
+				code.add(PushD, RunTime.SPLICE_STRING);
+				code.add(Printf);	// [... htpr]
+				code.add(Call, startlabel);
+				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
+				code.add(Printf);
+				code.add(Return);
+
+				// ok, it's primitive type, now I need to know what type size actually
+				code.add(Label, falselabel);
+				code.add(Duplicate);
+				code.add(PushI, 11); // [... ptr ptr 11]
+				code.add(Add); // [... ptr ptr+11]
+				code.add(LoadC); // [... ptr size]
+				code.add(Duplicate); // [... ptr size size]
+				code.add(PushI, 8); // [... ptr size size 8]
+				code.add(Subtract); // [.. ptr size size-8]
+				code.add(JumpNeg, notfloatlabel); // [... ptr size]
+				// yeah, it's float type, let's print
+				code.add(Pop); // [... ptr]
+				code.add(Duplicate); // [...ptr ptr]
+				code.add(PushI, 12); // [... ptr ptr 12]
+				code.add(Add); // [... ptr ptr+12]
+				code.add(LoadF); // [... ptr float]
+				code.add(PushD, RunTime.FLOAT_PRINT_FORMAT);
+				code.add(Printf); // [... ptr]
+				code.add(PushD, RunTime.SPLICE_STRING);
+				code.add(Printf); // [... ptr]
+				code.add(PushI, 20); // [... ptr 20]
+				code.add(Add); // [... ptr+20]
+				code.add(LoadF); // [... float]
+				code.add(PushD, RunTime.FLOAT_PRINT_FORMAT);
+				code.add(Printf);
+				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
+				code.add(Printf);
+				code.add(Return);
+				
+
+				// ok, it's not float, so it is int or char?
+				code.add(Label, notfloatlabel);
+				// code.add(Duplicate); // [... ptr size size]
+				code.add(PushI, 4); // [... ptr size 4]
+				code.add(Subtract); // [... ptr size-4]
+				code.add(JumpNeg, charlabel); // [... ptr]
+				// it's int type, let's print
+				code.add(Duplicate); // [...ptr ptr]
+				code.add(PushI, 12); // [... ptr ptr 12]
+				code.add(Add); // [... ptr ptr+12]
+				code.add(LoadI); // [... ptr int]
+				code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
+				code.add(Printf); // [... ptr]
+				code.add(PushD, RunTime.SPLICE_STRING);
+				code.add(Printf); // [... ptr]
+				code.add(PushI, 16); // [... ptr 16]
+				code.add(Add); // [... ptr+16]
+				code.add(LoadI); // [... int]
+				code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
+				code.add(Printf);
+				
+				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
+				code.add(Printf);
+				code.add(Return);
+
+				// finally, it is char type, let's print!!
+				code.add(Label, charlabel);
+				code.add(Duplicate); // [...ptr ptr]
+				code.add(PushI, 12); // [... ptr ptr 12]
+				code.add(Add); // [... ptr ptr+12]
+				code.add(LoadC); // [... ptr char]
+				code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
+				code.add(Printf); // [... ptr]
+				code.add(PushD, RunTime.SPLICE_STRING);
+				code.add(Printf); // [... ptr]
+				code.add(PushI, 13); // [... ptr 13]
+				code.add(Add); // [... ptr+13]
+				code.add(LoadC); // [... char]
+				code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
+				code.add(Printf);
+				
+				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
+				code.add(Printf);
+				code.add(Return);
+
+			
+			
+				code.add(Label, endlabel);
+			}
+			else {
+				String format = printFormat(node.getType());
+				code.append(removeValueCode(node));
+				convertToStringIfBoolean(node);
+				code.add(PushD, format);
+				code.add(Printf);
+			}
 		}
 
 		private void convertToStringIfBoolean(ParseNode node) {
@@ -343,7 +473,6 @@ public class ASMCodeGenerator {
 		public void visitLeave(CastingNode node) {
 			newValueCode(node);
 			ASMCodeFragment value = removeValueCode(node.child(0));
-			;
 
 			code.append(value);
 
@@ -387,6 +516,10 @@ public class ASMCodeGenerator {
 			if (type == PrimitiveType.CHARACTER) {
 				return StoreC;
 			}
+			if (type instanceof RangeType) {
+				return StoreI;
+			}
+
 			assert false : "Type " + type + " unimplemented in opcodeForStore()";
 			return null;
 		}
@@ -405,9 +538,73 @@ public class ASMCodeGenerator {
 			else if ((operator == Punctuator.AND) || (operator == Punctuator.OR)) {
 				visitBooleanOperator(node, operator);
 			}
+			else if (operator == Punctuator.OPEN_SQUARE) {
+				visitRangeOpertator(node);
+			}
 			else {
 				visitNormalBinaryOperatorNode(node);
 			}
+		}
+
+		public void visitRangeOpertator(BinaryOperatorNode node) {
+			newValueCode(node);
+			ASMCodeFragment arg1 = removeValueCode(node.child(0));
+			ASMCodeFragment arg2 = removeValueCode(node.child(1));
+			Type childType = node.child(0).getType();
+
+			code.add(PushI, 12 + 2 * childType.getSize());
+			code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
+
+			// for reference count
+			code.add(Duplicate);
+			code.add(PushI, 1);
+			code.add(StoreI);
+			// for type identifier
+			code.add(Duplicate);
+			code.add(PushI, 4);
+			code.add(Add); // [... ptr ptr+4]
+			if (childType instanceof PrimitiveType) {
+				code.add(PushI, 2);
+			}
+			else {
+				code.add(PushI, 3);
+			}
+			code.add(StoreI);
+			// for subtype size
+			code.add(Duplicate); // [... ptr ptr]
+			code.add(PushI, 11); // [... ptr ptr 11]
+			code.add(Add); // [... ptr ptr+11]
+			code.add(PushI, childType.getSize());
+			code.add(StoreC); // [... ptr]
+
+			code.add(Duplicate);
+			code.add(PushI, 12);
+			code.add(Add); // [... ptr ptr+12]
+			code.append(arg1); // [... ptr ptr+12 low]
+			if (childType == PrimitiveType.FLOATNUM) {
+				code.add(StoreF);
+			}
+			else if (childType == PrimitiveType.CHARACTER) {
+				code.add(StoreC);
+			}
+			else {
+				code.add(StoreI);
+			} // [... ptr]
+
+			code.add(Duplicate); // [... ptr ptr]
+			code.add(PushI, childType.getSize() + 12);
+			code.add(Add);
+			code.append(arg2); // [... ptr ptr+12+size high]
+			if (childType == PrimitiveType.FLOATNUM) {
+				code.add(StoreF);
+			}
+			else if (childType == PrimitiveType.CHARACTER) {
+				code.add(StoreC);
+			}
+			else {
+				code.add(StoreI);
+			} // [... ptr]
+
 		}
 
 		public void visitLeave(BooleanNotNode node) {
