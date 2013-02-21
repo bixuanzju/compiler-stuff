@@ -17,6 +17,7 @@ public enum Keyword implements Lextant {
 	IF("if"),
 	ELSE("else"),
 	WHILE("while"),
+	IN("in"),
 	UPDATE("update");
 	private String lexeme;
 	private Token prototype;

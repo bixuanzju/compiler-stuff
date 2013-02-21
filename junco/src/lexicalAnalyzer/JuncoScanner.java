@@ -63,13 +63,15 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 			nextToken = CharacterToken.make(ch.getLocation(), ch.getCharacter()
 					.toString());
 		}
-		else if (isPunctuatorStart(ch)) {
-			nextToken = PunctuatorScanner.scan(ch, input);
-		}
 		else if (ch.isLetter() || ch.getCharacter() == '_'
 				|| ch.getCharacter() == '#') {
 			scanIdentifier(ch);
 		}
+		
+		else if (isPunctuatorStart(ch)) {
+			nextToken = PunctuatorScanner.scan(ch, input);
+		}
+		
 
 		else if (isEndOfInput(ch)) {
 			nextToken = NullToken.make(ch.getLocation());

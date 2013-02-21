@@ -9,9 +9,7 @@ import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
-import parseTree.nodeTypes.BooleanNotNode;
 import parseTree.nodeTypes.BoxBodyNode;
-import parseTree.nodeTypes.CastingNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatNumberNode;
@@ -20,6 +18,7 @@ import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
 import parseTree.nodeTypes.WhileStatementNode;
 import semanticAnalyzer.PrimitiveType;
@@ -239,19 +238,20 @@ public class ASMCodeGenerator {
 
 			if (node.getType() instanceof RangeType) {
 				String startlabel = labeller.newLabel("-range-start-", "");
-				String falselabel = labeller.newLabelSameNumber("-false-end-", "");
-				String notfloatlabel = labeller
-						.newLabelSameNumber("-notfloat-end-", "");
-				String charlabel = labeller.newLabelSameNumber("-char-end-", "");
+				String falselabel = labeller
+						.newLabelSameNumber("-range-false-end-", "");
+				String notfloatlabel = labeller.newLabelSameNumber(
+						"-range-notfloat-end-", "");
+				String charlabel = labeller.newLabelSameNumber("-range-char-end-", "");
 				String endlabel = labeller.newLabelSameNumber("-range-end-", "");
-				
+
 				code.append(removeValueCode(node));
-				
+
 				code.add(Call, startlabel);
 				code.add(Jump, endlabel);
 
 				code.add(Label, startlabel);
-				code.add(Exchange);	// [... pc ptr]
+				code.add(Exchange); // [... pc ptr]
 				code.add(PushD, RunTime.OPEN_SQUARE_STRING);
 				code.add(Printf);
 
@@ -276,7 +276,7 @@ public class ASMCodeGenerator {
 				// what to do?
 				code.add(Call, startlabel);
 				code.add(PushD, RunTime.SPLICE_STRING);
-				code.add(Printf);	// [... htpr]
+				code.add(Printf); // [... htpr]
 				code.add(Call, startlabel);
 				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
 				code.add(Printf);
@@ -310,7 +310,6 @@ public class ASMCodeGenerator {
 				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
 				code.add(Printf);
 				code.add(Return);
-				
 
 				// ok, it's not float, so it is int or char?
 				code.add(Label, notfloatlabel);
@@ -332,7 +331,7 @@ public class ASMCodeGenerator {
 				code.add(LoadI); // [... int]
 				code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
 				code.add(Printf);
-				
+
 				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
 				code.add(Printf);
 				code.add(Return);
@@ -352,13 +351,11 @@ public class ASMCodeGenerator {
 				code.add(LoadC); // [... char]
 				code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
 				code.add(Printf);
-				
+
 				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
 				code.add(Printf);
 				code.add(Return);
 
-			
-			
 				code.add(Label, endlabel);
 			}
 			else {
@@ -470,13 +467,65 @@ public class ASMCodeGenerator {
 			}
 		}
 
-		public void visitLeave(CastingNode node) {
+		// public void visitLeave(CastingNode node) {
+		// newValueCode(node);
+		// ASMCodeFragment value = removeValueCode(node.child(0));
+		//
+		// code.append(value);
+		//
+		// if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
+		// code.add(ConvertF);
+		// }
+		// else if (node.getToken().isLextant(Punctuator.CASTTOINT)) {
+		// if (node.child(0).getType() == PrimitiveType.FLOATNUM)
+		// code.add(ConvertI);
+		//
+		// }
+		// else if (node.getToken().isLextant(Punctuator.CASTTOCHAR)) {
+		// code.add(PushI, 127);
+		// code.add(BTAnd);
+		// }
+		//
+		// }
+
+//		public void visitLeave(BooleanNotNode node) {
+//			newValueCode(node);
+//			String startLabel = labeller.newLabel("-not-arg1-", "");
+//			String endLabel = labeller.newLabelSameNumber("-not-end-", "");
+//
+//			ASMCodeFragment arg1 = removeValueCode(node.child(0));
+//			code.add(Label, startLabel);
+//			code.append(arg1);
+//
+//			code.add(BNegate);
+//			code.add(Duplicate);
+//			code.add(JumpFalse, endLabel);
+//			code.add(Pop);
+//			code.add(PushI, 1);
+//
+//			code.add(Label, endLabel);
+//		}
+
+		public void visitLeave(UniaryOperatorNode node) {
+
 			newValueCode(node);
 			ASMCodeFragment value = removeValueCode(node.child(0));
-
 			code.append(value);
 
-			if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
+			if (node.getToken().isLextant(Punctuator.NOT)) {
+				String startLabel = labeller.newLabel("-not-arg1-", "");
+				String endLabel = labeller.newLabelSameNumber("-not-end-", "");
+				code.add(Label, startLabel);
+
+				code.add(BNegate);
+				code.add(Duplicate);
+				code.add(JumpFalse, endLabel);
+				code.add(Pop);
+				code.add(PushI, 1);
+
+				code.add(Label, endLabel);
+			}
+			else if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
 				code.add(ConvertF);
 			}
 			else if (node.getToken().isLextant(Punctuator.CASTTOINT)) {
@@ -581,48 +630,14 @@ public class ASMCodeGenerator {
 			code.add(PushI, 12);
 			code.add(Add); // [... ptr ptr+12]
 			code.append(arg1); // [... ptr ptr+12 low]
-			if (childType == PrimitiveType.FLOATNUM) {
-				code.add(StoreF);
-			}
-			else if (childType == PrimitiveType.CHARACTER) {
-				code.add(StoreC);
-			}
-			else {
-				code.add(StoreI);
-			} // [... ptr]
+			code.add(opcodeForStore(childType));
 
 			code.add(Duplicate); // [... ptr ptr]
 			code.add(PushI, childType.getSize() + 12);
 			code.add(Add);
 			code.append(arg2); // [... ptr ptr+12+size high]
-			if (childType == PrimitiveType.FLOATNUM) {
-				code.add(StoreF);
-			}
-			else if (childType == PrimitiveType.CHARACTER) {
-				code.add(StoreC);
-			}
-			else {
-				code.add(StoreI);
-			} // [... ptr]
+			code.add(opcodeForStore(childType));
 
-		}
-
-		public void visitLeave(BooleanNotNode node) {
-			newValueCode(node);
-			String startLabel = labeller.newLabel("-not-arg1-", "");
-			String endLabel = labeller.newLabelSameNumber("-not-end-", "");
-
-			ASMCodeFragment arg1 = removeValueCode(node.child(0));
-			code.add(Label, startLabel);
-			code.append(arg1);
-
-			code.add(BNegate);
-			code.add(Duplicate);
-			code.add(JumpFalse, endLabel);
-			code.add(Pop);
-			code.add(PushI, 1);
-
-			code.add(Label, endLabel);
 		}
 
 		private void visitBooleanOperator(BinaryOperatorNode node, Lextant operator) {

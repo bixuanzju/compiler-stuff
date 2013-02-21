@@ -6,14 +6,14 @@ import lexicalAnalyzer.Lextant;
 import tokens.LextantToken;
 import tokens.Token;
 
-public class CastingNode extends ParseNode {
+public class UniaryOperatorNode extends ParseNode {
 	
-	public CastingNode(Token token) {
+	public UniaryOperatorNode(Token token) {
 		super(token);
 		assert(token instanceof LextantToken);
 	}
 
-	public CastingNode(ParseNode node) {
+	public UniaryOperatorNode(ParseNode node) {
 		super(node);
 	}
 	
@@ -26,8 +26,8 @@ public class CastingNode extends ParseNode {
 	}	
 	
 	
-	public static CastingNode withChildren(ParseNode left, Token token) {
-		CastingNode node = new CastingNode(token);
+	public static UniaryOperatorNode withChildren(ParseNode left, Token token) {
+		UniaryOperatorNode node = new UniaryOperatorNode(token);
 		node.appendChild(left);
 		return node;
 	}

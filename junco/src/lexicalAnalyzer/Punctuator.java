@@ -33,8 +33,12 @@ public enum Punctuator implements Lextant {
 	CASTTOINT(":i"),
 	CASTTOFLAOT(":f"),
 	CASTTOCHAR(":c"),
-	CASTTOBOOL(":b"),
-	IN("in");
+//	IN("in"),	
+	LOW(".low"),
+	HIGH(".high"),
+	EMPTY(".isEmpty"),
+	CASTTOBOOL(":b");
+	
 
 	private String lexeme;
 	private Token prototype;

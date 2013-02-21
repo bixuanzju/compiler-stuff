@@ -9,9 +9,7 @@ import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
-import parseTree.nodeTypes.BooleanNotNode;
 import parseTree.nodeTypes.BoxBodyNode;
-import parseTree.nodeTypes.CastingNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
@@ -21,6 +19,7 @@ import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
 import parseTree.nodeTypes.WhileStatementNode;
 import symbolTable.Binding;
@@ -147,38 +146,36 @@ public class JuncoSemanticAnalyzer {
 			return token.getLextant();
 		}
 
-		public void visitLeave(BooleanNotNode node) {
+//		public void visitLeave(BooleanNotNode node) {
+//			ParseNode child = node.child(0);
+//			if (child.getType() != PrimitiveType.BOOLEAN) {
+//				logError("must be boolean type");
+//			}
+//			node.setType(PrimitiveType.BOOLEAN);
+//		}
+		
+		public void visitLeave(UniaryOperatorNode node) {
 			ParseNode child = node.child(0);
-			if (child.getType() != PrimitiveType.BOOLEAN) {
-				logError("must be boolean type");
+			Token token = node.getToken();
+			if (token.isLextant(Punctuator.NOT)) {
+				if (child.getType() != PrimitiveType.BOOLEAN) {
+					logError("must be boolean type");
+				}
+				node.setType(PrimitiveType.BOOLEAN);
 			}
-			node.setType(PrimitiveType.BOOLEAN);
-		}
-
-		public void visitLeave(CastingNode node) {
-			ParseNode child = node.child(0);
-
-			if (node.getToken().isLextant(Punctuator.CASTTOBOOL)) {
+			else if (token.isLextant(Punctuator.CASTTOBOOL)) {
 				logError("cannot convert to boolean type");
 				node.setType(PrimitiveType.BOOLEAN);
 			}
-			else if (node.getToken().isLextant(Punctuator.CASTTOCHAR)) {
+			else if (token.isLextant(Punctuator.CASTTOCHAR)) {
 				if (child.getType() == PrimitiveType.BOOLEAN
 						|| child.getType() == PrimitiveType.FLOATNUM
 						|| child.getType() == PrimitiveType.CHARACTER) {
 					logError("cannot convert to character type");
 				}
 				node.setType(PrimitiveType.CHARACTER);
-
 			}
-			else if (node.getToken().isLextant(Punctuator.CASTTOINT)) {
-				if (child.getType() == PrimitiveType.BOOLEAN
-						|| child.getType() == PrimitiveType.INTEGER) {
-					logError("cannot convert to integer type");
-				}
-				node.setType(PrimitiveType.INTEGER);
-			}
-			else if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
+			else if (token.isLextant(Punctuator.CASTTOFLAOT)) {
 				if (child.getType() == PrimitiveType.BOOLEAN
 						|| child.getType() == PrimitiveType.CHARACTER
 						|| child.getType() == PrimitiveType.FLOATNUM) {
@@ -186,7 +183,47 @@ public class JuncoSemanticAnalyzer {
 				}
 				node.setType(PrimitiveType.FLOATNUM);
 			}
+			else if (token.isLextant(Punctuator.CASTTOINT)) {
+				if (child.getType() == PrimitiveType.BOOLEAN
+						|| child.getType() == PrimitiveType.INTEGER) {
+					logError("cannot convert to integer type");
+				}
+				node.setType(PrimitiveType.INTEGER);
+			}
 		}
+
+//		public void visitLeave(CastingNode node) {
+//			ParseNode child = node.child(0);
+//
+//			if (node.getToken().isLextant(Punctuator.CASTTOBOOL)) {
+//				logError("cannot convert to boolean type");
+//				node.setType(PrimitiveType.BOOLEAN);
+//			}
+//			else if (node.getToken().isLextant(Punctuator.CASTTOCHAR)) {
+//				if (child.getType() == PrimitiveType.BOOLEAN
+//						|| child.getType() == PrimitiveType.FLOATNUM
+//						|| child.getType() == PrimitiveType.CHARACTER) {
+//					logError("cannot convert to character type");
+//				}
+//				node.setType(PrimitiveType.CHARACTER);
+//
+//			}
+//			else if (node.getToken().isLextant(Punctuator.CASTTOINT)) {
+//				if (child.getType() == PrimitiveType.BOOLEAN
+//						|| child.getType() == PrimitiveType.INTEGER) {
+//					logError("cannot convert to integer type");
+//				}
+//				node.setType(PrimitiveType.INTEGER);
+//			}
+//			else if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
+//				if (child.getType() == PrimitiveType.BOOLEAN
+//						|| child.getType() == PrimitiveType.CHARACTER
+//						|| child.getType() == PrimitiveType.FLOATNUM) {
+//					logError("cannot convert to floating type");
+//				}
+//				node.setType(PrimitiveType.FLOATNUM);
+//			}
+//		}
 
 		// /////////////////////////////////////////////////////////////////////////
 		// simple leaf nodes
@@ -219,15 +256,15 @@ public class JuncoSemanticAnalyzer {
 		public void visitLeave(UpdateStatementNode node) {
 			IdentifierNode target = (IdentifierNode) node.child(0);
 			ParseNode updateValue = node.child(1);
-
-			// if (!isBeingDeclared(target)) {
-			// Binding binding = target.findVariableBinding();
-			// target.setType(binding.getType());
-			// node.setType(binding.getType());
-
-			node.setType(target.getType());
-			if (target.getType() != updateValue.getType())
-				typeCheckError(node, updateValue.getType());
+			
+			if (target.getType() != updateValue.getType()) {
+				if (updateValue.getType() instanceof RangeType) {
+					logError("identifier " + node.child(0).getToken().getLexeme()
+							+ " cannot be assigned " + updateValue.getType().infoString()
+							+ " value " + " at " + node.getToken().getLocation());
+				}
+				else typeCheckError(node, updateValue.getType());
+			}
 
 			if (!findDeclaredNode(target.findScopeNode(), target).getParent()
 					.getToken().isLextant(Keyword.INIT))
@@ -235,7 +272,7 @@ public class JuncoSemanticAnalyzer {
 						+ " cannot change value " + " at "
 						+ target.getToken().getLocation());
 
-			// }
+			node.setType(target.getType());
 
 		}
 

@@ -3,9 +3,7 @@ package parseTree;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
-import parseTree.nodeTypes.BooleanNotNode;
 import parseTree.nodeTypes.BoxBodyNode;
-import parseTree.nodeTypes.CastingNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
@@ -15,6 +13,7 @@ import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
 import parseTree.nodeTypes.WhileStatementNode;
 
@@ -49,14 +48,12 @@ public interface ParseNodeVisitor {
 	void visitEnter(PrintStatementNode node);
 	void visitLeave(PrintStatementNode node);
 	
-	void visitEnter(CastingNode node);
-	void visitLeave(CastingNode node);
 	
 	void visitEnter(ProgramNode node);
 	void visitLeave(ProgramNode node);
 	
-	void visitEnter(BooleanNotNode node);
-	void visitLeave(BooleanNotNode node);
+	void visitEnter(UniaryOperatorNode node);
+	void visitLeave(UniaryOperatorNode node);
 
 
 	// leaf nodes: visitLeaf only
@@ -111,12 +108,6 @@ public interface ParseNodeVisitor {
 		public void visitLeave(UpdateStatementNode node) {
 			defaultVisitLeave(node);
 		}		
-		public void visitEnter(CastingNode node) {
-			defaultVisitEnter(node);
-		}
-		public void visitLeave(CastingNode node) {
-			defaultVisitLeave(node);
-		}		
 		public void visitEnter(ParseNode node) {
 			defaultVisitEnter(node);
 		}
@@ -148,10 +139,10 @@ public interface ParseNodeVisitor {
 			defaultVisitLeave(node);
 		}
 		
-		public void visitEnter(BooleanNotNode node) {
+		public void visitEnter(UniaryOperatorNode node) {
 			defaultVisitEnter(node);
 		}
-		public void visitLeave(BooleanNotNode node) {
+		public void visitLeave(UniaryOperatorNode node) {
 			defaultVisitLeave(node);
 		}
 		
