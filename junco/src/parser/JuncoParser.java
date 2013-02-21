@@ -437,7 +437,7 @@ public class JuncoParser {
 	// cast expression
 	private ParseNode parseExpression4() {
 		if (!startsExpression5(nowReading)) {
-			return syntaxErrorNode("expression<4>");
+			return syntaxErrorNode("expression<case>");
 		}
 
 		ParseNode left = parseExpressionNot();
@@ -452,6 +452,7 @@ public class JuncoParser {
 		}
 		return left;
 	}
+	
 
 	// parse boolean not expression
 	private ParseNode parseExpressionNot() {
@@ -464,12 +465,29 @@ public class JuncoParser {
 
 		if (nowReading.isLextant(Punctuator.NOT)) {
 			readToken();
-			left = parseExpression5();
+			left = parseMemberAccess();
 			left = UniaryOperatorNode.withChildren(left, BoolenaNotToken);
 		}
 		else
-			left = parseExpression5();
+			left = parseMemberAccess();
 
+		return left;
+	}
+	
+	// parse member access expression
+	private ParseNode parseMemberAccess() {
+		if (!startsExpression5(nowReading)) {
+			return syntaxErrorNode("expression<menber>");
+		}
+		
+		ParseNode left = parseExpression5();
+		
+		if (nowReading.isLextant(Punctuator.LOW, Punctuator.HIGH, Punctuator.EMPTY)) {
+			Token memberToken = nowReading;
+			left = UniaryOperatorNode.withChildren(left, memberToken);
+			readToken();
+		}
+		
 		return left;
 	}
 

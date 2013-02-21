@@ -467,50 +467,15 @@ public class ASMCodeGenerator {
 			}
 		}
 
-		// public void visitLeave(CastingNode node) {
-		// newValueCode(node);
-		// ASMCodeFragment value = removeValueCode(node.child(0));
-		//
-		// code.append(value);
-		//
-		// if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
-		// code.add(ConvertF);
-		// }
-		// else if (node.getToken().isLextant(Punctuator.CASTTOINT)) {
-		// if (node.child(0).getType() == PrimitiveType.FLOATNUM)
-		// code.add(ConvertI);
-		//
-		// }
-		// else if (node.getToken().isLextant(Punctuator.CASTTOCHAR)) {
-		// code.add(PushI, 127);
-		// code.add(BTAnd);
-		// }
-		//
-		// }
-
-//		public void visitLeave(BooleanNotNode node) {
-//			newValueCode(node);
-//			String startLabel = labeller.newLabel("-not-arg1-", "");
-//			String endLabel = labeller.newLabelSameNumber("-not-end-", "");
-//
-//			ASMCodeFragment arg1 = removeValueCode(node.child(0));
-//			code.add(Label, startLabel);
-//			code.append(arg1);
-//
-//			code.add(BNegate);
-//			code.add(Duplicate);
-//			code.add(JumpFalse, endLabel);
-//			code.add(Pop);
-//			code.add(PushI, 1);
-//
-//			code.add(Label, endLabel);
-//		}
-
 		public void visitLeave(UniaryOperatorNode node) {
 
 			newValueCode(node);
 			ASMCodeFragment value = removeValueCode(node.child(0));
 			code.append(value);
+			
+			String notfloatlabel = labeller.newLabel("-member-start-", "");
+			String charlabel = labeller.newLabelSameNumber("-member-char-", "");
+			String endlabel = labeller.newLabelSameNumber("-member-end-", "");
 
 			if (node.getToken().isLextant(Punctuator.NOT)) {
 				String startLabel = labeller.newLabel("-not-arg1-", "");
@@ -536,6 +501,84 @@ public class ASMCodeGenerator {
 			else if (node.getToken().isLextant(Punctuator.CASTTOCHAR)) {
 				code.add(PushI, 127);
 				code.add(BTAnd);
+			}
+			else if (node.getToken().isLextant(Punctuator.LOW)) {
+				code.add(Duplicate);	// [... ptr ptr]
+				code.add(PushI, 11);	// [... ptr ptr 11]
+				code.add(Add);	// [... ptr ptr+11]
+				code.add(LoadC);	// [... ptr size]
+				code.add(Duplicate);	// [... ptr size size]
+				code.add(PushI, 8);
+				code.add(Subtract);
+				code.add(JumpNeg, notfloatlabel);
+				
+				// float
+				code.add(Pop);
+				code.add(PushI, 12);
+				code.add(Add);	// [... ptr+12]
+				code.add(LoadF);
+				code.add(Jump, endlabel);
+				
+				// char or int
+				code.add(Label, notfloatlabel);
+				code.add(PushI, 4);	// [...ptr size 4]
+				code.add(Subtract);
+				code.add(JumpNeg, charlabel);
+				
+				// its int or pointer
+				code.add(PushI, 12);
+				code.add(Add);
+				code.add(LoadI);
+				code.add(Jump, endlabel);
+				
+				// it's char
+				code.add(PushI, 12);
+				code.add(Add);
+				code.add(LoadC);
+				code.add(Jump, endlabel);
+				
+				code.add(Label, endlabel);
+				
+			}
+			else if (node.getToken().isLextant(Punctuator.HIGH)) {
+				code.add(Duplicate);	// [... ptr ptr]
+				code.add(PushI, 11);	// [... ptr ptr 11]
+				code.add(Add);	// [... ptr ptr+11]
+				code.add(LoadC);	// [... ptr size]
+				code.add(Duplicate);	// [... ptr size size]
+				code.add(PushI, 8);
+				code.add(Subtract);
+				code.add(JumpNeg, notfloatlabel);
+				
+				// float
+				code.add(Pop);
+				code.add(PushI, 20);
+				code.add(Add);	// [... ptr+20]
+				code.add(LoadF);
+				code.add(Jump, endlabel);
+				
+				// char or int
+				code.add(Label, notfloatlabel);
+				code.add(PushI, 4);	// [...ptr size 4]
+				code.add(Subtract);
+				code.add(JumpNeg, charlabel);
+				
+				// its int or pointer
+				code.add(PushI, 16);
+				code.add(Add);
+				code.add(LoadI);
+				code.add(Jump, endlabel);
+				
+				// it's char
+				code.add(PushI, 13);
+				code.add(Add);
+				code.add(LoadC);
+				code.add(Jump, endlabel);
+				
+				code.add(Label, endlabel);
+			}
+			else if (node.getToken().isLextant(Punctuator.EMPTY)) {
+
 			}
 
 		}
