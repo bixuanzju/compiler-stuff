@@ -343,6 +343,8 @@ public class ASMCodeGenerator {
 				code.add(Add); // [... ptr ptr+12]
 				code.add(LoadC); // [... ptr char]
 				code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
+//				code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
+				
 				code.add(Printf); // [... ptr]
 				code.add(PushD, RunTime.SPLICE_STRING);
 				code.add(Printf); // [... ptr]
@@ -350,6 +352,7 @@ public class ASMCodeGenerator {
 				code.add(Add); // [... ptr+13]
 				code.add(LoadC); // [... char]
 				code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
+//				code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
 				code.add(Printf);
 
 				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
@@ -468,41 +471,53 @@ public class ASMCodeGenerator {
 		}
 
 		public void visitLeave(UniaryOperatorNode node) {
-
-			newValueCode(node);
-			ASMCodeFragment value = removeValueCode(node.child(0));
-			code.append(value);
 			
 			String notfloatlabel = labeller.newLabel("-member-start-", "");
 			String charlabel = labeller.newLabelSameNumber("-member-char-", "");
 			String endlabel = labeller.newLabelSameNumber("-member-end-", "");
 
 			if (node.getToken().isLextant(Punctuator.NOT)) {
+				newValueCode(node);
+				ASMCodeFragment value = removeValueCode(node.child(0));
+				code.append(value);
+				
 				String startLabel = labeller.newLabel("-not-arg1-", "");
-				String endLabel = labeller.newLabelSameNumber("-not-end-", "");
+				String notendLabel = labeller.newLabelSameNumber("-not-end-", "");
 				code.add(Label, startLabel);
 
 				code.add(BNegate);
 				code.add(Duplicate);
-				code.add(JumpFalse, endLabel);
+				code.add(JumpFalse, notendLabel);
 				code.add(Pop);
 				code.add(PushI, 1);
-
-				code.add(Label, endLabel);
+				code.add(Label, notendLabel);
 			}
 			else if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
+				newValueCode(node);
+				ASMCodeFragment value = removeValueCode(node.child(0));
+				code.append(value);
 				code.add(ConvertF);
 			}
 			else if (node.getToken().isLextant(Punctuator.CASTTOINT)) {
+				newValueCode(node);
+				ASMCodeFragment value = removeValueCode(node.child(0));
+				code.append(value);
 				if (node.child(0).getType() == PrimitiveType.FLOATNUM)
 					code.add(ConvertI);
 
 			}
 			else if (node.getToken().isLextant(Punctuator.CASTTOCHAR)) {
+				newValueCode(node);
+				ASMCodeFragment value = removeValueCode(node.child(0));
+				code.append(value);
 				code.add(PushI, 127);
 				code.add(BTAnd);
 			}
 			else if (node.getToken().isLextant(Punctuator.LOW)) {
+				newAddressCode(node);
+				ASMCodeFragment value = removeValueCode(node.child(0));
+				code.append(value);
+				
 				code.add(Duplicate);	// [... ptr ptr]
 				code.add(PushI, 11);	// [... ptr ptr 11]
 				code.add(Add);	// [... ptr ptr+11]
@@ -516,7 +531,7 @@ public class ASMCodeGenerator {
 				code.add(Pop);
 				code.add(PushI, 12);
 				code.add(Add);	// [... ptr+12]
-				code.add(LoadF);
+				// code.add(LoadF);
 				code.add(Jump, endlabel);
 				
 				// char or int
@@ -528,19 +543,24 @@ public class ASMCodeGenerator {
 				// its int or pointer
 				code.add(PushI, 12);
 				code.add(Add);
-				code.add(LoadI);
+				// code.add(LoadI);
 				code.add(Jump, endlabel);
 				
 				// it's char
+				code.add(Label, charlabel);
 				code.add(PushI, 12);
 				code.add(Add);
-				code.add(LoadC);
+				// code.add(LoadC);
 				code.add(Jump, endlabel);
 				
 				code.add(Label, endlabel);
 				
 			}
 			else if (node.getToken().isLextant(Punctuator.HIGH)) {
+				newAddressCode(node);
+				ASMCodeFragment value = removeValueCode(node.child(0));
+				code.append(value);
+				
 				code.add(Duplicate);	// [... ptr ptr]
 				code.add(PushI, 11);	// [... ptr ptr 11]
 				code.add(Add);	// [... ptr ptr+11]
@@ -554,7 +574,7 @@ public class ASMCodeGenerator {
 				code.add(Pop);
 				code.add(PushI, 20);
 				code.add(Add);	// [... ptr+20]
-				code.add(LoadF);
+				//code.add(LoadF);
 				code.add(Jump, endlabel);
 				
 				// char or int
@@ -566,20 +586,21 @@ public class ASMCodeGenerator {
 				// its int or pointer
 				code.add(PushI, 16);
 				code.add(Add);
-				code.add(LoadI);
+				// code.add(LoadI);
 				code.add(Jump, endlabel);
 				
 				// it's char
+				code.add(Label, charlabel);
 				code.add(PushI, 13);
 				code.add(Add);
-				code.add(LoadC);
+				// code.add(LoadC);
 				code.add(Jump, endlabel);
 				
 				code.add(Label, endlabel);
 			}
-			else if (node.getToken().isLextant(Punctuator.EMPTY)) {
-
-			}
+//			else if (node.getToken().isLextant(Punctuator.EMPTY)) {
+//
+//			}
 
 		}
 

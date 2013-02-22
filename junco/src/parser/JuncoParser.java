@@ -296,7 +296,12 @@ public class JuncoParser {
 		Token updateToken = nowReading;
 		readToken();
 
-		ParseNode target = parseIdentifier();
+		ParseNode target = parseExpression();
+
+		if (!(target instanceof IdentifierNode || target.getToken().isLextant(Punctuator.HIGH, Punctuator.LOW))) {
+			syntaxError(updateToken, "can't be targeted");
+		}
+		
 		expect(Punctuator.ASSIGN);
 		ParseNode updateValue = parseExpression();
 		expect(Punctuator.TERMINATOR);

@@ -3,7 +3,7 @@ package semanticAnalyzer;
 public class RangeType implements Type {
 	
 	private int sizeInBytes = 4;
-	public Type childType;
+	private Type childType;
 	
 	public RangeType(Type childType) {
 		this.childType = childType;
@@ -17,5 +17,8 @@ public class RangeType implements Type {
 	}
 	public String infoString() {
 		return "Range:"+ childType.infoString();
+	}
+	public Type getChildType() {
+		return childType;
 	}
 }
