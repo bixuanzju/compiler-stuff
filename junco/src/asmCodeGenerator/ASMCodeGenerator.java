@@ -449,7 +449,7 @@ public class ASMCodeGenerator {
 				code.add(opcodeForStore(type));
 			}
 
-			// code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT);
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
 
@@ -467,6 +467,8 @@ public class ASMCodeGenerator {
 			code.add(Jump, startlabel);
 
 			code.add(Label, endlabel);
+			
+			//code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT);
 
 		}
 
@@ -496,6 +498,9 @@ public class ASMCodeGenerator {
 				code.add(Jump, endlabel);
 			}
 			code.add(Label, endlabel);
+			
+			//code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT);
+
 		}
 
 		public void visitLeave(BodyNode node) {
@@ -522,14 +527,30 @@ public class ASMCodeGenerator {
 
 			if (node.getToken().isLextant(Punctuator.LOW, Punctuator.HIGH)) {
 				newAddressCode(node);
+				
 			}
 			else {
 				newValueCode(node);
+				
 			}
-
-			// newValueCode(node);
-			ASMCodeFragment value = removeValueCode(node.child(0));
-			code.append(value);
+			
+			ASMCodeFragment value = getAndRemoveCode(node.child(0));
+			//ASMCodeFragment value = removeValueCode(node.child(0));
+			//code.append(value);
+			
+			if (!value.isAddress()) {
+				code.append(value); // [... val]
+				if (node.child(0).getType() instanceof RangeType) {
+					code.add(Duplicate);	// [... val val]
+					code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);	// [... val]
+				}
+	
+			}
+			else {
+				turnAddressIntoValue(value, node.child(0));
+				code.append(value);	//[... val]
+			}
+			
 
 			if (node.getToken().isLextant(Punctuator.NOT)) {
 
@@ -560,7 +581,7 @@ public class ASMCodeGenerator {
 				code.add(BTAnd);
 			}
 			else if (node.getToken().isLextant(Punctuator.LOW)) {
-
+				
 				code.add(PushI, 12);
 				code.add(Add);
 
@@ -572,6 +593,8 @@ public class ASMCodeGenerator {
 				code.add(Add);
 
 			}
+			
+			//code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
 
