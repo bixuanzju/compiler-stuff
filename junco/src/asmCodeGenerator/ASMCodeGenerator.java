@@ -442,7 +442,7 @@ public class ASMCodeGenerator {
 
 			}
 			else {
-				
+
 				code.append(lvalue);
 				code.append(rvalue);
 				Type type = node.getType();
@@ -527,7 +527,7 @@ public class ASMCodeGenerator {
 				newValueCode(node);
 			}
 
-			//newValueCode(node);
+			// newValueCode(node);
 			ASMCodeFragment value = removeValueCode(node.child(0));
 			code.append(value);
 
@@ -578,13 +578,38 @@ public class ASMCodeGenerator {
 		public void visitLeave(UpdateStatementNode node) {
 			newVoidCode(node);
 			ASMCodeFragment lvalue = removeAddressCode(node.child(0));
-			ASMCodeFragment rvalue = removeValueCode(node.child(1));
+			ASMCodeFragment rvalue = getAndRemoveCode(node.child(1));
 
-			code.append(lvalue);
-			code.append(rvalue);
+			code.append(lvalue);	// [... addr]
+			
+			// reference counting
+			if (node.child(0).getType() instanceof RangeType) {
+				code.add(Duplicate); // [... addr addr]
+				code.add(LoadI);	// [... addr lptr]
+				code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD); // [... addr]
+				
+				if (rvalue.isAddress()) {
+					turnAddressIntoValue(rvalue, node.child(1));
+					code.append(rvalue); // [... addr rprt]
+					code.add(Duplicate); // [... addr rptr rptr]
+					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [...addr rptr]
+				}
+				else {
+					code.append(rvalue); // [... addr rptr]
+				}
+			}
+			else {
+				if (rvalue.isAddress()) {
+					turnAddressIntoValue(rvalue, node.child(1));
+				}
+				code.append(rvalue); // [... addr rval]
+			}
 
 			Type type = node.getType();
 			code.add(opcodeForStore(type));
+
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+
 		}
 
 		private ASMOpcode opcodeForStore(Type type) {
@@ -638,12 +663,12 @@ public class ASMCodeGenerator {
 
 			code.add(PushI, 12 + 2 * childType.getSize());
 			code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
-			code.add(Duplicate);	// [... ptr ptr]
-			
+			code.add(Duplicate); // [... ptr ptr]
+
 			String tempVariable = labeller.newLabel("$temporary-variable-", "");
 			declareI(code, tempVariable);
-			storeITo(code, tempVariable); 	// [... ptr]
-			
+			storeITo(code, tempVariable); // [... ptr]
+
 			// for reference count
 			code.add(Duplicate);
 			code.add(PushI, 1);
@@ -669,43 +694,43 @@ public class ASMCodeGenerator {
 			// check reference counting
 			if (arg1.isAddress()) {
 				turnAddressIntoValue(arg1, node.child(0));
-				code.append(arg1);	// [... ptr low]
-				
+				code.append(arg1); // [... ptr low]
+
 				if (node.child(0).getType() instanceof RangeType) {
-					code.add(Duplicate);	// [... ptr low low]
-					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT);	// [... ptr low]
+					code.add(Duplicate); // [... ptr low low]
+					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [... ptr low]
 				}
-				
+
 			}
 			else {
-				code.append(arg1);	// [... ptr low]
+				code.append(arg1); // [... ptr low]
 			}
 
-			code.add(Exchange); 	// [... low ptr]
+			code.add(Exchange); // [... low ptr]
 			code.add(PushI, 12);
 			code.add(Add); // [... low ptr+12]
-			
-			code.add(Exchange);	// [... ptr+12 low]
+
+			code.add(Exchange); // [... ptr+12 low]
 			code.add(opcodeForStore(childType));
 
-			loadIFrom(code, tempVariable);	// [... ptr]
+			loadIFrom(code, tempVariable); // [... ptr]
 			code.add(Duplicate); // [... ptr ptr]
 			code.add(PushI, childType.getSize() + 12);
-			code.add(Add);	// [... ptr ptr+size+12]
-			
+			code.add(Add); // [... ptr ptr+size+12]
+
 			if (arg2.isAddress()) {
 				turnAddressIntoValue(arg2, node.child(1));
-				code.append(arg2);	// [... ptr ptr+size+12 high]
-				
+				code.append(arg2); // [... ptr ptr+size+12 high]
+
 				if (node.child(1).getType() instanceof RangeType) {
-					code.add(Duplicate);	// [... ptr ptr+size+12 high high]
-					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT);	// [... ptr ptr+size+12 high]
+					code.add(Duplicate); // [... ptr ptr+size+12 high high]
+					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [... ptr ptr+size+12 high]
 				}
 			}
 			else {
-				code.append(arg2);	// [... ptr ptr+size+12 high]
+				code.append(arg2); // [... ptr ptr+size+12 high]
 			}
-		
+
 			code.add(opcodeForStore(childType));
 
 		}
