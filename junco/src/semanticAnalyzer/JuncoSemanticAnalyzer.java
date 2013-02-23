@@ -243,7 +243,7 @@ public class JuncoSemanticAnalyzer {
 			ParseNode target = node.child(0);
 			ParseNode updateValue = node.child(1);
 
-			if (target.getType() != updateValue.getType()) {
+			if (!target.getType().infoString().equals(updateValue.getType().infoString())) {
 				if (updateValue.getType() instanceof RangeType) {
 					logError("identifier " + node.child(0).getToken().getLexeme()
 							+ " cannot be assigned " + updateValue.getType().infoString()

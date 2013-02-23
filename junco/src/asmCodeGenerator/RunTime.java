@@ -23,6 +23,8 @@ public class RunTime {
 	public static final String ERROR_MESSAGE_IF_DIVIDE_BY_ZERO   = "$print-error-message";
 	public static final String GENERAL_RUNTIME_ERROR  = "$$general-runtime-error";
 	public static final String RUNTIME_ERROR_MESSAGE  = "$print-runtime-error-message";
+	//public static final String TEMPORARY_VARIABLE  = "$tempory-variable";
+	
 	
 
 	private ASMCodeFragment environmentASM() {
@@ -68,7 +70,8 @@ public class RunTime {
 		frag.add(DLabel, PRINT_SPACER_STRING);
 		frag.add(DataS, " ");
 		frag.add(DLabel, ERROR_MESSAGE_IF_DIVIDE_BY_ZERO);
-		frag.add(DataS, "Damn error! you must divided by zero!!!\n");
+		frag.add(DataS, "Runtime error, divided by zero!\n");
+		
 //		frag.add(DLabel, RunTime.RUNTIME_ERROR_MESSAGE);
 //		frag.add(DataS, "Runtime error: ");
 		
