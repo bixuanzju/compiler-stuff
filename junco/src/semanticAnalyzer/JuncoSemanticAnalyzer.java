@@ -132,16 +132,17 @@ public class JuncoSemanticAnalyzer {
 				}
 			}
 			else {
-				FunctionSignature signature = FunctionSignature.signatureOf(operator,
-						left);
-
-				if (signature.accepts(left.getType(), right.getType())) {
-					node.setType(signature.resultType());
+				
+				FunctionSignature signature = FunctionSignature.signatureOf(operator);
+				
+				if (signature.accepts(operator, left.getType(), right.getType())) {
+					node.setType(signature.resultType().getConstraintType());
 				}
 				else {
 					typeCheckError(node, left.getType(), right.getType());
 					node.setType(PrimitiveType.ERROR);
 				}
+				
 			}
 		}
 
@@ -243,7 +244,8 @@ public class JuncoSemanticAnalyzer {
 			ParseNode target = node.child(0);
 			ParseNode updateValue = node.child(1);
 
-			if (!target.getType().infoString().equals(updateValue.getType().infoString())) {
+			if (!target.getType().infoString()
+					.equals(updateValue.getType().infoString())) {
 				if (updateValue.getType() instanceof RangeType) {
 					logError("identifier " + node.child(0).getToken().getLexeme()
 							+ " cannot be assigned " + updateValue.getType().infoString()
