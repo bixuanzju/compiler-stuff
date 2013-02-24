@@ -14,4 +14,10 @@ public class NoneType implements Type{
 		return "None type";
 	}
 
+	@Override
+	public Boolean isComparable() {
+	
+		return false;
+	}
+
 }

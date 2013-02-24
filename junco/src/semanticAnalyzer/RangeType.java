@@ -21,4 +21,10 @@ public class RangeType implements Type {
 	public Type getChildType() {
 		return childType;
 	}
+	
+	@Override
+	public Boolean isComparable() {
+	
+		return childType.isComparable();
+	}
 }

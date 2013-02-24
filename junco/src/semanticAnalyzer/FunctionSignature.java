@@ -1,5 +1,6 @@
 package semanticAnalyzer;
 
+import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 
@@ -7,13 +8,14 @@ class FunctionSignature {
 	// private static final boolean ALL_TYPES_ACCEPT_ERROR_TYPES = true;
 	private TypeVariable resultType;
 	private TypeVariable[] paramTypes;
-	Object whichVariant;
 
-	public FunctionSignature(Object whichVariant, TypeVariable... types) {
+	// Object whichVariant;
+
+	public FunctionSignature(TypeVariable... types) {
 		assert (types.length >= 1);
 		storeParamTypes(types);
 		resultType = types[types.length - 1];
-		this.whichVariant = whichVariant;
+		// this.whichVariant = whichVariant;
 	}
 
 	private void storeParamTypes(TypeVariable[] types) {
@@ -31,6 +33,22 @@ class FunctionSignature {
 		if (types.length != paramTypes.length) {
 			return false;
 		}
+		
+		if (lextant == Keyword.IN) {
+			paramTypes[0].constrain(types[0]);
+			if (!(types[1] instanceof RangeType)) {
+				return false;
+			}
+			paramTypes[1].constrain(((RangeType)types[1]).getChildType());
+			
+			if (paramTypes[0].isComparable()) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		
 
 		for (int i = 0; i < paramTypes.length; i++) {
 			paramTypes[i].constrain(types[i]);
@@ -40,82 +58,77 @@ class FunctionSignature {
 			return false;
 		}
 
-		if ((Punctuator) lextant == Punctuator.ADD
-				|| (Punctuator) lextant == Punctuator.MINUS
-				|| (Punctuator) lextant == Punctuator.MULTIPLY
-				|| (Punctuator) lextant == Punctuator.DIVIDE) {
+		switch ((Punctuator) lextant) {
+		case ADD:
+		case MINUS:
+		case MULTIPLY:
+		case DIVIDE:
 			if (resultType.getConstraintType() != PrimitiveType.INTEGER
 					&& resultType.getConstraintType() != PrimitiveType.FLOATNUM) {
 				return false;
 			}
-		}
-		
-		if ((Punctuator) lextant == Punctuator.GREATEREQ
-				|| (Punctuator) lextant == Punctuator.GREATER
-				|| (Punctuator) lextant == Punctuator.LESSEQ
-				|| (Punctuator) lextant == Punctuator.LESS) {
+		case GREATEREQ:
+		case GREATER:
+		case LESSEQ:
+		case LESS:
 			if (paramTypes[0].getConstraintType() == PrimitiveType.BOOLEAN) {
 				return false;
 			}
+		case EQUAL:
+		case UNEQUAL:
+			return true;
+		case SPAN:
+		case INTERSECTION:
+			if (resultType.getConstraintType().isComparable()) {
+				return true;
+			}
+			else return false;
+			
+		default:
+			return false;
 		}
-		
-//		if ((Punctuator) lextant == Punctuator.EQUAL
-//				|| (Punctuator) lextant == Punctuator.UNEQUAL) {
-//			if (resultType.getConstraintType() != PrimitiveType.INTEGER
-//					&& resultType.getConstraintType() != PrimitiveType.FLOATNUM) {
-//				return false;
-//			}
-//		}
-		return true;
+
 	}
 
 	public static FunctionSignature signatureOf(Lextant lextant) {
-		assert (lextant instanceof Punctuator);
-		Punctuator punctuator = (Punctuator) lextant;
+		//assert (lextant instanceof Punctuator);
+		//Punctuator punctuator = (Punctuator) lextant;
 
 		TypeVariable typeVariable = new TypeVariable();
 		TypeVariable resultType = new TypeVariable();
 		typeVariable.resetType();
 		resultType.resetType();
 
-		switch (punctuator) {
+		if (lextant == Keyword.IN) {
+			
+			resultType.constrain(PrimitiveType.BOOLEAN);
+			return new FunctionSignature(typeVariable, typeVariable, resultType);
+		}
+
+		switch ((Punctuator) lextant) {
 		case ADD:
-			return new FunctionSignature(1, typeVariable, typeVariable, typeVariable);
 		case MINUS:
-			return new FunctionSignature(1, typeVariable, typeVariable, typeVariable);
 		case MULTIPLY:
-			return new FunctionSignature(1, typeVariable, typeVariable, typeVariable);
 		case DIVIDE:
-			return new FunctionSignature(1, typeVariable, typeVariable, typeVariable);
+		case SPAN:
+		case INTERSECTION:
+			return new FunctionSignature(typeVariable, typeVariable, typeVariable);
 		case GREATEREQ:
-			resultType.constrain(PrimitiveType.BOOLEAN);
-			return new FunctionSignature(1, typeVariable, typeVariable, resultType);
 		case GREATER:
-			resultType.constrain(PrimitiveType.BOOLEAN);
-			return new FunctionSignature(1, typeVariable, typeVariable, resultType);
 		case LESSEQ:
-			resultType.constrain(PrimitiveType.BOOLEAN);
-			return new FunctionSignature(1, typeVariable, typeVariable, resultType);
 		case LESS:
-			resultType.constrain(PrimitiveType.BOOLEAN);
-			return new FunctionSignature(1, typeVariable, typeVariable, resultType);
 		case EQUAL:
-			resultType.constrain(PrimitiveType.BOOLEAN);
-			return new FunctionSignature(1, typeVariable, typeVariable, resultType);
 		case UNEQUAL:
 			resultType.constrain(PrimitiveType.BOOLEAN);
-			return new FunctionSignature(1, typeVariable, typeVariable, resultType);
+			return new FunctionSignature(typeVariable, typeVariable, resultType);
 		case AND:
-			resultType.constrain(PrimitiveType.BOOLEAN);
-			typeVariable.constrain(PrimitiveType.BOOLEAN);
-			return new FunctionSignature(1, typeVariable, typeVariable, resultType);
 		case OR:
 			resultType.constrain(PrimitiveType.BOOLEAN);
 			typeVariable.constrain(PrimitiveType.BOOLEAN);
-			return new FunctionSignature(1, typeVariable, typeVariable, resultType);
+			return new FunctionSignature(typeVariable, typeVariable, resultType);
 		default:
 			resultType.constrain(PrimitiveType.ERROR);
-			return new FunctionSignature(1, resultType);
+			return new FunctionSignature(resultType);
 		}
 
 	}

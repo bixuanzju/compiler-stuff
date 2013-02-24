@@ -37,6 +37,8 @@ public enum Punctuator implements Lextant {
 	LOW(".low"),
 	HIGH(".high"),
 	EMPTY(".isEmpty"),
+	SPAN("|"),
+	INTERSECTION("&"),
 	CASTTOBOOL(":b");
 	
 

@@ -52,6 +52,12 @@ public class TypeVariable implements Type {
 	public String infoString() {
 		return constraitType.infoString();
 	}
+
+	@Override
+	public Boolean isComparable() {
+		
+		return constraitType.isComparable();
+	}
 	
 	
 

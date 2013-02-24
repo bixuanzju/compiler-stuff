@@ -14,4 +14,10 @@ public class AnyType implements Type {
 		return "Any type";
 	}
 
+	@Override
+	public Boolean isComparable() {
+		
+		return false;
+	}
+
 }

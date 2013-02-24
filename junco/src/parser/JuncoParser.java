@@ -376,10 +376,47 @@ public class JuncoParser {
 			return syntaxErrorNode("expression<1>");
 		}
 
-		ParseNode left = parseExpression2();
+		ParseNode left = parseExpressionSpan();
 		while (nowReading.isLextant(Punctuator.GREATER, Punctuator.GREATEREQ,
-				Punctuator.LESS, Punctuator.LESSEQ, Punctuator.EQUAL,
-				Punctuator.UNEQUAL)) {
+				Punctuator.LESS, Punctuator.LESSEQ, Punctuator.EQUAL, Punctuator.UNEQUAL, Keyword.IN)) {
+			Token compareToken = nowReading;
+			readToken();
+			ParseNode right = parseExpressionSpan();
+
+			left = BinaryOperatorNode.withChildren(compareToken, left, right);
+		}
+
+		return left;
+
+	}
+	
+	// parse range span
+	private ParseNode parseExpressionSpan() {
+		if (!startsExpression5(nowReading)) {
+			return syntaxErrorNode("expression<span>");
+		}
+
+		ParseNode left = parseExpressionInter();
+		while (nowReading.isLextant(Punctuator.SPAN)) {
+			Token compareToken = nowReading;
+			readToken();
+			ParseNode right = parseExpressionInter();
+
+			left = BinaryOperatorNode.withChildren(compareToken, left, right);
+		}
+
+		return left;
+
+	}
+	
+	// parse range intersection
+	private ParseNode parseExpressionInter() {
+		if (!startsExpression5(nowReading)) {
+			return syntaxErrorNode("expression<intersection>");
+		}
+
+		ParseNode left = parseExpression2();
+		while (nowReading.isLextant(Punctuator.INTERSECTION)) {
 			Token compareToken = nowReading;
 			readToken();
 			ParseNode right = parseExpression2();
@@ -390,7 +427,7 @@ public class JuncoParser {
 		return left;
 
 	}
-
+	
 	// private boolean startsExpression1(Token token) {
 	// return startsExpression2(token);
 	// }
@@ -435,9 +472,6 @@ public class JuncoParser {
 		return left;
 	}
 
-	// private boolean startsExpression3(Token token) {
-	// return startsExpression4(token);
-	// }
 
 	// cast expression
 	private ParseNode parseExpression4() {

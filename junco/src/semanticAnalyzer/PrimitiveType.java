@@ -25,4 +25,13 @@ public enum PrimitiveType implements Type {
 	public String infoString() {
 		return infoString;
 	}
+	@Override
+	public Boolean isComparable() {
+		if (equals(PrimitiveType.INTEGER) || equals(PrimitiveType.FLOATNUM) || equals(PrimitiveType.CHARACTER)) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 }
