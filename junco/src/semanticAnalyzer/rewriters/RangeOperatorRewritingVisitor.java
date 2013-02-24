@@ -30,6 +30,9 @@ public class RangeOperatorRewritingVisitor extends ASTRewritingVisitor {
 		
 		else if (isInOperator(node)) {
 			assert node.nChildren() == 2;
+			
+			NodeRewriter rewriter = new RangeInRewriter();
+			registerReplacement(node, rewriter.rewriteNode(node));
 		}
 		// else span, intersect, in ?
 	}

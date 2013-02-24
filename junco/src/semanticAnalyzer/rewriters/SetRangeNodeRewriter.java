@@ -32,7 +32,7 @@ public class SetRangeNodeRewriter extends NodeRewriterImp {
 			return rewriteIntersection(node);
 		}
 
-		return null;
+		return node;
 	}
 
 	private ParseNode rewriteSpan(ParseNode node) {
