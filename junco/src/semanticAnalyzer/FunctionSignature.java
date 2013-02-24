@@ -67,6 +67,8 @@ class FunctionSignature {
 					&& resultType.getConstraintType() != PrimitiveType.FLOATNUM) {
 				return false;
 			}
+		
+		else return true;
 		case GREATEREQ:
 		case GREATER:
 		case LESSEQ:
@@ -74,6 +76,7 @@ class FunctionSignature {
 			if (paramTypes[0].getConstraintType() == PrimitiveType.BOOLEAN) {
 				return false;
 			}
+			else return true;
 		case AND:
 		case OR:
 		case EQUAL:
@@ -81,7 +84,7 @@ class FunctionSignature {
 			return true;
 		case SPAN:
 		case INTERSECTION:
-			if (resultType.getConstraintType().isComparable()) {
+			if (resultType.getConstraintType() instanceof RangeType && resultType.getConstraintType().isComparable()) {
 				return true;
 			}
 			else return false;

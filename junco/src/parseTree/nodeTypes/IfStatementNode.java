@@ -7,7 +7,7 @@ import tokens.Token;
 
 public class IfStatementNode extends ParseNode {
 	
-	private boolean flag = false;
+	
 
 	public IfStatementNode(Token token) {
 		super(token);
@@ -18,38 +18,6 @@ public class IfStatementNode extends ParseNode {
 		super(node);
 	}
 	
-	public void setElse(boolean flag) {
-		this.flag = flag;
-	}
-	
-	public boolean hasElse() {
-		return flag;
-	}
-	
-	////////////////////////////////////////////////////////////
-	// attributes
-	
-//	public Lextant getDeclarationType() {
-//		return lextantToken().getLextant();
-//	}
-//	public LextantToken lextantToken() {
-//		return (LextantToken)token;
-//	}	
-	
-	
-	////////////////////////////////////////////////////////////
-	// convenience factory
-	
-//	public static IfStatementNode withChildren(Token token, ParseNode declaredName, ParseNode initializer) {
-//		IfStatementNode node = new IfStatementNode(token);
-//		node.appendChild(declaredName);
-//		node.appendChild(initializer);
-//		return node;
-//	}
-//	
-//	
-	///////////////////////////////////////////////////////////
-	// boilerplate for visitors
 			
 	public void accept(ParseNodeVisitor visitor) {
 		visitor.visitEnter(this);

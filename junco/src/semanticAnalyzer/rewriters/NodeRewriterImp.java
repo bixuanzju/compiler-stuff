@@ -150,6 +150,12 @@ abstract public class NodeRewriterImp implements NodeRewriter {
 		LextantToken token = lextantToken(Keyword.TRUE);
 		return new BooleanConstantNode(token);
 	}
+	
+	// range variable
+	protected BinaryOperatorNode rangeNode(ParseNode low, ParseNode high) {
+		LextantToken token = lextantToken(Punctuator.OPEN_SQUARE);
+		return BinaryOperatorNode.withChildren(token, low, high);
+	}
 
 	
 	////////////////////////////////////////////////////////////////////////////////////////

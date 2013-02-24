@@ -202,7 +202,7 @@ public class ASMCodeGenerator {
 				code.append(childCode);
 			}
 			
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			
 		}
 
 		public void visitLeave(BoxBodyNode node) {
@@ -221,6 +221,7 @@ public class ASMCodeGenerator {
 					}
 				}
 			}
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
 		
@@ -517,28 +518,6 @@ public class ASMCodeGenerator {
 			}
 			
 			code.add(Label, endlabel);
-//			
-//			
-//			
-//			code.add(JumpFalse, elselabel);
-//			
-//		
-//			ASMCodeFragment ifBody = removeVoidCode(node.child(1));
-//			code.append(ifBody);
-//			code.add(Jump, endlabel);
-//		
-//	
-//			code.add(Label, elselabel);
-//			if (node.hasElse()) {
-//				ASMCodeFragment elseBody = removeVoidCode(node.child(2));
-//				code.append(elseBody);
-//				code.add(Jump, endlabel);
-//			}
-			
-//			code.add(Label, endlabel);
-			
-			
-			//code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT);
 
 		}
 

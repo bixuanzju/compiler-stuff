@@ -162,7 +162,7 @@ public class JuncoParser {
 
 		if (startsElseBody(nowReading)) {
 			expect(Keyword.ELSE);
-			result.setElse(true);
+			//result.setElse(true);
 			body = parseBody();
 			result.appendChild(body);
 		}

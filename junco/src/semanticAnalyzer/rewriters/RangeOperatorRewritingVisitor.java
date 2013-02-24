@@ -1,5 +1,6 @@
 package semanticAnalyzer.rewriters;
 
+import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Punctuator;
 import parseTree.ParseNode;
 import parseTree.nodeTypes.BinaryOperatorNode;
@@ -19,6 +20,16 @@ public class RangeOperatorRewritingVisitor extends ASTRewritingVisitor {
 
 			NodeRewriter rewriter = new CompareRangeNodeRewriter();
 			registerReplacement(node, rewriter.rewriteNode(node));
+		}
+		else if (isSetRangeOperator(node)) {
+			assert node.nChildren() == 2;
+	
+			NodeRewriter rewriter = new SetRangeNodeRewriter();
+			registerReplacement(node, rewriter.rewriteNode(node));
+		}
+		
+		else if (isInOperator(node)) {
+			assert node.nChildren() == 2;
 		}
 		// else span, intersect, in ?
 	}
@@ -45,6 +56,23 @@ public class RangeOperatorRewritingVisitor extends ASTRewritingVisitor {
 		}
 		return false;
 	}
+	
+	private boolean isSetRangeOperator(BinaryOperatorNode node) {
+		if (node.getToken().isLextant(Punctuator.SPAN, Punctuator.INTERSECTION)) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean isInOperator(BinaryOperatorNode node) {
+		if (node.getToken().isLextant(Keyword.IN)) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 
 	private boolean isComparisonOperator(BinaryOperatorNode node) {
 		// TODO You must implement this!
