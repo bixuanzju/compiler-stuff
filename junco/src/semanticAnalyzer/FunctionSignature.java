@@ -74,6 +74,8 @@ class FunctionSignature {
 			if (paramTypes[0].getConstraintType() == PrimitiveType.BOOLEAN) {
 				return false;
 			}
+		case AND:
+		case OR:
 		case EQUAL:
 		case UNEQUAL:
 			return true;

@@ -118,6 +118,17 @@ public class ParseNode {
 		return children.size();
 	}
 	
+	public void replaceChild(ParseNode old, ParseNode replacement) {
+		for (int i = 0; i < nChildren(); i++) {
+			if (children.get(i) == old) {
+				children.remove(i);
+				children.add(i, replacement);
+				replacement.setParent(this);
+				break;
+			}
+		}
+	}
+	
 ////////////////////////////////////////////////////////////////////////////////////
 //Iterable<ParseNode> pathToRoot
 
@@ -146,5 +157,8 @@ public class ParseNode {
 			child.accept(visitor);
 		}
 	}
+	
+	
+
 
 }

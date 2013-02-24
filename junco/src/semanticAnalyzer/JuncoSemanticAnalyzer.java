@@ -21,7 +21,10 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
+import parseTree.nodeTypes.ValueBodyNode;
 import parseTree.nodeTypes.WhileStatementNode;
+import semanticAnalyzer.rewriters.ASTRewriter;
+import semanticAnalyzer.rewriters.RangeOperatorRewritingVisitor;
 import symbolTable.Binding;
 import symbolTable.Scope;
 import tokens.LextantToken;
@@ -40,10 +43,31 @@ public class JuncoSemanticAnalyzer {
 	}
 
 	public ParseNode analyze() {
-		ParseNodeVisitor visitor = new SemanticAnalysisVisitor();
-		ASTree.accept(visitor);
+		//ParseNodeVisitor visitor = new SemanticAnalysisVisitor();
+		ASTree.accept(new SemanticAnalysisVisitor());
+		
+		if(logging.JuncoLogger.hasErrors()) {
+      return ASTree;
+		}
+		
+		ASTree = iterateRewriting(ASTree);
+    ASTree.accept(new SemanticAnalysisVisitor());   
+		
 		return ASTree;
 	}
+	
+	private ParseNode iterateRewriting(ParseNode inputTree) {
+    ASTRewriter rewriter = null;
+    ParseNode tree = inputTree;
+    
+    do {
+        rewriter = new RangeOperatorRewritingVisitor();
+        tree = rewriter.rewrite(tree);
+    }
+    while (rewriter.changesWereMade());
+    
+    return tree;
+}
 
 	private class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		@Override
@@ -65,9 +89,11 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitEnter(BoxBodyNode node) {
+			Scopes.enterStaticScope(node);
 		}
 
 		public void visitLeave(BoxBodyNode node) {
+			Scopes.leaveScope();
 		}
 
 		// /////////////////////////////////////////////////////////////////////////
@@ -108,6 +134,17 @@ public class JuncoSemanticAnalyzer {
 
 		public void visitLeave(BodyNode node) {
 			Scopes.leaveScope();
+		}
+		
+		public void visitEnter(ValueBodyNode node) {
+				Scopes.enterStaticScope(node);
+			
+		}
+		
+		public void visitLeave(ValueBodyNode node) {
+			node.setType(node.child(node.nChildren()-1).getType());
+			Scopes.leaveScope();
+			
 		}
 
 		// /////////////////////////////////////////////////////////////////////////

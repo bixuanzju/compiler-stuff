@@ -20,6 +20,7 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
+import parseTree.nodeTypes.ValueBodyNode;
 import parseTree.nodeTypes.WhileStatementNode;
 import semanticAnalyzer.PrimitiveType;
 import semanticAnalyzer.RangeType;
@@ -200,7 +201,17 @@ public class ASMCodeGenerator {
 				ASMCodeFragment childCode = removeVoidCode(child);
 				code.append(childCode);
 			}
+			
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+		}
 
+		public void visitLeave(BoxBodyNode node) {
+			newVoidCode(node);
+			for (ParseNode child : node.getChildren()) {
+				ASMCodeFragment childCode = removeVoidCode(child);
+				code.append(childCode);
+			}
+			
 			for (ParseNode child : node.getChildren()) {
 				if (child.getType() instanceof DeclarationNode) {
 					if (child.child(0).getType() instanceof RangeType) {
@@ -211,16 +222,19 @@ public class ASMCodeGenerator {
 				}
 			}
 
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
-
-		public void visitLeave(BoxBodyNode node) {
-			newVoidCode(node);
-			for (ParseNode child : node.getChildren()) {
-				ASMCodeFragment childCode = removeVoidCode(child);
-				code.append(childCode);
+		
+		public void visitLeave(ValueBodyNode node) {
+			newValueCode(node);
+			
+			for (int i = 0; i < node.nChildren()-1; i++) {
+				code.append(removeVoidCode(node.child(i)));
 			}
+			
+			code.append(removeValueCode(node.child(node.nChildren()-1)));
 		}
+		
+		
 
 		// /////////////////////////////////////////////////////////////////////////
 		// statements and declarations
@@ -475,29 +489,54 @@ public class ASMCodeGenerator {
 		public void visitLeave(IfStatementNode node) {
 			newVoidCode(node);
 			String startlabel = labeller.newLabel("-if-start-", "");
+//			String thenlabel = labeller.newLabelSameNumber("-if-then-", "");
 			String endlabel = labeller.newLabelSameNumber("-if-end-", "");
 			String elselabel = labeller.newLabelSameNumber("-if-else-", "");
 
 			code.add(Label, startlabel);
-			ASMCodeFragment expr = removeValueCode(node.child(0));
-			code.append(expr);
-			if (node.hasElse()) {
-				code.add(JumpFalse, elselabel);
+			if (node.nChildren() == 2) {
+				ASMCodeFragment expr = removeValueCode(node.child(0));
+				code.append(expr);
+				code.add(JumpFalse, endlabel);
+				ASMCodeFragment ifBody = removeVoidCode(node.child(1));
+				code.append(ifBody);
+				code.add(Jump, endlabel);
 			}
 			else {
-				code.add(JumpFalse, endlabel);
-			}
-
-			ASMCodeFragment ifBody = removeVoidCode(node.child(1));
-			code.append(ifBody);
-			code.add(Jump, endlabel);
-			if (node.hasElse()) {
+				ASMCodeFragment expr = removeValueCode(node.child(0));
+				code.append(expr);
+				code.add(JumpFalse, elselabel);
+				ASMCodeFragment ifBody = removeVoidCode(node.child(1));
+				code.append(ifBody);
+				code.add(Jump, endlabel);
 				code.add(Label, elselabel);
 				ASMCodeFragment elseBody = removeVoidCode(node.child(2));
 				code.append(elseBody);
 				code.add(Jump, endlabel);
+				
 			}
+			
 			code.add(Label, endlabel);
+//			
+//			
+//			
+//			code.add(JumpFalse, elselabel);
+//			
+//		
+//			ASMCodeFragment ifBody = removeVoidCode(node.child(1));
+//			code.append(ifBody);
+//			code.add(Jump, endlabel);
+//		
+//	
+//			code.add(Label, elselabel);
+//			if (node.hasElse()) {
+//				ASMCodeFragment elseBody = removeVoidCode(node.child(2));
+//				code.append(elseBody);
+//				code.add(Jump, endlabel);
+//			}
+			
+//			code.add(Label, endlabel);
+			
 			
 			//code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT);
 

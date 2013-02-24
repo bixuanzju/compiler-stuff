@@ -197,7 +197,7 @@ public class JuncoParser {
 
 	private ParseNode parseBody() {
 		if (!startsBody(nowReading)) {
-			syntaxErrorNode("while body");
+			syntaxErrorNode("body node");
 		}
 		ParseNode body = new BodyNode(nowReading);
 
