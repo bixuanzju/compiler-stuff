@@ -42,9 +42,9 @@ public class JuncoScanner extends ScannerImp implements Scanner {
 			while ((ch.getCharacter() != '*' || input.peek().getCharacter() != '*')
 					&& ch.getCharacter() != '\n');
 			if (ch.getCharacter() == '*') {
-				// eat the second '*'
 				ch = input.next();
 			}
+			//findNextToken();
 			ch = nextNonWhitespaceChar();
 		}
 

@@ -554,14 +554,13 @@ public class ASMCodeGenerator {
 
 			code.add(Label, endlabel);
 
-			// code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT);
-
+			
 		}
 
 		public void visitLeave(IfStatementNode node) {
 			newVoidCode(node);
 			String startlabel = labeller.newLabel("-if-start-", "");
-			// String thenlabel = labeller.newLabelSameNumber("-if-then-", "");
+		
 			String endlabel = labeller.newLabelSameNumber("-if-end-", "");
 			String elselabel = labeller.newLabelSameNumber("-if-else-", "");
 
@@ -690,7 +689,7 @@ public class ASMCodeGenerator {
 
 			}
 
-			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			
 
 		}
 
@@ -818,9 +817,8 @@ public class ASMCodeGenerator {
 
 				if (node.child(0).getType() instanceof RangeType) {
 					code.add(Duplicate); // [... ptr low low]
-					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [...
-																																						// ptr
-																																						// low]
+					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [... ptr low]
+																																																																												
 				}
 
 			}

@@ -16,43 +16,46 @@ public class RangeInRewriter extends NodeRewriterImp {
 
 	@Override
 	public ParseNode rewriteNode(ParseNode node) {
-		
 		setLocation(node.getToken().getLocation());
-
+		
 		left = node.child(0);
 		right = node.child(1);
-		rangeType = (RangeType) right.getType();
-
-		BinaryOperatorNode operatorNode = (BinaryOperatorNode) node;
+		rangeType = (RangeType)right.getType();
+		type = (Type)left.getType();
+		
+		
+		BinaryOperatorNode operatorNode = (BinaryOperatorNode)node;
 		Lextant operator = operatorNode.getOperator();
-
-		if (operator == Keyword.IN) {
+		
+		if(operator == Keyword.IN) {
 			return rewriteIn(node);
 		}
-
 		return node;
 	}
 
 	private ParseNode rewriteIn(ParseNode node) {
-		String leftVariable = freshVariableName();
-		String rightVariable = freshVariableName();
-		String resultVariable = freshVariableName();
-
+		String leftVariable = freshVariableName();		
+		String rightVariable = freshVariableName();		
+		String resultVariable = freshVariableName();	
+		
 		return valueBodyNode(
-				declareConst(leftVariable, left, type),
-				declareConst(rightVariable, right, rangeType),
-				declareInit(resultVariable, falseNode(), BOOLEAN),
-
-				ifStatement(
-						and(lessEquals(identifier(leftVariable, type),
-								highEnd(identifier(rightVariable, rangeType))),
-								lessEquals(lowEnd(identifier(rightVariable, rangeType)),
-										identifier(leftVariable, type))),
-						bodyNode(update(identifier(resultVariable, BOOLEAN), trueNode())),
-						bodyNode(update(identifier(resultVariable, BOOLEAN), falseNode()))),
-
-				identifier(resultVariable, BOOLEAN));
-
+					declareConst(leftVariable, left, type),
+					declareConst(rightVariable, right, rangeType),
+					declareInit(resultVariable, falseNode(), BOOLEAN),
+					
+					update(identifier(resultVariable, BOOLEAN), 
+						and(
+							lessEquals(
+								lowEnd(identifier(rightVariable, rangeType)),
+								identifier(leftVariable, type)
+							),
+							lessEquals(
+								identifier(leftVariable, type),
+								highEnd(identifier(rightVariable, rangeType))
+							))),
+					identifier(resultVariable, BOOLEAN)
+			   );
+		
 	}
-
+	
 }

@@ -340,12 +340,12 @@ public class JuncoParser {
 		}
 
 		ParseNode left = parseExpressionAnd();
-		if (nowReading.isLextant(Punctuator.OR)) {
+		while (nowReading.isLextant(Punctuator.OR)) {
 			Token BooleanToken = nowReading;
 			readToken();
 			ParseNode right = parseExpressionAnd();
 
-			return BinaryOperatorNode.withChildren(BooleanToken, left, right);
+			left =  BinaryOperatorNode.withChildren(BooleanToken, left, right);
 		}
 
 		return left;
@@ -358,12 +358,12 @@ public class JuncoParser {
 		}
 
 		ParseNode left = parseExpression1();
-		if (nowReading.isLextant(Punctuator.AND)) {
+		while (nowReading.isLextant(Punctuator.AND)) {
 			Token BooleanToken = nowReading;
 			readToken();
 			ParseNode right = parseExpression1();
 
-			return BinaryOperatorNode.withChildren(BooleanToken, left, right);
+			left = BinaryOperatorNode.withChildren(BooleanToken, left, right);
 		}
 
 		return left;

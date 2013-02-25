@@ -218,7 +218,7 @@ public class CompareRangeNodeRewriter extends NodeRewriterImp {
 
 				ifStatement(
 						and(isEmpty(identifier(leftVariable, rangeType)),
-								isEmpty(identifier(leftVariable, rangeType))),
+								isEmpty(identifier(rightVariable, rangeType))),
 						bodyNode(update(identifier(resultVariable, BOOLEAN), falseNode())),
 						bodyNode(ifStatement(
 								and(isEmpty(identifier(leftVariable, rangeType)),
