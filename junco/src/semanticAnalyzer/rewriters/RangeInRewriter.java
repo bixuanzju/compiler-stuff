@@ -16,8 +16,7 @@ public class RangeInRewriter extends NodeRewriterImp {
 
 	@Override
 	public ParseNode rewriteNode(ParseNode node) {
-		// TODO Auto-generated method stub
-
+		
 		setLocation(node.getToken().getLocation());
 
 		left = node.child(0);

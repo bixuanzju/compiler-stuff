@@ -201,8 +201,7 @@ public class ASMCodeGenerator {
 				ASMCodeFragment childCode = removeVoidCode(child);
 				code.append(childCode);
 			}
-			
-			
+
 		}
 
 		public void visitLeave(BoxBodyNode node) {
@@ -211,31 +210,56 @@ public class ASMCodeGenerator {
 				ASMCodeFragment childCode = removeVoidCode(child);
 				code.append(childCode);
 			}
-			
+
 			for (ParseNode child : node.getChildren()) {
-				if (child.getType() instanceof DeclarationNode) {
-					if (child.child(0).getType() instanceof RangeType) {
-						ParseNode rangeVariable = child.child(0);
-						code.append(removeValueCode(rangeVariable));
+				if (child instanceof DeclarationNode
+						&& child.child(0).getType() instanceof RangeType) {
+					{
+						IdentifierNode variable = (IdentifierNode) child.child(0);
+						int offset = variable.getBinding().getMemoryLocation().getOffset();
+						String baseAddress = variable.getBinding().getMemoryLocation()
+								.getBaseAddress();
+						code.add(PushD, baseAddress);
+						code.add(PushI, offset);
+						code.add(Add);
+						code.add(LoadI);
 						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
 					}
 				}
 			}
+
 			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
-		
+
 		public void visitLeave(ValueBodyNode node) {
 			newValueCode(node);
-			
-			for (int i = 0; i < node.nChildren()-1; i++) {
+
+			for (int i = 0; i < node.nChildren() - 1; i++) {
 				code.append(removeVoidCode(node.child(i)));
 			}
-			
-			code.append(removeValueCode(node.child(node.nChildren()-1)));
+
+			code.append(removeValueCode(node.child(node.nChildren() - 1)));
+
+			for (ParseNode child : node.getChildren()) {
+				if (child instanceof DeclarationNode
+						&& child.child(0).getType() instanceof RangeType) {
+					{
+						IdentifierNode variable = (IdentifierNode) child.child(0);
+						int offset = variable.getBinding().getMemoryLocation().getOffset();
+						String baseAddress = variable.getBinding().getMemoryLocation()
+								.getBaseAddress();
+						code.add(PushD, baseAddress);
+						code.add(PushI, offset);
+						code.add(Add);
+						code.add(LoadI);
+						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+					}
+				}
+			}
+
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
-		
-		
 
 		// /////////////////////////////////////////////////////////////////////////
 		// statements and declarations
@@ -267,129 +291,163 @@ public class ASMCodeGenerator {
 		private void appendPrintCode(ParseNode node) {
 
 			if (node.getType() instanceof RangeType) {
-				String startlabel = labeller.newLabel("-range-start-", "");
-				String falselabel = labeller
-						.newLabelSameNumber("-range-false-end-", "");
-				String notfloatlabel = labeller.newLabelSameNumber(
-						"-range-notfloat-end-", "");
-				String charlabel = labeller.newLabelSameNumber("-range-char-end-", "");
-				String endlabel = labeller.newLabelSameNumber("-range-end-", "");
+				RangeType type = (RangeType) node.getType();
 
-				code.append(removeValueCode(node));
+				if (type.getChildType() == PrimitiveType.BOOLEAN) {
+					code.append(removeValueCode(node));	// [... ptr]
+					code.add(Duplicate);	// [... ptr ptr]
+					code.add(PushI, 12);
+					code.add(Add);
+					code.add(LoadC);	// [... ptr low]
+					code.add(PushD, RunTime.OPEN_SQUARE_STRING);
+					code.add(Printf);
+					
+					convertToBoolean();
+					
+					
+					code.add(PushD, RunTime.BOOLEAN_PRINT_FORMAT);
+					code.add(Printf);
+					code.add(PushD, RunTime.SPLICE_STRING);	// [... ptr]
+					code.add(Printf);
+					code.add(PushI, 13);
+					code.add(Add);
+					code.add(LoadC);
+					
+					convertToBoolean();
+					
+					code.add(PushD, RunTime.BOOLEAN_PRINT_FORMAT);
+					code.add(Printf);
+					code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
+					code.add(Printf);
+					
+					
+				}
+				else {
+					String startlabel = labeller.newLabel("-range-start-", "");
+					String falselabel = labeller.newLabelSameNumber("-range-false-end-",
+							"");
+					String notfloatlabel = labeller.newLabelSameNumber(
+							"-range-notfloat-end-", "");
+					String charlabel = labeller
+							.newLabelSameNumber("-range-char-end-", "");
+					String endlabel = labeller.newLabelSameNumber("-range-end-", "");
 
-				code.add(Call, startlabel);
-				code.add(Jump, endlabel);
+					code.append(removeValueCode(node));
 
-				code.add(Label, startlabel);
-				code.add(Exchange); // [... pc ptr]
-				code.add(PushD, RunTime.OPEN_SQUARE_STRING);
-				code.add(Printf);
+					code.add(Call, startlabel);
+					code.add(Jump, endlabel);
 
-				// I need to know the type identifier
-				code.add(Duplicate);
-				code.add(PushI, 4); // [... ptr ptr 4]
-				code.add(Add); // [... ptr ptr+4]
-				code.add(LoadI); // [... ptr id]
-				code.add(PushI, 2); // [... ptr id 2]
-				code.add(Subtract); // [... ptr id-2]
-				code.add(JumpFalse, falselabel); // [... ptr]
-				// god, it's range type, how can I print
-				code.add(Duplicate); // [... ptr ptr]
-				code.add(PushI, 12); // [... ptr ptr 12]
-				code.add(Add); // [... ptr ptr+12]
-				code.add(LoadI); // [... ptr lptr]
-				code.add(Exchange); // [... lptr ptr]
-				code.add(PushI, 16);
-				code.add(Add);
-				code.add(LoadI); // [... lptr hptr]
-				code.add(Exchange); // [... hptr lptr]
-				// what to do?
-				code.add(Call, startlabel);
-				code.add(PushD, RunTime.SPLICE_STRING);
-				code.add(Printf); // [... htpr]
-				code.add(Call, startlabel);
-				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
-				code.add(Printf);
-				code.add(Return);
+					code.add(Label, startlabel);
+					code.add(Exchange); // [... pc ptr]
+					code.add(PushD, RunTime.OPEN_SQUARE_STRING);
+					code.add(Printf);
 
-				// ok, it's primitive type, now I need to know what type size actually
-				code.add(Label, falselabel);
-				code.add(Duplicate);
-				code.add(PushI, 11); // [... ptr ptr 11]
-				code.add(Add); // [... ptr ptr+11]
-				code.add(LoadC); // [... ptr size]
-				code.add(Duplicate); // [... ptr size size]
-				code.add(PushI, 8); // [... ptr size size 8]
-				code.add(Subtract); // [.. ptr size size-8]
-				code.add(JumpNeg, notfloatlabel); // [... ptr size]
-				// yeah, it's float type, let's print
-				code.add(Pop); // [... ptr]
-				code.add(Duplicate); // [...ptr ptr]
-				code.add(PushI, 12); // [... ptr ptr 12]
-				code.add(Add); // [... ptr ptr+12]
-				code.add(LoadF); // [... ptr float]
-				code.add(PushD, RunTime.FLOAT_PRINT_FORMAT);
-				code.add(Printf); // [... ptr]
-				code.add(PushD, RunTime.SPLICE_STRING);
-				code.add(Printf); // [... ptr]
-				code.add(PushI, 20); // [... ptr 20]
-				code.add(Add); // [... ptr+20]
-				code.add(LoadF); // [... float]
-				code.add(PushD, RunTime.FLOAT_PRINT_FORMAT);
-				code.add(Printf);
-				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
-				code.add(Printf);
-				code.add(Return);
+					// I need to know the type identifier
+					code.add(Duplicate);
+					code.add(PushI, 4); // [... ptr ptr 4]
+					code.add(Add); // [... ptr ptr+4]
+					code.add(LoadI); // [... ptr id]
+					code.add(PushI, 2); // [... ptr id 2]
+					code.add(Subtract); // [... ptr id-2]
+					code.add(JumpFalse, falselabel); // [... ptr]
+					// god, it's range type, how can I print
+					code.add(Duplicate); // [... ptr ptr]
+					code.add(PushI, 12); // [... ptr ptr 12]
+					code.add(Add); // [... ptr ptr+12]
+					code.add(LoadI); // [... ptr lptr]
+					code.add(Exchange); // [... lptr ptr]
+					code.add(PushI, 16);
+					code.add(Add);
+					code.add(LoadI); // [... lptr hptr]
+					code.add(Exchange); // [... hptr lptr]
+					// what to do?
+					code.add(Call, startlabel);
+					code.add(PushD, RunTime.SPLICE_STRING);
+					code.add(Printf); // [... htpr]
+					code.add(Call, startlabel);
+					code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
+					code.add(Printf);
+					code.add(Return);
 
-				// ok, it's not float, so it is int or char?
-				code.add(Label, notfloatlabel);
-				// code.add(Duplicate); // [... ptr size size]
-				code.add(PushI, 4); // [... ptr size 4]
-				code.add(Subtract); // [... ptr size-4]
-				code.add(JumpNeg, charlabel); // [... ptr]
-				// it's int type, let's print
-				code.add(Duplicate); // [...ptr ptr]
-				code.add(PushI, 12); // [... ptr ptr 12]
-				code.add(Add); // [... ptr ptr+12]
-				code.add(LoadI); // [... ptr int]
-				code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
-				code.add(Printf); // [... ptr]
-				code.add(PushD, RunTime.SPLICE_STRING);
-				code.add(Printf); // [... ptr]
-				code.add(PushI, 16); // [... ptr 16]
-				code.add(Add); // [... ptr+16]
-				code.add(LoadI); // [... int]
-				code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
-				code.add(Printf);
+					// ok, it's primitive type, now I need to know what type size actually
+					code.add(Label, falselabel);
+					code.add(Duplicate);
+					code.add(PushI, 11); // [... ptr ptr 11]
+					code.add(Add); // [... ptr ptr+11]
+					code.add(LoadC); // [... ptr size]
+					code.add(Duplicate); // [... ptr size size]
+					code.add(PushI, 8); // [... ptr size size 8]
+					code.add(Subtract); // [.. ptr size size-8]
+					code.add(JumpNeg, notfloatlabel); // [... ptr size]
+					// yeah, it's float type, let's print
+					code.add(Pop); // [... ptr]
+					code.add(Duplicate); // [...ptr ptr]
+					code.add(PushI, 12); // [... ptr ptr 12]
+					code.add(Add); // [... ptr ptr+12]
+					code.add(LoadF); // [... ptr float]
+					code.add(PushD, RunTime.FLOAT_PRINT_FORMAT);
+					code.add(Printf); // [... ptr]
+					code.add(PushD, RunTime.SPLICE_STRING);
+					code.add(Printf); // [... ptr]
+					code.add(PushI, 20); // [... ptr 20]
+					code.add(Add); // [... ptr+20]
+					code.add(LoadF); // [... float]
+					code.add(PushD, RunTime.FLOAT_PRINT_FORMAT);
+					code.add(Printf);
+					code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
+					code.add(Printf);
+					code.add(Return);
 
-				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
-				code.add(Printf);
-				code.add(Return);
+					// ok, it's not float, so it is int or char?
+					code.add(Label, notfloatlabel);
+					// code.add(Duplicate); // [... ptr size size]
+					code.add(PushI, 4); // [... ptr size 4]
+					code.add(Subtract); // [... ptr size-4]
+					code.add(JumpNeg, charlabel); // [... ptr]
+					// it's int type, let's print
+					code.add(Duplicate); // [...ptr ptr]
+					code.add(PushI, 12); // [... ptr ptr 12]
+					code.add(Add); // [... ptr ptr+12]
+					code.add(LoadI); // [... ptr int]
+					code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
+					code.add(Printf); // [... ptr]
+					code.add(PushD, RunTime.SPLICE_STRING);
+					code.add(Printf); // [... ptr]
+					code.add(PushI, 16); // [... ptr 16]
+					code.add(Add); // [... ptr+16]
+					code.add(LoadI); // [... int]
+					code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
+					code.add(Printf);
 
-				// finally, it is char type, let's print!!
-				code.add(Label, charlabel);
-				code.add(Duplicate); // [...ptr ptr]
-				code.add(PushI, 12); // [... ptr ptr 12]
-				code.add(Add); // [... ptr ptr+12]
-				code.add(LoadC); // [... ptr char]
-				code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
-				// code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
+					code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
+					code.add(Printf);
+					code.add(Return);
 
-				code.add(Printf); // [... ptr]
-				code.add(PushD, RunTime.SPLICE_STRING);
-				code.add(Printf); // [... ptr]
-				code.add(PushI, 13); // [... ptr 13]
-				code.add(Add); // [... ptr+13]
-				code.add(LoadC); // [... char]
-				code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
-				// code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
-				code.add(Printf);
+					// finally, it is char type, let's print!!
+					code.add(Label, charlabel);
+					code.add(Duplicate); // [...ptr ptr]
+					code.add(PushI, 12); // [... ptr ptr 12]
+					code.add(Add); // [... ptr ptr+12]
+					code.add(LoadC); // [... ptr char]
+					code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
+					// code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
 
-				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
-				code.add(Printf);
-				code.add(Return);
+					code.add(Printf); // [... ptr]
+					code.add(PushD, RunTime.SPLICE_STRING);
+					code.add(Printf); // [... ptr]
+					code.add(PushI, 13); // [... ptr 13]
+					code.add(Add); // [... ptr+13]
+					code.add(LoadC); // [... char]
+					code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
+					// code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
+					code.add(Printf);
 
-				code.add(Label, endlabel);
+					code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
+					code.add(Printf);
+					code.add(Return);
+
+					code.add(Label, endlabel);
+				}
 			}
 			else {
 				String format = printFormat(node.getType());
@@ -405,6 +463,19 @@ public class ASMCodeGenerator {
 				return;
 			}
 
+			String trueLabel = labeller.newLabel("-print-boolean-true", "");
+			String endLabel = labeller.newLabelSameNumber("-print-boolean-join", "");
+
+			code.add(JumpTrue, trueLabel);
+			code.add(PushD, RunTime.BOOLEAN_FALSE_STRING);
+			code.add(Jump, endLabel);
+			code.add(Label, trueLabel);
+			code.add(PushD, RunTime.BOOLEAN_TRUE_STRING);
+			code.add(Label, endLabel);
+		}
+		
+		private void convertToBoolean() {
+		
 			String trueLabel = labeller.newLabel("-print-boolean-true", "");
 			String endLabel = labeller.newLabelSameNumber("-print-boolean-join", "");
 
@@ -482,15 +553,15 @@ public class ASMCodeGenerator {
 			code.add(Jump, startlabel);
 
 			code.add(Label, endlabel);
-			
-			//code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT);
+
+			// code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT);
 
 		}
 
 		public void visitLeave(IfStatementNode node) {
 			newVoidCode(node);
 			String startlabel = labeller.newLabel("-if-start-", "");
-//			String thenlabel = labeller.newLabelSameNumber("-if-then-", "");
+			// String thenlabel = labeller.newLabelSameNumber("-if-then-", "");
 			String endlabel = labeller.newLabelSameNumber("-if-end-", "");
 			String elselabel = labeller.newLabelSameNumber("-if-else-", "");
 
@@ -514,9 +585,9 @@ public class ASMCodeGenerator {
 				ASMCodeFragment elseBody = removeVoidCode(node.child(2));
 				code.append(elseBody);
 				code.add(Jump, endlabel);
-				
+
 			}
-			
+
 			code.add(Label, endlabel);
 
 		}
@@ -529,10 +600,17 @@ public class ASMCodeGenerator {
 			}
 
 			for (ParseNode child : node.getChildren()) {
-				if (child.getType() instanceof DeclarationNode) {
-					if (child.child(0).getType() instanceof RangeType) {
-						ParseNode rangeVariable = child.child(0);
-						code.append(removeValueCode(rangeVariable));
+				if (child instanceof DeclarationNode
+						&& child.child(0).getType() instanceof RangeType) {
+					{
+						IdentifierNode variable = (IdentifierNode) child.child(0);
+						int offset = variable.getBinding().getMemoryLocation().getOffset();
+						String baseAddress = variable.getBinding().getMemoryLocation()
+								.getBaseAddress();
+						code.add(PushD, baseAddress);
+						code.add(PushI, offset);
+						code.add(Add);
+						code.add(LoadI);
 						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
 					}
 				}
@@ -545,30 +623,30 @@ public class ASMCodeGenerator {
 
 			if (node.getToken().isLextant(Punctuator.LOW, Punctuator.HIGH)) {
 				newAddressCode(node);
-				
+
 			}
 			else {
 				newValueCode(node);
-				
+
 			}
-			
+
 			ASMCodeFragment value = getAndRemoveCode(node.child(0));
-			//ASMCodeFragment value = removeValueCode(node.child(0));
-			//code.append(value);
-			
+			// ASMCodeFragment value = removeValueCode(node.child(0));
+			// code.append(value);
+
 			if (!value.isAddress()) {
 				code.append(value); // [... val]
 				if (node.child(0).getType() instanceof RangeType) {
-					code.add(Duplicate);	// [... val val]
-					code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);	// [... val]
+					code.add(Duplicate); // [... val val]
+					code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD); // [...
+																																			// val]
 				}
-	
+
 			}
 			else {
 				turnAddressIntoValue(value, node.child(0));
-				code.append(value);	//[... val]
+				code.append(value); // [... val]
 			}
-			
 
 			if (node.getToken().isLextant(Punctuator.NOT)) {
 
@@ -599,7 +677,7 @@ public class ASMCodeGenerator {
 				code.add(BTAnd);
 			}
 			else if (node.getToken().isLextant(Punctuator.LOW)) {
-				
+
 				code.add(PushI, 12);
 				code.add(Add);
 
@@ -611,8 +689,8 @@ public class ASMCodeGenerator {
 				code.add(Add);
 
 			}
-			
-			//code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
 
@@ -621,19 +699,20 @@ public class ASMCodeGenerator {
 			ASMCodeFragment lvalue = removeAddressCode(node.child(0));
 			ASMCodeFragment rvalue = getAndRemoveCode(node.child(1));
 
-			code.append(lvalue);	// [... addr]
-			
+			code.append(lvalue); // [... addr]
+
 			// reference counting
 			if (node.child(0).getType() instanceof RangeType) {
 				code.add(Duplicate); // [... addr addr]
-				code.add(LoadI);	// [... addr lptr]
+				code.add(LoadI); // [... addr lptr]
 				code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD); // [... addr]
-				
+
 				if (rvalue.isAddress()) {
 					turnAddressIntoValue(rvalue, node.child(1));
 					code.append(rvalue); // [... addr rprt]
 					code.add(Duplicate); // [... addr rptr rptr]
-					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [...addr rptr]
+					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [...addr
+																																						// rptr]
 				}
 				else {
 					code.append(rvalue); // [... addr rptr]
@@ -739,7 +818,9 @@ public class ASMCodeGenerator {
 
 				if (node.child(0).getType() instanceof RangeType) {
 					code.add(Duplicate); // [... ptr low low]
-					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [... ptr low]
+					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [...
+																																						// ptr
+																																						// low]
 				}
 
 			}
@@ -765,7 +846,10 @@ public class ASMCodeGenerator {
 
 				if (node.child(1).getType() instanceof RangeType) {
 					code.add(Duplicate); // [... ptr ptr+size+12 high high]
-					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [... ptr ptr+size+12 high]
+					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [...
+																																						// ptr
+																																						// ptr+size+12
+																																						// high]
 				}
 			}
 			else {

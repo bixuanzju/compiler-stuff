@@ -84,7 +84,8 @@ class FunctionSignature {
 			return true;
 		case SPAN:
 		case INTERSECTION:
-			if (resultType.getConstraintType() instanceof RangeType && resultType.getConstraintType().isComparable()) {
+			//if (resultType.getConstraintType() instanceof RangeType && resultType.getConstraintType().isComparable()) {
+				if (resultType.getConstraintType() instanceof RangeType) {
 				return true;
 			}
 			else return false;
