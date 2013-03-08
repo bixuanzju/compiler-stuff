@@ -86,7 +86,6 @@ public class ASMCodeGenerator {
 
 		code.add(Label, RunTime.GENERAL_RUNTIME_ERROR);
 		code.add(Printf);
-		code.add(Printf);
 		code.add(Halt);
 
 		return code;

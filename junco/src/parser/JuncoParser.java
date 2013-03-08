@@ -18,6 +18,7 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
+import parseTree.nodeTypes.ValueBodyNode;
 import parseTree.nodeTypes.WhileStatementNode;
 import tokens.*;
 import lexicalAnalyzer.Keyword;
@@ -209,6 +210,26 @@ public class JuncoParser {
 
 		expect(Punctuator.CLOSE_BRACE);
 		return body;
+	}
+	
+	private ParseNode valueBodyNode() {
+		if (!startsValueBodyNode(nowReading)) {
+			syntaxErrorNode("body node");
+		}
+		ParseNode body = new ValueBodyNode(nowReading);
+
+		expect(Punctuator.BODY_OPEN);
+		while (startsStatement(nowReading)) {
+			ParseNode statement = parseStatement();
+			body.appendChild(statement);
+		}
+
+		expect(Punctuator.BODY_CLOSE);
+		return body;
+	}
+	
+	private boolean startsValueBodyNode(Token token) {
+		return token.isLextant(Punctuator.BODY_OPEN);
 	}
 
 	private boolean startsBody(Token token) {

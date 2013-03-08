@@ -53,7 +53,7 @@ public class RangeOperatorRewritingVisitor extends ASTRewritingVisitor {
 	}
 
 	private boolean isIsEmptyMemberOperator(UniaryOperatorNode node) {
-		// TODO You must implement this!
+		// 
 		if (node.getToken().isLextant(Punctuator.EMPTY)) {
 			return true;
 		}
@@ -78,7 +78,7 @@ public class RangeOperatorRewritingVisitor extends ASTRewritingVisitor {
 	
 
 	private boolean isComparisonOperator(BinaryOperatorNode node) {
-		// TODO You must implement this!
+
 		if (node.getToken().isLextant(Punctuator.GREATER, Punctuator.GREATEREQ,
 				Punctuator.LESS, Punctuator.LESSEQ, Punctuator.EQUAL,
 				Punctuator.UNEQUAL)) {

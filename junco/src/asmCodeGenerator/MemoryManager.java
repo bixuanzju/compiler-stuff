@@ -5,8 +5,10 @@ import static asmCodeGenerator.ASMOpcode.*;
 import static asmCodeGenerator.ASMHelper.*;
 
 public class MemoryManager {
-	// Debug Mode.  Adds debug code and executes insertDebugMain when the program is initiailzed.
+	// Debug Mode. DEBUGGING Adds debug code and executes insertDebugMain when the program is initiailzed.
+	// Debug Mode. DEBUGGING2 does not insertDebugMain, but prints allocation diagnostics.
 	private static final boolean DEBUGGING = false;
+	private static final boolean DEBUGGING2 = false;		// does not insertDebugMain
 	
 	// ASM Subroutines.  User/Compiler-writer needs only ALLOCATE and DEALLOCATE
 	private static final String MEM_MANAGER_INITIALIZE =   "-mem-manager-initialize";
@@ -221,6 +223,10 @@ public class MemoryManager {
 
 		//store return addr
 		storeITo(frag, MMGR_ALLOC_RETURN_ADDRESS);	// [... usableSize]
+		
+		if(DEBUGGING2) {
+			ptop(frag, "--allocate %d bytes\n");
+		}
 
 		//convert user size to mmgr size and store
 		frag.add(PushI, MMGR_TWICE_TAG_SIZE);			// [... usableSize 2*tagsize]
@@ -240,9 +246,14 @@ public class MemoryManager {
 		// if (curblock.size > allocsize) goto FOUND_BLOCK		
 		frag.add(Label, MMGR_ALLOC_TEST_BLOCK);
 			loadIFrom(frag, MMGR_ALLOC_CURRENT_BLOCK);		// [... block]
+			if(DEBUGGING2) {
+				ptop(frag, "--testing block %d\n");
+			}
 			readTagSize(frag);								// [... block.size]
 			loadIFrom(frag, MMGR_ALLOC_SIZE);				// [... block.size allocSize]
 			frag.add(Subtract);								// [... block.size-allocSize]
+			frag.add(PushI, 1);								// [... block.size-allocSize 1]
+			frag.add(Add);									// [... block.size-allocSize+1]
 			frag.add(JumpPos, MMGR_ALLOC_FOUND_BLOCK);
 
 
@@ -318,6 +329,9 @@ public class MemoryManager {
 		
 		
 		frag.add(Label, MMGR_ALLOC_NO_BLOCK_WORKS);
+			if(DEBUGGING2) {
+				pstring(frag, "--NO BLOCK WORKS\n");
+			}
 			loadIFrom(frag, MMGR_ALLOC_SIZE);			// [... size]
 //			debugPrintI(frag, "alloc ", MEM_MANAGER_HEAP_END_PTR);
 			newBlock(frag);								// [... block]
@@ -761,6 +775,35 @@ public class MemoryManager {
 			loadIFrom(frag, MMGRD_PFREE_RETURN_ADDRESS);
 			frag.add(Return);
 		return frag;
+	}	
+	
+	////////////////////////////////////////////////////////////////////
+    // debugging aids
+	public static void pstack(ASMCodeFragment code, String string) {
+		String stringLabel = labeller.newLabel("mm-pstack-", "");
+		code.add(DLabel, stringLabel);
+		code.add(DataS, string + " ");
+		code.add(PushD, stringLabel);
+		code.add(Printf);
+		code.add(PStack);
+	}
+
+	// does not disturb stack.  Takes a format string
+	public static void ptop(ASMCodeFragment code, String format) {
+		code.add(Duplicate);
+		String stringLabel = labeller.newLabel("mm-ptop-", "");
+		code.add(DLabel, stringLabel);
+		code.add(DataS, format);
+		code.add(PushD, stringLabel);
+		code.add(Printf);
+	}	
+	// does not disturb stack.  Takes a format string - no %'s!
+	public static void pstring(ASMCodeFragment code, String format) {
+		String stringLabel = labeller.newLabel("mm-pstring-", "");
+		code.add(DLabel, stringLabel);
+		code.add(DataS, format);
+		code.add(PushD, stringLabel);
+		code.add(Printf);
 	}
 
 }

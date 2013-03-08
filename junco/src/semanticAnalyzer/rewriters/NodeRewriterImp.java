@@ -34,7 +34,7 @@ abstract public class NodeRewriterImp implements NodeRewriter {
 	// valueBodyNode is a new node type that isn't in the spec (yet).
 	// it makes rewriting parts of expressions easier.
 	protected ParseNode valueBodyNode(ParseNode ...children) {
-		Token valueBodyToken = lextantToken(Punctuator.NULL_PUNCTUATOR);
+		Token valueBodyToken = lextantToken(Punctuator.BODY_OPEN);
 		ParseNode node = new ValueBodyNode(valueBodyToken);
 		for(ParseNode child: children) {
 			node.appendChild(child);
@@ -42,7 +42,7 @@ abstract public class NodeRewriterImp implements NodeRewriter {
 		return node;
 	}	
 	protected ParseNode bodyNode(ParseNode ...children) {
-		Token bodyToken = lextantToken(Punctuator.NULL_PUNCTUATOR);
+		Token bodyToken = lextantToken(Punctuator.OPEN_BRACE);
 		ParseNode node = new BodyNode(bodyToken);
 		for(ParseNode child: children) {
 			node.appendChild(child);

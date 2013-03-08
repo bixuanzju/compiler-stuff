@@ -24,6 +24,8 @@ public enum Punctuator implements Lextant {
 	PRINT_NEWLINE("$"),
 	OPEN_BRACE("{"),
 	CLOSE_BRACE("}"),
+	BODY_OPEN("{["),
+	BODY_CLOSE("]}"),
 	OPEN_BRACKET("("),
 	CLOSE_BRACKET(")"),
 	OPEN_SQUARE("["),
