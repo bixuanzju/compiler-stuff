@@ -16,6 +16,7 @@ import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.ReturnStatementNode;
 import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
 import parseTree.nodeTypes.ValueBodyNode;
@@ -100,7 +101,12 @@ public class JuncoParser {
 
 		while (startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
+			
 			box.appendChild(statement);
+			
+			if (statement instanceof ReturnStatementNode) {
+				syntaxError(statement.getToken(),"box body node cannot contain return statement");
+			}
 		}
 		expect(Punctuator.CLOSE_BRACE);
 		return box;
@@ -136,6 +142,9 @@ public class JuncoParser {
 		if (startsBody(nowReading)) {
 			return parseBody();
 		}
+		if (startsReturnStatement(nowReading)) { 
+			return parseReturnStatement();
+		}
 		assert false : "bad token " + nowReading + " in parseStatement()";
 		return null;
 	}
@@ -143,7 +152,7 @@ public class JuncoParser {
 	private boolean startsStatement(Token token) {
 		return startsPrintStatement(token) || startsDeclaration(token)
 				|| startsUpdateStatement(token) || startsIfStatement(token)
-				|| startsWhileStatement(token) || startsBody(token);
+				|| startsWhileStatement(token) || startsBody(token) || startsReturnStatement(token);
 	}
 
 	private ParseNode parseIfStatement() {
@@ -212,7 +221,7 @@ public class JuncoParser {
 		return body;
 	}
 	
-	private ParseNode valueBodyNode() {
+	private ParseNode parseValueBodyNode() {
 		if (!startsValueBodyNode(nowReading)) {
 			syntaxErrorNode("body node");
 		}
@@ -304,9 +313,29 @@ public class JuncoParser {
 		return DeclarationNode.withChildren(declarationToken, identifier,
 				initializer);
 	}
+	
 
 	private boolean startsDeclaration(Token token) {
 		return token.isLextant(Keyword.CONST, Keyword.INIT);
+	}
+	
+	private ParseNode parseReturnStatement() {
+		if (!startsReturnStatement(nowReading)) {
+			return syntaxErrorNode("return");
+		}
+		
+		Token returnToken = nowReading;
+		readToken();
+		
+		ParseNode expression = parseExpression();
+		expect(Punctuator.TERMINATOR);
+		
+		return ReturnStatementNode.withChildren(returnToken, expression);
+	}
+	
+	
+	private boolean startsReturnStatement(Token token) {
+		return token.isLextant(Keyword.RETURN);
 	}
 
 	// updateStmt -> UPDATE identifier <- expression ;
@@ -571,7 +600,10 @@ public class JuncoParser {
 			expect(Punctuator.CLOSE_SQUARE);
 			return BinaryOperatorNode.withChildren(token, left, right);
 		}
-		else
+		else if (nowReading.isLextant(Punctuator.BODY_OPEN)) {
+			return parseValueBodyNode();
+		}
+		else 
 			return parseLiteral();
 	}
 
@@ -600,6 +632,7 @@ public class JuncoParser {
 		if (startsCharacterConstant(nowReading)) {
 			return parseCharacterConstant();
 		}
+
 		assert false : "bad token " + nowReading + " in parseLiteral()";
 		return null;
 	}
@@ -611,7 +644,7 @@ public class JuncoParser {
 				|| startsBooleanConstant(token)
 				|| startsCharacterConstant(token)
 				|| (token.isLextant(Punctuator.OPEN_BRACKET, Punctuator.NOT,
-						Punctuator.OPEN_SQUARE));
+						Punctuator.OPEN_SQUARE, Punctuator.BODY_OPEN));
 	}
 
 	// number (terminal)

@@ -43,7 +43,30 @@ public class Scope {
 					MemoryLocation.FRAME_POINTER);
 		}
 	};
+	
+	public Scope createSubscope() {
+		return new Scope(staticNestingLevel+1, allocator, this);
+	}
 
+//	public static Scope createParameterScope() {
+//		
+//	}
+//		
+//	public static Scope createProcedureScope() {
+//		
+//	}
+	
+	public static Scope createGlobalScope() {
+		AllocationStrategy allocator = globalScopeStrategy();
+		return new Scope(0, allocator, null);
+	}
+	
+	private static AllocationStrategy globalScopeStrategy() {
+		return new PositiveAllocationStrategy(
+				MemoryAccessMethod.DIRECT_ACCESS_BASE,
+				MemoryLocation.GLOBAL_VARIABLE_BLOCK);
+	}
+	
 //////////////////////////////////////////////////////////////////////
 // private constructor.	
 	private Scope(int staticNestingLevel, AllocationStrategy allocator, Scope baseScope) {

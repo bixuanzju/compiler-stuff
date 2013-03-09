@@ -68,6 +68,27 @@ public class JuncoSemanticAnalyzer {
     
     return tree;
 }
+	
+	
+	// various kinds of scope generators
+//	private static void enterParameterScope(ParseNode node) {
+//		
+//	}
+//	
+//	private static void enterFunctionbodyScope(ParseNode node) {
+//		
+//	}
+	
+	private static void enterGlobleScope(ParseNode node) {
+		Scope scope = Scope.createGlobalScope();
+		node.setScope(scope);
+	}
+	
+	private static void enterSubscope(ParseNode node) {
+		Scope baseScope = node.getLocalScope();
+		Scope scope = baseScope.createSubscope();
+		node.setScope(scope);
+	}
 
 	private class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		@Override
@@ -76,24 +97,28 @@ public class JuncoSemanticAnalyzer {
 					"Node class unimplemented in SemanticAnalysisVisitor: "
 							+ node.getClass());
 		}
+		
+	
 
 		// /////////////////////////////////////////////////////////////////////////
 		// constructs larger than statements
 		@Override
 		public void visitEnter(ProgramNode node) {
-			Scopes.enterStaticScope(node);
+//			Scopes.enterStaticScope(node);
+			enterGlobleScope(node);
 		}
 
 		public void visitLeave(ProgramNode node) {
-			Scopes.leaveScope();
+//			Scopes.leaveScope();
 		}
 
 		public void visitEnter(BoxBodyNode node) {
-			Scopes.enterStaticScope(node);
+//			Scopes.enterStaticScope(node);
+			enterSubscope(node);
 		}
 
 		public void visitLeave(BoxBodyNode node) {
-			Scopes.leaveScope();
+//			Scopes.leaveScope();
 		}
 
 		// /////////////////////////////////////////////////////////////////////////
@@ -129,21 +154,22 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitEnter(BodyNode node) {
-			Scopes.enterStaticScope(node);
+//			Scopes.enterStaticScope(node);
+			enterSubscope(node);
 		}
 
 		public void visitLeave(BodyNode node) {
-			Scopes.leaveScope();
+//			Scopes.leaveScope();
 		}
 		
 		public void visitEnter(ValueBodyNode node) {
-				Scopes.enterStaticScope(node);
-			
+//				Scopes.enterStaticScope(node);
+			enterSubscope(node);
 		}
 		
 		public void visitLeave(ValueBodyNode node) {
 			node.setType(node.child(node.nChildren()-1).getType());
-			Scopes.leaveScope();
+//			Scopes.leaveScope();
 			
 		}
 
