@@ -142,7 +142,7 @@ public class JuncoSemanticAnalyzer {
 				if (child instanceof ReturnStatementNode) {
 					returnType.constrain(child.getType());
 				}
-				else if (child instanceof IfStatementNode) {
+				else if ((child instanceof IfStatementNode) || (child instanceof WhileStatementNode)) {
 					// System.out.println(child.getToken().getLexeme());
 					checkReturn(returnType, child);
 
