@@ -53,7 +53,7 @@ public class RangeInRewriter extends NodeRewriterImp {
 								identifier(leftVariable, type),
 								highEnd(identifier(rightVariable, rangeType))
 							))),
-					identifier(resultVariable, BOOLEAN)
+					returnStatement(identifier(resultVariable, BOOLEAN))
 			   );
 		
 	}
