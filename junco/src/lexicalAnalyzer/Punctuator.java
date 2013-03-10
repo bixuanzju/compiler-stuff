@@ -31,17 +31,16 @@ public enum Punctuator implements Lextant {
 	OPEN_SQUARE("["),
 	CLOSE_SQUARE("]"),
 	COLON(":"),
-	NULL_PUNCTUATOR(""),
-	CASTTOINT(":i"),
-	CASTTOFLAOT(":f"),
-	CASTTOCHAR(":c"),
-//	IN("in"),	
+	CASTTOINT("::i"),
+	CASTTOFLAOT("::f"),
+	CASTTOCHAR("::c"),
+	CASTTOBOOL("::b"),
 	LOW(".low"),
 	HIGH(".high"),
 	EMPTY(".isEmpty"),
 	SPAN("|"),
 	INTERSECTION("&"),
-	CASTTOBOOL(":b");
+	NULL_PUNCTUATOR("");
 	
 
 	private String lexeme;

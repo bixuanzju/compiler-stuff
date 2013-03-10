@@ -101,11 +101,12 @@ public class JuncoParser {
 
 		while (startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
-			
+
 			box.appendChild(statement);
-			
+
 			if (statement instanceof ReturnStatementNode) {
-				syntaxError(statement.getToken(),"box body node cannot contain return statement");
+				syntaxError(statement.getToken(),
+						"box body node cannot contain return statement");
 			}
 		}
 		expect(Punctuator.CLOSE_BRACE);
@@ -142,7 +143,7 @@ public class JuncoParser {
 		if (startsBody(nowReading)) {
 			return parseBody();
 		}
-		if (startsReturnStatement(nowReading)) { 
+		if (startsReturnStatement(nowReading)) {
 			return parseReturnStatement();
 		}
 		assert false : "bad token " + nowReading + " in parseStatement()";
@@ -152,7 +153,8 @@ public class JuncoParser {
 	private boolean startsStatement(Token token) {
 		return startsPrintStatement(token) || startsDeclaration(token)
 				|| startsUpdateStatement(token) || startsIfStatement(token)
-				|| startsWhileStatement(token) || startsBody(token) || startsReturnStatement(token);
+				|| startsWhileStatement(token) || startsBody(token)
+				|| startsReturnStatement(token);
 	}
 
 	private ParseNode parseIfStatement() {
@@ -172,7 +174,7 @@ public class JuncoParser {
 
 		if (startsElseBody(nowReading)) {
 			expect(Keyword.ELSE);
-			//result.setElse(true);
+			// result.setElse(true);
 			body = parseBody();
 			result.appendChild(body);
 		}
@@ -220,7 +222,7 @@ public class JuncoParser {
 		expect(Punctuator.CLOSE_BRACE);
 		return body;
 	}
-	
+
 	private ParseNode parseValueBodyNode() {
 		if (!startsValueBodyNode(nowReading)) {
 			syntaxErrorNode("body node");
@@ -236,7 +238,7 @@ public class JuncoParser {
 		expect(Punctuator.BODY_CLOSE);
 		return body;
 	}
-	
+
 	private boolean startsValueBodyNode(Token token) {
 		return token.isLextant(Punctuator.BODY_OPEN);
 	}
@@ -313,27 +315,25 @@ public class JuncoParser {
 		return DeclarationNode.withChildren(declarationToken, identifier,
 				initializer);
 	}
-	
 
 	private boolean startsDeclaration(Token token) {
 		return token.isLextant(Keyword.CONST, Keyword.INIT);
 	}
-	
+
 	private ParseNode parseReturnStatement() {
 		if (!startsReturnStatement(nowReading)) {
 			return syntaxErrorNode("return");
 		}
-		
+
 		Token returnToken = nowReading;
 		readToken();
-		
+
 		ParseNode expression = parseExpression();
 		expect(Punctuator.TERMINATOR);
-		
+
 		return ReturnStatementNode.withChildren(returnToken, expression);
 	}
-	
-	
+
 	private boolean startsReturnStatement(Token token) {
 		return token.isLextant(Keyword.RETURN);
 	}
@@ -348,10 +348,11 @@ public class JuncoParser {
 
 		ParseNode target = parseExpression();
 
-		if (!(target instanceof IdentifierNode || target.getToken().isLextant(Punctuator.HIGH, Punctuator.LOW))) {
+		if (!(target instanceof IdentifierNode || target.getToken().isLextant(
+				Punctuator.HIGH, Punctuator.LOW))) {
 			syntaxError(updateToken, "can't be targeted");
 		}
-		
+
 		expect(Punctuator.ASSIGN);
 		ParseNode updateValue = parseExpression();
 		expect(Punctuator.TERMINATOR);
@@ -395,7 +396,7 @@ public class JuncoParser {
 			readToken();
 			ParseNode right = parseExpressionAnd();
 
-			left =  BinaryOperatorNode.withChildren(BooleanToken, left, right);
+			left = BinaryOperatorNode.withChildren(BooleanToken, left, right);
 		}
 
 		return left;
@@ -428,7 +429,8 @@ public class JuncoParser {
 
 		ParseNode left = parseExpressionSpan();
 		while (nowReading.isLextant(Punctuator.GREATER, Punctuator.GREATEREQ,
-				Punctuator.LESS, Punctuator.LESSEQ, Punctuator.EQUAL, Punctuator.UNEQUAL, Keyword.IN)) {
+				Punctuator.LESS, Punctuator.LESSEQ, Punctuator.EQUAL,
+				Punctuator.UNEQUAL, Keyword.IN)) {
 			Token compareToken = nowReading;
 			readToken();
 			ParseNode right = parseExpressionSpan();
@@ -439,7 +441,7 @@ public class JuncoParser {
 		return left;
 
 	}
-	
+
 	// parse range span
 	private ParseNode parseExpressionSpan() {
 		if (!startsExpression5(nowReading)) {
@@ -458,7 +460,7 @@ public class JuncoParser {
 		return left;
 
 	}
-	
+
 	// parse range intersection
 	private ParseNode parseExpressionInter() {
 		if (!startsExpression5(nowReading)) {
@@ -477,7 +479,7 @@ public class JuncoParser {
 		return left;
 
 	}
-	
+
 	// private boolean startsExpression1(Token token) {
 	// return startsExpression2(token);
 	// }
@@ -522,7 +524,6 @@ public class JuncoParser {
 		return left;
 	}
 
-
 	// cast expression
 	private ParseNode parseExpression4() {
 		if (!startsExpression5(nowReading)) {
@@ -531,17 +532,42 @@ public class JuncoParser {
 
 		ParseNode left = parseExpressionNot();
 
-		if (nowReading.isLextant(Punctuator.CASTTOBOOL, Punctuator.CASTTOCHAR,
-				Punctuator.CASTTOFLAOT, Punctuator.CASTTOINT)) {
-			// syntaxError(nowReading, " expecting type indicator");
+		if (nowReading.isLextant(Punctuator.COLON)) {
+			
+			expect(Punctuator.COLON);
+			
+			ParseNode typeIdentifier = parseIdentifier();
 
-			Token typeIndicatorToken = nowReading;
-			left = UniaryOperatorNode.withChildren(left, typeIndicatorToken);
-			readToken();
+			String id = typeIdentifier.getToken().getLexeme().toLowerCase();
+
+			if (id.equals("i")) {
+				left = UniaryOperatorNode
+						.withChildren(left, LextantToken.make(typeIdentifier.getToken()
+								.getLocation(), "i", Punctuator.CASTTOINT));
+			}
+			else if (id.equals("b")) {
+				left = UniaryOperatorNode.withChildren(left, LextantToken
+						.make(typeIdentifier.getToken().getLocation(), "b",
+								Punctuator.CASTTOBOOL));				
+			}
+			else if (id.equals("f")) {
+				left = UniaryOperatorNode.withChildren(left, LextantToken.make(
+						typeIdentifier.getToken().getLocation(), "f",
+						Punctuator.CASTTOFLAOT));
+			}
+			else if (id.equals("c")) {
+				left = UniaryOperatorNode.withChildren(left, LextantToken
+						.make(typeIdentifier.getToken().getLocation(), "c",
+								Punctuator.CASTTOCHAR));
+			}
+			else {
+				syntaxError(typeIdentifier.getToken(), "unknown type");
+			}
+
 		}
+
 		return left;
 	}
-	
 
 	// parse boolean not expression
 	private ParseNode parseExpressionNot() {
@@ -562,21 +588,21 @@ public class JuncoParser {
 
 		return left;
 	}
-	
+
 	// parse member access expression
 	private ParseNode parseMemberAccess() {
 		if (!startsExpression5(nowReading)) {
 			return syntaxErrorNode("expression<menber>");
 		}
-		
+
 		ParseNode left = parseExpression5();
-		
+
 		if (nowReading.isLextant(Punctuator.LOW, Punctuator.HIGH, Punctuator.EMPTY)) {
 			Token memberToken = nowReading;
 			left = UniaryOperatorNode.withChildren(left, memberToken);
 			readToken();
 		}
-		
+
 		return left;
 	}
 
@@ -603,7 +629,7 @@ public class JuncoParser {
 		else if (nowReading.isLextant(Punctuator.BODY_OPEN)) {
 			return parseValueBodyNode();
 		}
-		else 
+		else
 			return parseLiteral();
 	}
 

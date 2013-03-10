@@ -142,8 +142,8 @@ public class JuncoSemanticAnalyzer {
 				if (child instanceof ReturnStatementNode) {
 					returnType.constrain(child.getType());
 				}
-				else if ((child instanceof IfStatementNode) || (child instanceof WhileStatementNode)) {
-					// System.out.println(child.getToken().getLexeme());
+				else if ((child instanceof IfStatementNode)
+						|| (child instanceof WhileStatementNode)) {
 					checkReturn(returnType, child);
 
 				}
@@ -164,7 +164,7 @@ public class JuncoSemanticAnalyzer {
 		private void checkReturn(TypeVariable type, ParseNode node) {
 
 			ParseNode thenBody = node.child(1);
-			
+
 			for (ParseNode child : thenBody.getChildren()) {
 				if (child instanceof ReturnStatementNode) {
 					type.constrain(child.getType());
@@ -173,7 +173,7 @@ public class JuncoSemanticAnalyzer {
 					checkReturn(type, child);
 				}
 			}
-			
+
 			if (node.nChildren() == 3) {
 				// ParseNode thenBody = node.child(0);
 				ParseNode elseBody = node.child(2);
