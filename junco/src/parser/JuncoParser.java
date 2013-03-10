@@ -24,6 +24,7 @@ import parseTree.nodeTypes.UpdateStatementNode;
 import parseTree.nodeTypes.ValueBodyNode;
 import parseTree.nodeTypes.WhileStatementNode;
 import semanticAnalyzer.PrimitiveType;
+import semanticAnalyzer.RangeType;
 import semanticAnalyzer.Type;
 import tokens.*;
 import lexicalAnalyzer.Keyword;
@@ -267,7 +268,11 @@ public class JuncoParser {
 		else if (id.equals("f") || id.equals("float") || id.equals("floating")) {
 			return PrimitiveType.FLOATNUM;
 		}
-		
+		else if (id.equals("r") || id.equals("range")) {
+			expect(Punctuator.COLON);
+			return new RangeType(parseTypeSpec());
+			
+		}
 		return null;
 	}
 	
