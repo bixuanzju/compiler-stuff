@@ -244,13 +244,13 @@ public class ASMCodeGenerator {
 			
 			code.add(Label, startlabel);
 			for (int i = 0; i < node.nChildren() - 1; i++) {
-				if (node.child(i) instanceof ReturnStatementNode) {
-					code.append(removeValueCode(node.child(i)));
-					code.add(Exchange);
-					code.add(Return);
+				ParseNode child = node.child(i);
+				
+				if (child instanceof ReturnStatementNode) {
+					code.append(removeValueCode(child));
 				}
 				else {
-					code.append(removeVoidCode(node.child(i)));
+					code.append(removeVoidCode(child));
 				}
 			}
 
@@ -276,6 +276,38 @@ public class ASMCodeGenerator {
 					}
 				}
 			}
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+		}
+		
+		public void visitLeave(BodyNode node) {
+			newVoidCode(node);
+			for (ParseNode child : node.getChildren()) {
+				if (child instanceof ReturnStatementNode) {
+					code.append(removeValueCode(child));
+				}
+				else {
+					code.append(removeVoidCode(child));
+				}
+				
+			}
+
+			for (ParseNode child : node.getChildren()) {
+				if (child instanceof DeclarationNode
+						&& child.child(0).getType() instanceof RangeType) {
+					{
+						IdentifierNode variable = (IdentifierNode) child.child(0);
+						int offset = variable.getBinding().getMemoryLocation().getOffset();
+						String baseAddress = variable.getBinding().getMemoryLocation()
+								.getBaseAddress();
+						code.add(PushD, baseAddress);
+						code.add(PushI, offset);
+						code.add(Add);
+						code.add(LoadI);
+						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+					}
+				}
+			}
+
 			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
 
@@ -614,34 +646,11 @@ public class ASMCodeGenerator {
 			
 			ASMCodeFragment expr = removeValueCode(node.child(0));
 			code.append(expr);
+			code.add(Exchange);
+			code.add(Return);
 			
 		}
-		public void visitLeave(BodyNode node) {
-			newVoidCode(node);
-			for (ParseNode child : node.getChildren()) {
-				ASMCodeFragment childCode = removeVoidCode(child);
-				code.append(childCode);
-			}
 
-			for (ParseNode child : node.getChildren()) {
-				if (child instanceof DeclarationNode
-						&& child.child(0).getType() instanceof RangeType) {
-					{
-						IdentifierNode variable = (IdentifierNode) child.child(0);
-						int offset = variable.getBinding().getMemoryLocation().getOffset();
-						String baseAddress = variable.getBinding().getMemoryLocation()
-								.getBaseAddress();
-						code.add(PushD, baseAddress);
-						code.add(PushI, offset);
-						code.add(Add);
-						code.add(LoadI);
-						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
-					}
-				}
-			}
-
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
-		}
 
 		public void visitLeave(UniaryOperatorNode node) {
 

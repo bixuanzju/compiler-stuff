@@ -137,9 +137,15 @@ public class JuncoSemanticAnalyzer {
 
 			TypeVariable returnType = new TypeVariable();
 			returnType.resetType();
+
 			for (ParseNode child : node.getChildren()) {
 				if (child instanceof ReturnStatementNode) {
 					returnType.constrain(child.getType());
+				}
+				else if (child instanceof IfStatementNode) {
+					// System.out.println(child.getToken().getLexeme());
+					checkReturn(returnType, child);
+
 				}
 			}
 
@@ -149,10 +155,39 @@ public class JuncoSemanticAnalyzer {
 			else if (returnType.getConstraintType() instanceof AnyType) {
 				logError("Value body must have at least one return statement");
 			}
-			
+
 			node.setType(node.child(node.nChildren() - 1).getType());
 			// Scopes.leaveScope();
 
+		}
+
+		private void checkReturn(TypeVariable type, ParseNode node) {
+
+			ParseNode thenBody = node.child(1);
+			
+			for (ParseNode child : thenBody.getChildren()) {
+				if (child instanceof ReturnStatementNode) {
+					type.constrain(child.getType());
+				}
+				else if (child instanceof IfStatementNode) {
+					checkReturn(type, child);
+				}
+			}
+			
+			if (node.nChildren() == 3) {
+				// ParseNode thenBody = node.child(0);
+				ParseNode elseBody = node.child(2);
+
+				for (ParseNode child : elseBody.getChildren()) {
+					if (child instanceof ReturnStatementNode) {
+						type.constrain(child.getType());
+					}
+					else if (child instanceof IfStatementNode) {
+						checkReturn(type, child);
+					}
+				}
+
+			}
 		}
 
 		// /////////////////////////////////////////////////////////////////////////
