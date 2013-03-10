@@ -46,7 +46,7 @@ public class SetRangeNodeRewriter extends NodeRewriterImp {
 										identifier(resultVariable, rangeType),
 										rangeNode(lowEnd(identifier(rightVariable, rangeType)),
 												highEnd(identifier(rightVariable, rangeType)))))),
-						identifier(resultVariable, rangeType));
+						returnStatement(identifier(resultVariable, rangeType)));
 
 			}
 
@@ -76,7 +76,7 @@ public class SetRangeNodeRewriter extends NodeRewriterImp {
 										rangeNode(lowEnd(identifier(leftVariable, rangeType)),
 												highEnd(identifier(leftVariable, rangeType)))))),
 
-						identifier(resultVariable, BOOLEAN));
+						returnStatement(identifier(resultVariable, BOOLEAN)));
 
 			}
 
@@ -146,7 +146,7 @@ public class SetRangeNodeRewriter extends NodeRewriterImp {
 																rangeNode(
 																		lowEnd(identifier(rightVariable, rangeType)),
 																		highEnd(identifier(leftVariable, rangeType)))))))))))))),
-				identifier(resultVariable, rangeType));
+				returnStatement(identifier(resultVariable, rangeType)));
 
 	}
 
@@ -210,7 +210,7 @@ public class SetRangeNodeRewriter extends NodeRewriterImp {
 																rangeNode(
 																		lowEnd(identifier(leftVariable, rangeType)),
 																		highEnd(identifier(rightVariable, rangeType)))))))))))))),
-				identifier(resultVariable, rangeType));
+				returnStatement(identifier(resultVariable, rangeType)));
 
 	}
 

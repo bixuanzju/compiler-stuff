@@ -11,6 +11,7 @@ import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
+import parseTree.nodeTypes.ReturnStatementNode;
 import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
 import parseTree.nodeTypes.ValueBodyNode;
@@ -56,6 +57,14 @@ abstract public class NodeRewriterImp implements NodeRewriter {
 		for (ParseNode child : children) {
 			result.appendChild(child);
 		}
+		
+		return result;
+	}
+	
+	protected ParseNode returnStatement(ParseNode children) {
+		
+		ParseNode result = new ReturnStatementNode(lextantToken(Keyword.RETURN));
+		result.appendChild(children);
 		
 		return result;
 	}

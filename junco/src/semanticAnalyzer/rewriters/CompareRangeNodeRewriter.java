@@ -70,7 +70,7 @@ public class CompareRangeNodeRewriter extends NodeRewriterImp {
 														highEnd(identifier(leftVariable, rangeType)),
 														highEnd(identifier(rightVariable, rangeType))))))))),
 
-				identifier(resultVariable, BOOLEAN));
+				returnStatement(identifier(resultVariable, BOOLEAN)));
 	}
 
 	private ParseNode rewriteLess(ParseNode node) {
@@ -103,7 +103,7 @@ public class CompareRangeNodeRewriter extends NodeRewriterImp {
 														less(highEnd(identifier(leftVariable, rangeType)),
 																highEnd(identifier(rightVariable, rangeType)))))))))),
 
-				identifier(resultVariable, BOOLEAN));
+				returnStatement(identifier(resultVariable, BOOLEAN)));
 	}
 
 	private ParseNode rewriteGreater(ParseNode node) {
@@ -137,7 +137,7 @@ public class CompareRangeNodeRewriter extends NodeRewriterImp {
 														less(highEnd(identifier(rightVariable, rangeType)),
 																highEnd(identifier(leftVariable, rangeType)))))))))),
 
-				identifier(resultVariable, BOOLEAN));
+				returnStatement(identifier(resultVariable, BOOLEAN)));
 	}
 
 	private ParseNode rewriteGreaterEquals(ParseNode node) {
@@ -166,7 +166,7 @@ public class CompareRangeNodeRewriter extends NodeRewriterImp {
 														highEnd(identifier(rightVariable, rangeType)),
 														highEnd(identifier(leftVariable, rangeType))))))))),
 
-				identifier(resultVariable, BOOLEAN));
+				returnStatement(identifier(resultVariable, BOOLEAN)));
 	}
 
 	private ParseNode rewriteEquals(ParseNode node) {
@@ -202,7 +202,7 @@ public class CompareRangeNodeRewriter extends NodeRewriterImp {
 												bodyNode(update(identifier(resultVariable, BOOLEAN), trueNode())),
 												bodyNode(update(identifier(resultVariable, BOOLEAN), falseNode()))))))))),
 
-				identifier(resultVariable, BOOLEAN));
+				returnStatement(identifier(resultVariable, BOOLEAN)));
 	}
 
 	private ParseNode rewriteNotEquals(ParseNode node) {
@@ -238,7 +238,7 @@ public class CompareRangeNodeRewriter extends NodeRewriterImp {
 												bodyNode(update(identifier(resultVariable, BOOLEAN), trueNode())),
 												bodyNode(update(identifier(resultVariable, BOOLEAN), falseNode()))))))))),
 
-				identifier(resultVariable, BOOLEAN));
+				returnStatement(identifier(resultVariable, BOOLEAN)));
 	}
 
 }

@@ -19,6 +19,7 @@ import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.ReturnStatementNode;
 import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
 import parseTree.nodeTypes.ValueBodyNode;
@@ -43,47 +44,46 @@ public class JuncoSemanticAnalyzer {
 	}
 
 	public ParseNode analyze() {
-		//ParseNodeVisitor visitor = new SemanticAnalysisVisitor();
+		// ParseNodeVisitor visitor = new SemanticAnalysisVisitor();
 		ASTree.accept(new SemanticAnalysisVisitor());
-		
-		if(logging.JuncoLogger.hasErrors()) {
-      return ASTree;
+
+		if (logging.JuncoLogger.hasErrors()) {
+			return ASTree;
 		}
-		
+
 		ASTree = iterateRewriting(ASTree);
-    ASTree.accept(new SemanticAnalysisVisitor());   
-		
+		ASTree.accept(new SemanticAnalysisVisitor());
+
 		return ASTree;
 	}
-	
+
 	private ParseNode iterateRewriting(ParseNode inputTree) {
-    ASTRewriter rewriter = null;
-    ParseNode tree = inputTree;
-    
-    do {
-        rewriter = new RangeOperatorRewritingVisitor();
-        tree = rewriter.rewrite(tree);
-    }
-    while (rewriter.changesWereMade());
-    
-    return tree;
-}
-	
-	
+		ASTRewriter rewriter = null;
+		ParseNode tree = inputTree;
+
+		do {
+			rewriter = new RangeOperatorRewritingVisitor();
+			tree = rewriter.rewrite(tree);
+		}
+		while (rewriter.changesWereMade());
+
+		return tree;
+	}
+
 	// various kinds of scope generators
-//	private static void enterParameterScope(ParseNode node) {
-//		
-//	}
-//	
-//	private static void enterFunctionbodyScope(ParseNode node) {
-//		
-//	}
-	
+	// private static void enterParameterScope(ParseNode node) {
+	//
+	// }
+	//
+	// private static void enterFunctionbodyScope(ParseNode node) {
+	//
+	// }
+
 	private static void enterGlobleScope(ParseNode node) {
 		Scope scope = Scope.createGlobalScope();
 		node.setScope(scope);
 	}
-	
+
 	private static void enterSubscope(ParseNode node) {
 		Scope baseScope = node.getLocalScope();
 		Scope scope = baseScope.createSubscope();
@@ -97,28 +97,62 @@ public class JuncoSemanticAnalyzer {
 					"Node class unimplemented in SemanticAnalysisVisitor: "
 							+ node.getClass());
 		}
-		
-	
 
 		// /////////////////////////////////////////////////////////////////////////
 		// constructs larger than statements
 		@Override
 		public void visitEnter(ProgramNode node) {
-//			Scopes.enterStaticScope(node);
+			// Scopes.enterStaticScope(node);
 			enterGlobleScope(node);
 		}
 
 		public void visitLeave(ProgramNode node) {
-//			Scopes.leaveScope();
+			// Scopes.leaveScope();
 		}
 
 		public void visitEnter(BoxBodyNode node) {
-//			Scopes.enterStaticScope(node);
+			// Scopes.enterStaticScope(node);
 			enterSubscope(node);
 		}
 
 		public void visitLeave(BoxBodyNode node) {
-//			Scopes.leaveScope();
+			// Scopes.leaveScope();
+		}
+
+		public void visitEnter(BodyNode node) {
+			// Scopes.enterStaticScope(node);
+			enterSubscope(node);
+		}
+
+		public void visitLeave(BodyNode node) {
+			// Scopes.leaveScope();
+		}
+
+		public void visitEnter(ValueBodyNode node) {
+			// Scopes.enterStaticScope(node);
+			enterSubscope(node);
+		}
+
+		public void visitLeave(ValueBodyNode node) {
+
+			TypeVariable returnType = new TypeVariable();
+			returnType.resetType();
+			for (ParseNode child : node.getChildren()) {
+				if (child instanceof ReturnStatementNode) {
+					returnType.constrain(child.getType());
+				}
+			}
+
+			if (returnType.getConstraintType() instanceof NoneType) {
+				logError("All return statements must return the same type");
+			}
+			else if (returnType.getConstraintType() instanceof AnyType) {
+				logError("Value body must have at least one return statement");
+			}
+			
+			node.setType(node.child(node.nChildren() - 1).getType());
+			// Scopes.leaveScope();
+
 		}
 
 		// /////////////////////////////////////////////////////////////////////////
@@ -153,24 +187,9 @@ public class JuncoSemanticAnalyzer {
 			}
 		}
 
-		public void visitEnter(BodyNode node) {
-//			Scopes.enterStaticScope(node);
-			enterSubscope(node);
-		}
+		public void visitLeave(ReturnStatementNode node) {
+			node.setType(node.child(0).getType());
 
-		public void visitLeave(BodyNode node) {
-//			Scopes.leaveScope();
-		}
-		
-		public void visitEnter(ValueBodyNode node) {
-//				Scopes.enterStaticScope(node);
-			enterSubscope(node);
-		}
-		
-		public void visitLeave(ValueBodyNode node) {
-			node.setType(node.child(node.nChildren()-1).getType());
-//			Scopes.leaveScope();
-			
 		}
 
 		// /////////////////////////////////////////////////////////////////////////
@@ -195,9 +214,9 @@ public class JuncoSemanticAnalyzer {
 				}
 			}
 			else {
-				
+
 				FunctionSignature signature = FunctionSignature.signatureOf(operator);
-				
+
 				if (signature.accepts(operator, left.getType(), right.getType())) {
 					node.setType(signature.resultType().getConstraintType());
 				}
@@ -205,7 +224,7 @@ public class JuncoSemanticAnalyzer {
 					typeCheckError(node, left.getType(), right.getType());
 					node.setType(PrimitiveType.ERROR);
 				}
-				
+
 			}
 		}
 

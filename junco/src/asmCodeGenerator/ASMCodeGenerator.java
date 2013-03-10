@@ -18,6 +18,7 @@ import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
+import parseTree.nodeTypes.ReturnStatementNode;
 import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
 import parseTree.nodeTypes.ValueBodyNode;
@@ -233,13 +234,32 @@ public class ASMCodeGenerator {
 
 		public void visitLeave(ValueBodyNode node) {
 			newValueCode(node);
-
+			
+			String startlabel = labeller.newLabel("value-body-start", "");
+			String endlabel = labeller.newLabelSameNumber("value-body-end", "");
+			
+			code.add(Call, startlabel);
+			code.add(Jump, endlabel);
+			
+			
+			code.add(Label, startlabel);
 			for (int i = 0; i < node.nChildren() - 1; i++) {
-				code.append(removeVoidCode(node.child(i)));
+				if (node.child(i) instanceof ReturnStatementNode) {
+					code.append(removeValueCode(node.child(i)));
+					code.add(Exchange);
+					code.add(Return);
+				}
+				else {
+					code.append(removeVoidCode(node.child(i)));
+				}
 			}
 
 			code.append(removeValueCode(node.child(node.nChildren() - 1)));
-
+			code.add(Exchange);	// [... val, pc]			
+			code.add(Return);
+			
+			code.add(Label, endlabel);
+			
 			for (ParseNode child : node.getChildren()) {
 				if (child instanceof DeclarationNode
 						&& child.child(0).getType() instanceof RangeType) {
@@ -256,7 +276,6 @@ public class ASMCodeGenerator {
 					}
 				}
 			}
-
 			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
 
@@ -590,6 +609,13 @@ public class ASMCodeGenerator {
 
 		}
 
+		public void visitLeave(ReturnStatementNode node) {
+			newValueCode(node);
+			
+			ASMCodeFragment expr = removeValueCode(node.child(0));
+			code.append(expr);
+			
+		}
 		public void visitLeave(BodyNode node) {
 			newVoidCode(node);
 			for (ParseNode child : node.getChildren()) {
