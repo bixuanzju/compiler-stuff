@@ -19,6 +19,7 @@ public enum Keyword implements Lextant {
 	WHILE("while"),
 	IN("in"),
 	RETURN("return"),
+	FUNC("func"),
 	UPDATE("update");
 	private String lexeme;
 	private Token prototype;

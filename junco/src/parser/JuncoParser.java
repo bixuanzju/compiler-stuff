@@ -11,9 +11,11 @@ import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatNumberNode;
+import parseTree.nodeTypes.FunctionDeclNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
+import parseTree.nodeTypes.ParameterListNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.ReturnStatementNode;
@@ -21,6 +23,8 @@ import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
 import parseTree.nodeTypes.ValueBodyNode;
 import parseTree.nodeTypes.WhileStatementNode;
+import semanticAnalyzer.PrimitiveType;
+import semanticAnalyzer.Type;
 import tokens.*;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
@@ -146,6 +150,9 @@ public class JuncoParser {
 		if (startsReturnStatement(nowReading)) {
 			return parseReturnStatement();
 		}
+		if (startsFunctionDecl(nowReading)) {
+			return parseFunctionDecl();
+		}
 		assert false : "bad token " + nowReading + " in parseStatement()";
 		return null;
 	}
@@ -154,7 +161,7 @@ public class JuncoParser {
 		return startsPrintStatement(token) || startsDeclaration(token)
 				|| startsUpdateStatement(token) || startsIfStatement(token)
 				|| startsWhileStatement(token) || startsBody(token)
-				|| startsReturnStatement(token);
+				|| startsReturnStatement(token) || startsFunctionDecl(token);
 	}
 
 	private ParseNode parseIfStatement() {
@@ -206,7 +213,108 @@ public class JuncoParser {
 		return result;
 
 	}
+	
+	private ParseNode parseFunctionDecl() {
+		if (!startsFunctionDecl(nowReading)) {
+			return syntaxErrorNode("function declaration");
+		}
+		
+		FunctionDeclNode result = new FunctionDeclNode(nowReading);
+		
+		expect(Keyword.FUNC);
+		
+		ParseNode identifier = parseIdentifier();
+		result.appendChild(identifier);
+		
+		
+		ParseNode parameterList = parseParameterList();
+		result.appendChild(parameterList);
+		
+		expect(Punctuator.COLON);
+		
+		Type typeSpecification = parseTypeSpec();
+		if (typeSpecification == null ) {
+			syntaxError(previouslyRead, "unkown type");
+		}
+		else {
+			result.setType(typeSpecification);
+		}
+		
+		result.appendChild(parseValueBodyNode());
+		
+		return result;
+	}
+	
+	private boolean startsFunctionDecl(Token token) {
+		return token.isLextant(Keyword.FUNC);
+	}
+	
+	private Type parseTypeSpec() {
+	
+		ParseNode result = parseIdentifier();
+		
+		String id = result.getToken().getLexeme().toLowerCase();
+		
+		if (id.equals("i") || id.equals("int") || id.equals("integer")) {
+			return PrimitiveType.INTEGER;
+		}
+		else if (id.equals("b") || id.equals("bool") || id.equals("boolean")) {
+			return PrimitiveType.BOOLEAN;
+		}
+		else if (id.equals("c") || id.equals("char") || id.equals("character")) {
+			return PrimitiveType.CHARACTER;
+		}
+		else if (id.equals("f") || id.equals("float") || id.equals("floating")) {
+			return PrimitiveType.FLOATNUM;
+		}
+		
+		return null;
+	}
+	
+	private ParseNode parseParameterList() {
+		if (!startsParameterList(nowReading)) {
+			return syntaxErrorNode("parameter list");
+		}
+		
+		ParseNode result = new ParameterListNode(nowReading);
+		expect(Punctuator.OPEN_BRACKET);
+		
+		ParseNode parameter = parseIdentifier();
+		expect(Punctuator.COLON);
+		Type typeSpecification = parseTypeSpec();
+		if (typeSpecification == null ) {
+			syntaxError(previouslyRead, "unkown type");
+		}
+		else {
+			parameter.setType(typeSpecification);
+		}
+		result.appendChild(parameter);
+		
+		while (nowReading.isLextant(Punctuator.SPLICE)) {
+			readToken();
+			
+			parameter = parseIdentifier();
+			expect(Punctuator.COLON);
+			typeSpecification = parseTypeSpec();
+			if (typeSpecification == null ) {
+				syntaxError(previouslyRead, "unkown type");
+			}
+			else {
+				parameter.setType(typeSpecification);
+			}
+			result.appendChild(parameter);
+		}
+		
+		expect(Punctuator.CLOSE_BRACKET);
+		
+		return result;
+		
+	}
 
+	private boolean startsParameterList(Token token) {
+		return token.isLextant(Punctuator.OPEN_BRACKET);
+	}
+	
 	private ParseNode parseBody() {
 		if (!startsBody(nowReading)) {
 			syntaxErrorNode("body node");
@@ -216,6 +324,9 @@ public class JuncoParser {
 		expect(Punctuator.OPEN_BRACE);
 		while (startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
+			if (statement instanceof FunctionDeclNode) {
+				syntaxError(nowReading, "no function declaration allowed");
+			}
 			body.appendChild(statement);
 		}
 
@@ -232,6 +343,9 @@ public class JuncoParser {
 		expect(Punctuator.BODY_OPEN);
 		while (startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
+			if (statement instanceof FunctionDeclNode) {
+				syntaxError(nowReading, "no function declaration allowed");
+			}
 			body.appendChild(statement);
 		}
 
@@ -538,7 +652,7 @@ public class JuncoParser {
 			
 			ParseNode typeIdentifier = parseIdentifier();
 
-			String id = typeIdentifier.getToken().getLexeme().toLowerCase();
+			String id = typeIdentifier.getToken().getLexeme();
 
 			if (id.equals("i")) {
 				left = UniaryOperatorNode
