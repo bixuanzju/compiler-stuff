@@ -1,5 +1,0 @@
-box main{
-	
-	const r <- [1,2];
-	update r.low <- 0;
-}
