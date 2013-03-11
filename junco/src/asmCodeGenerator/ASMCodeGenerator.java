@@ -74,8 +74,17 @@ public class ASMCodeGenerator {
 
 	private ASMCodeFragment programASM() {
 		ASMCodeFragment code = new ASMCodeFragment(GENERATES_VOID);
-
+		
 		code.add(Label, RunTime.MAIN_PROGRAM_LABEL);
+		
+		// allocate mem for frame pointer and stack pointer
+		code.add(Memtop);
+		declareI(code, RunTime.FRAME_POINTER);
+		storeITo(code, RunTime.FRAME_POINTER);
+		code.add(Memtop);
+		declareI(code, RunTime.STACK_POINTER);
+		storeITo(code, RunTime.STACK_POINTER);
+		
 		code.append(programCode());
 		code.add(Halt);
 

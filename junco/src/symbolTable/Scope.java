@@ -48,13 +48,15 @@ public class Scope {
 		return new Scope(staticNestingLevel+1, allocator, this);
 	}
 
-//	public static Scope createParameterScope() {
-//		
-//	}
-//		
-//	public static Scope createProcedureScope() {
-//		
-//	}
+	public static Scope createParameterScope() {
+		AllocationStrategy allocator = parameterScopeStrategy();
+		return new Scope(0, allocator, null);
+	}
+		
+	public static Scope createProcedureScope() {
+		AllocationStrategy allocator = procedureScopeStrategy();
+		return new Scope(0, allocator, null);
+	}
 	
 	public static Scope createGlobalScope() {
 		AllocationStrategy allocator = globalScopeStrategy();
@@ -65,6 +67,18 @@ public class Scope {
 		return new PositiveAllocationStrategy(
 				MemoryAccessMethod.DIRECT_ACCESS_BASE,
 				MemoryLocation.GLOBAL_VARIABLE_BLOCK);
+	}
+	
+	private static AllocationStrategy procedureScopeStrategy() {
+		return new NegativeAllocationStrategy(
+				MemoryAccessMethod.INDIRECT_ACCESS_BASE,
+				MemoryLocation.FRAME_POINTER);
+	}
+	
+	private static AllocationStrategy parameterScopeStrategy() {
+		return new NegativeAllocationStrategy(
+				MemoryAccessMethod.INDIRECT_ACCESS_BASE,
+				MemoryLocation.FRAME_POINTER);
 	}
 	
 //////////////////////////////////////////////////////////////////////
