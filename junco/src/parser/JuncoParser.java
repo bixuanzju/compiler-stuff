@@ -286,6 +286,11 @@ public class JuncoParser {
 		ParseNode result = new ParameterListNode(nowReading);
 		expect(Punctuator.OPEN_BRACKET);
 		
+		if (nowReading.isLextant(Punctuator.CLOSE_BRACKET)) {
+			expect(Punctuator.CLOSE_BRACKET);
+			return result;
+		}
+		
 		ParseNode parameter = parseIdentifier();
 		expect(Punctuator.COLON);
 		Type typeSpecification = parseTypeSpec();
@@ -380,7 +385,7 @@ public class JuncoParser {
 		PrintStatementNode result = new PrintStatementNode(nowReading);
 
 		readToken();
-		result = parseExpressionList(result);
+		result = (PrintStatementNode) parseExpressionList(result);
 
 		if (nowReading.isLextant(Punctuator.PRINT_NEWLINE)) {
 			readToken();
@@ -397,7 +402,7 @@ public class JuncoParser {
 
 	// This adds the expressions found to the children of the given parent
 	// expressionList -> (expr (, expr)*)?
-	private PrintStatementNode parseExpressionList(PrintStatementNode parent) {
+	private ParseNode parseExpressionList(ParseNode parent) {
 		if (!startsExpressionList(nowReading)) {
 			parent.appendChild(syntaxErrorNode("expressionList"));
 			return parent;
@@ -756,8 +761,13 @@ public class JuncoParser {
 			if(nowReading.isLextant(Punctuator.OPEN_BRACKET)) {
 				ParseNode functionInvocation = new FunctionInvocationNode(nowReading);
 				
-				ParseNode expressionList = parseExpressionList();
+				ParseNode expressionList = new ExpressionListNode(nowReading);
 				
+				expect(Punctuator.OPEN_BRACKET);
+				if (!nowReading.isLextant(Punctuator.CLOSE_BRACKET)) {
+					expressionList = parseExpressionList(expressionList);
+				}
+				expect(Punctuator.CLOSE_BRACKET);
 				
 				functionInvocation.appendChild(id);
 				functionInvocation.appendChild(expressionList);
@@ -772,30 +782,30 @@ public class JuncoParser {
 		}
 	}
 	
-	private ParseNode parseExpressionList() {
-		
-		ParseNode exprList = new ExpressionListNode(nowReading);
-		
-		expect(Punctuator.OPEN_BRACKET);
-		
-		if (!startsExpression(nowReading)) {
-			return syntaxErrorNode("expression");
-		}
-		
-		ParseNode expr = parseExpression();
-		exprList.appendChild(expr);
-		
-		while (nowReading.isLextant(Punctuator.SPLICE)) {
-			expect(Punctuator.SPLICE);
-			
-			exprList.appendChild(parseExpression());
-		}
-		
-		expect(Punctuator.CLOSE_BRACKET);
-		
-		return exprList;
-		
-	}
+//	private ParseNode parseExpressionList() {
+//		
+//		ParseNode exprList = new ExpressionListNode(nowReading);
+//		
+//		expect(Punctuator.OPEN_BRACKET);
+//		
+//		if (!startsExpression(nowReading)) {
+//			return syntaxErrorNode("expression");
+//		}
+//		
+//		ParseNode expr = parseExpression();
+//		exprList.appendChild(expr);
+//		
+//		while (nowReading.isLextant(Punctuator.SPLICE)) {
+//			expect(Punctuator.SPLICE);
+//			
+//			exprList.appendChild(parseExpression());
+//		}
+//		
+//		expect(Punctuator.CLOSE_BRACKET);
+//		
+//		return exprList;
+//		
+//	}
 
 	private boolean startsExpression5(Token token) {
 		return startsLiteralOrBracket(token);
