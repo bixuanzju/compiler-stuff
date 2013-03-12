@@ -10,8 +10,10 @@ import parseTree.nodeTypes.BoxBodyNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
+import parseTree.nodeTypes.ExpressionListNode;
 import parseTree.nodeTypes.FloatNumberNode;
 import parseTree.nodeTypes.FunctionDeclNode;
+import parseTree.nodeTypes.FunctionInvocationNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
@@ -296,7 +298,7 @@ public class JuncoParser {
 		result.appendChild(parameter);
 		
 		while (nowReading.isLextant(Punctuator.SPLICE)) {
-			readToken();
+			expect(Punctuator.SPLICE);
 			
 			parameter = parseIdentifier();
 			expect(Punctuator.COLON);
@@ -748,8 +750,51 @@ public class JuncoParser {
 		else if (nowReading.isLextant(Punctuator.BODY_OPEN)) {
 			return parseValueBodyNode();
 		}
-		else
+		else if (nowReading instanceof IdentifierToken) {
+			ParseNode id = parseIdentifier();
+			
+			if(nowReading.isLextant(Punctuator.OPEN_BRACKET)) {
+				ParseNode functionInvocation = new FunctionInvocationNode(nowReading);
+				
+				ParseNode expressionList = parseExpressionList();
+				
+				
+				functionInvocation.appendChild(id);
+				functionInvocation.appendChild(expressionList);
+				
+				return functionInvocation;
+			}
+			
+			return id;
+		}
+		else {
 			return parseLiteral();
+		}
+	}
+	
+	private ParseNode parseExpressionList() {
+		
+		ParseNode exprList = new ExpressionListNode(nowReading);
+		
+		expect(Punctuator.OPEN_BRACKET);
+		
+		if (!startsExpression(nowReading)) {
+			return syntaxErrorNode("expression");
+		}
+		
+		ParseNode expr = parseExpression();
+		exprList.appendChild(expr);
+		
+		while (nowReading.isLextant(Punctuator.SPLICE)) {
+			expect(Punctuator.SPLICE);
+			
+			exprList.appendChild(parseExpression());
+		}
+		
+		expect(Punctuator.CLOSE_BRACKET);
+		
+		return exprList;
+		
 	}
 
 	private boolean startsExpression5(Token token) {
@@ -767,9 +812,6 @@ public class JuncoParser {
 		}
 		if (startsFloatNumber(nowReading)) {
 			return parseFloatNumber();
-		}
-		if (startsIdentifier(nowReading)) {
-			return parseIdentifier();
 		}
 		if (startsBooleanConstant(nowReading)) {
 			return parseBooleanConstant();
