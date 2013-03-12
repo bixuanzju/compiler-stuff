@@ -72,7 +72,8 @@ public class Scope {
 	private static AllocationStrategy procedureScopeStrategy() {
 		return new NegativeAllocationStrategy(
 				MemoryAccessMethod.INDIRECT_ACCESS_BASE,
-				MemoryLocation.FRAME_POINTER);
+				MemoryLocation.FRAME_POINTER,
+				-8);
 	}
 	
 	private static AllocationStrategy parameterScopeStrategy() {

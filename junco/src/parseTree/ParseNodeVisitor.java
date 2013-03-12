@@ -8,9 +8,11 @@ import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatNumberNode;
+import parseTree.nodeTypes.FunctionDeclNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
+import parseTree.nodeTypes.ParameterListNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.ReturnStatementNode;
@@ -74,6 +76,15 @@ public interface ParseNodeVisitor {
 	void visitEnter(UniaryOperatorNode node);
 
 	void visitLeave(UniaryOperatorNode node);
+	
+	void visitEnter(FunctionDeclNode node);
+
+	void visitLeave(FunctionDeclNode node);
+	
+	void visitEnter(ParameterListNode node);
+
+	void visitLeave(ParameterListNode node);
+	
 
 	// leaf nodes: visitLeaf only
 	void visit(BooleanConstantNode node);
@@ -201,6 +212,21 @@ public interface ParseNodeVisitor {
 			defaultVisitLeave(node);
 		}
 
+		public void visitEnter(FunctionDeclNode node) {
+			defaultVisitEnter(node);
+		}
+
+		public void visitLeave(FunctionDeclNode node) {
+			defaultVisitLeave(node);
+		}
+		
+		public void visitEnter(ParameterListNode node) {
+			defaultVisitEnter(node);
+		}
+
+		public void visitLeave(ParameterListNode node) {
+			defaultVisitLeave(node);
+		}
 
 		public void visitEnter(UniaryOperatorNode node) {
 			defaultVisitEnter(node);

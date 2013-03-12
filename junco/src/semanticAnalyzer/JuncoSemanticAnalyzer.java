@@ -14,9 +14,11 @@ import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatNumberNode;
+import parseTree.nodeTypes.FunctionDeclNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
+import parseTree.nodeTypes.ParameterListNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.ReturnStatementNode;
@@ -70,14 +72,6 @@ public class JuncoSemanticAnalyzer {
 		return tree;
 	}
 
-	// various kinds of scope generators
-	// private static void enterParameterScope(ParseNode node) {
-	//
-	// }
-	//
-	// private static void enterFunctionbodyScope(ParseNode node) {
-	//
-	// }
 
 	private static void enterGlobleScope(ParseNode node) {
 		Scope scope = Scope.createGlobalScope();
@@ -87,6 +81,16 @@ public class JuncoSemanticAnalyzer {
 	private static void enterSubscope(ParseNode node) {
 		Scope baseScope = node.getLocalScope();
 		Scope scope = baseScope.createSubscope();
+		node.setScope(scope);
+	}
+	
+	private static void enterProcedureScope(ParseNode node) {
+		Scope scope = Scope.createProcedureScope();
+		node.setScope(scope);
+	}
+	
+	private static void enterParameterScope(ParseNode node) {
+		Scope scope = Scope.createParameterScope();
 		node.setScope(scope);
 	}
 
@@ -127,10 +131,51 @@ public class JuncoSemanticAnalyzer {
 		public void visitLeave(BodyNode node) {
 			// Scopes.leaveScope();
 		}
+		
+		public void visitEnter(FunctionDeclNode node) {
+			enterParameterScope(node);
+			
+			IdentifierNode name = (IdentifierNode) node.child(0);
+			ParameterListNode parameterList = (ParameterListNode) node.child(1);
+			
+			// binding function name
+			Scope scope = node.getParent().getScope();
+			Binding binding = scope.createBinding(name, node.getType());
+			name.setBinding(binding);
+			
+			for (ParseNode child : parameterList.getChildren()) {
+				addBinding((IdentifierNode)child, child.getType());
+			}
+			
+			int sizeOfParameters = node.getScope().getAllocatedSize();
+			
+			for (ParseNode child : parameterList.getChildren()) {
+				((IdentifierNode)child).getBinding().getMemoryLocation().resetOffset(sizeOfParameters);
+			}
+			
+			
+//			
+//			for (ParseNode child : parameterList.getChildren()) {
+//				System.out.println(((IdentifierNode)child).getBinding().getMemoryLocation().getOffset());
+//			}
+//			
+			
+		}
+		
+		public void visitLeave(FunctionDeclNode node) {
+						
+		}
 
 		public void visitEnter(ValueBodyNode node) {
 			// Scopes.enterStaticScope(node);
-			enterSubscope(node);
+			if (node.getParent() instanceof FunctionDeclNode) {
+				enterProcedureScope(node);
+				
+			}
+			else {
+				enterSubscope(node);
+			}
+			
 		}
 
 		public void visitLeave(ValueBodyNode node) {
@@ -407,12 +452,18 @@ public class JuncoSemanticAnalyzer {
 		// IdentifierNodes, with helper methods
 		@Override
 		public void visit(IdentifierNode node) {
-			if (!isBeingDeclared(node)) {
+			if (!isBeingDeclared(node) && !isParameter(node)) {
 				Binding binding = node.findVariableBinding();
 				node.setType(binding.getType());
 				node.setBinding(binding);
+				//System.out.println(node.getBinding().getMemoryLocation().getOffset());
 			}
 			// else parent DeclarationNode does the processing.
+		}
+		
+		private boolean isParameter(ParseNode node) {
+			ParseNode parent = node.getParent();
+			return (parent instanceof ParameterListNode);
 		}
 
 		private boolean isBeingDeclared(IdentifierNode node) {

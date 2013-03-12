@@ -5,7 +5,7 @@ import asmCodeGenerator.RunTime;
 
 public class MemoryLocation {
 	public static final String GLOBAL_VARIABLE_BLOCK = RunTime.GLOBAL_MEMORY_BLOCK;
-	public static final String FRAME_POINTER = "Frame pointer not yet implemented in RunTime.";
+	public static final String FRAME_POINTER = RunTime.GLOBAL_FRAME_POINTER;
 	
 	private MemoryAccessMethod accessor;
 	private String baseAddress;
@@ -33,6 +33,10 @@ public class MemoryLocation {
 	
 	public void generateAddress(ASMCodeFragment code, String comment) {
 		accessor.generateAddress(code, baseAddress, offset, comment);
+	}
+	
+	public void resetOffset(int size) {
+		offset += size;
 	}
 	
 	

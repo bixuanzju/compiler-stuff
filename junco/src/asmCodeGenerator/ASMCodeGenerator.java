@@ -77,13 +77,13 @@ public class ASMCodeGenerator {
 		
 		code.add(Label, RunTime.MAIN_PROGRAM_LABEL);
 		
-		// allocate mem for frame pointer and stack pointer
+		// allocate memory for frame pointer and stack pointer
 		code.add(Memtop);
-		declareI(code, RunTime.FRAME_POINTER);
-		storeITo(code, RunTime.FRAME_POINTER);
+		declareI(code, RunTime.GLOBAL_FRAME_POINTER);
+		storeITo(code, RunTime.GLOBAL_FRAME_POINTER);
 		code.add(Memtop);
-		declareI(code, RunTime.STACK_POINTER);
-		storeITo(code, RunTime.STACK_POINTER);
+		declareI(code, RunTime.GLOBAL_STACK_POINTER);
+		storeITo(code, RunTime.GLOBAL_STACK_POINTER);
 		
 		code.append(programCode());
 		code.add(Halt);
