@@ -175,7 +175,13 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitLeave(FunctionDeclNode node) {
+			TypeVariable returnType = ((ValueBodyNode)node.child(2)).getReturnType();
 			
+			returnType.constrain(node.getType());
+			
+			if (returnType.getConstraintType() instanceof NoneType) {
+				logError("function signature doesn't match return type");
+			}
 			
 		}
 
@@ -195,25 +201,24 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitLeave(ValueBodyNode node) {
-
-			TypeVariable returnType = new TypeVariable();
-			returnType.resetType();
+			
+			node.getReturnType().resetType();
 
 			for (ParseNode child : node.getChildren()) {
 				if (child instanceof ReturnStatementNode) {
-					returnType.constrain(child.getType());
+					node.getReturnType().constrain(child.getType());
 				}
 				else if ((child instanceof IfStatementNode)
 						|| (child instanceof WhileStatementNode)) {
-					checkReturn(returnType, child);
+					checkReturn(node.getReturnType(), child);
 
 				}
 			}
 
-			if (returnType.getConstraintType() instanceof NoneType) {
+			if (node.getReturnType().getConstraintType() instanceof NoneType) {
 				logError("All return statements must return the same type");
 			}
-			else if (returnType.getConstraintType() instanceof AnyType) {
+			else if (node.getReturnType().getConstraintType() instanceof AnyType) {
 				logError("Value body must have at least one return statement");
 			}
 
