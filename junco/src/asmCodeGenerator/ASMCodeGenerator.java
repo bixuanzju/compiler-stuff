@@ -74,9 +74,9 @@ public class ASMCodeGenerator {
 
 	private ASMCodeFragment programASM() {
 		ASMCodeFragment code = new ASMCodeFragment(GENERATES_VOID);
-		
+
 		code.add(Label, RunTime.MAIN_PROGRAM_LABEL);
-		
+
 		// allocate memory for frame pointer and stack pointer
 		code.add(Memtop);
 		declareI(code, RunTime.GLOBAL_FRAME_POINTER);
@@ -84,7 +84,7 @@ public class ASMCodeGenerator {
 		code.add(Memtop);
 		declareI(code, RunTime.GLOBAL_STACK_POINTER);
 		storeITo(code, RunTime.GLOBAL_STACK_POINTER);
-		
+
 		code.append(programCode());
 		code.add(Halt);
 
@@ -240,21 +240,25 @@ public class ASMCodeGenerator {
 			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
+		
+		public void visitEnter(ValueBodyNode node) {
+			String returnlabel = labeller.newLabel("value-body-start", "");
+			node.setReturnLabel(returnlabel);
+		}
 
 		public void visitLeave(ValueBodyNode node) {
 			newValueCode(node);
-			
-			String startlabel = labeller.newLabel("value-body-start", "");
-			String endlabel = labeller.newLabelSameNumber("value-body-end", "");
-			
-			code.add(Call, startlabel);
-			code.add(Jump, endlabel);
-			
-			
-			code.add(Label, startlabel);
+
+
+			// String endlabel = labeller.newLabelSameNumber("value-body-end", "");
+
+			// code.add(Call, startlabel);
+			// code.add(Jump, endlabel);
+
+			// code.add(Label, startlabel);
 			for (int i = 0; i < node.nChildren() - 1; i++) {
 				ParseNode child = node.child(i);
-				
+
 				if (child instanceof ReturnStatementNode) {
 					code.append(removeValueCode(child));
 				}
@@ -264,11 +268,11 @@ public class ASMCodeGenerator {
 			}
 
 			code.append(removeValueCode(node.child(node.nChildren() - 1)));
-			code.add(Exchange);	// [... val, pc]			
-			code.add(Return);
-			
-			code.add(Label, endlabel);
-			
+//			code.add(Exchange); // [... val, pc]
+//			code.add(Return);
+
+			code.add(Label, node.getReturnLabel());
+
 			for (ParseNode child : node.getChildren()) {
 				if (child instanceof DeclarationNode
 						&& child.child(0).getType() instanceof RangeType) {
@@ -288,6 +292,10 @@ public class ASMCodeGenerator {
 			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
 		
+		public void visitEnter(BodyNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
+		}
+
 		public void visitLeave(BodyNode node) {
 			newVoidCode(node);
 			for (ParseNode child : node.getChildren()) {
@@ -297,7 +305,7 @@ public class ASMCodeGenerator {
 				else {
 					code.append(removeVoidCode(child));
 				}
-				
+
 			}
 
 			for (ParseNode child : node.getChildren()) {
@@ -323,6 +331,10 @@ public class ASMCodeGenerator {
 		// /////////////////////////////////////////////////////////////////////////
 		// statements and declarations
 
+		public void visitEnter(PrintStatementNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
+		}
+		
 		public void visitLeave(PrintStatementNode node) {
 			newVoidCode(node);
 
@@ -353,33 +365,31 @@ public class ASMCodeGenerator {
 				RangeType type = (RangeType) node.getType();
 
 				if (type.getChildType() == PrimitiveType.BOOLEAN) {
-					code.append(removeValueCode(node));	// [... ptr]
-					code.add(Duplicate);	// [... ptr ptr]
+					code.append(removeValueCode(node)); // [... ptr]
+					code.add(Duplicate); // [... ptr ptr]
 					code.add(PushI, 12);
 					code.add(Add);
-					code.add(LoadC);	// [... ptr low]
+					code.add(LoadC); // [... ptr low]
 					code.add(PushD, RunTime.OPEN_SQUARE_STRING);
 					code.add(Printf);
-					
+
 					convertToBoolean();
-					
-					
+
 					code.add(PushD, RunTime.BOOLEAN_PRINT_FORMAT);
 					code.add(Printf);
-					code.add(PushD, RunTime.SPLICE_STRING);	// [... ptr]
+					code.add(PushD, RunTime.SPLICE_STRING); // [... ptr]
 					code.add(Printf);
 					code.add(PushI, 13);
 					code.add(Add);
 					code.add(LoadC);
-					
+
 					convertToBoolean();
-					
+
 					code.add(PushD, RunTime.BOOLEAN_PRINT_FORMAT);
 					code.add(Printf);
 					code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
 					code.add(Printf);
-					
-					
+
 				}
 				else {
 					String startlabel = labeller.newLabel("-range-start-", "");
@@ -532,9 +542,9 @@ public class ASMCodeGenerator {
 			code.add(PushD, RunTime.BOOLEAN_TRUE_STRING);
 			code.add(Label, endLabel);
 		}
-		
+
 		private void convertToBoolean() {
-		
+
 			String trueLabel = labeller.newLabel("-print-boolean-true", "");
 			String endLabel = labeller.newLabelSameNumber("-print-boolean-join", "");
 
@@ -565,8 +575,13 @@ public class ASMCodeGenerator {
 			}
 		}
 
+		public void visitEnter(DeclarationNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
+		}
+
 		public void visitLeave(DeclarationNode node) {
 			newVoidCode(node);
+
 			ASMCodeFragment lvalue = removeAddressCode(node.child(0));
 			ASMCodeFragment rvalue = getAndRemoveCode(node.child(1));
 
@@ -598,8 +613,13 @@ public class ASMCodeGenerator {
 
 		}
 
+		public void visitEnter(WhileStatementNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
+		}
+
 		public void visitLeave(WhileStatementNode node) {
 			newVoidCode(node);
+
 			String startlabel = labeller.newLabel("-while-start-", "");
 			String endlabel = labeller.newLabelSameNumber("-while-end-", "");
 
@@ -613,13 +633,17 @@ public class ASMCodeGenerator {
 
 			code.add(Label, endlabel);
 
-			
+		}
+
+		public void visitEnter(IfStatementNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
 		public void visitLeave(IfStatementNode node) {
 			newVoidCode(node);
+
 			String startlabel = labeller.newLabel("-if-start-", "");
-		
+
 			String endlabel = labeller.newLabelSameNumber("-if-end-", "");
 			String elselabel = labeller.newLabelSameNumber("-if-else-", "");
 
@@ -650,16 +674,22 @@ public class ASMCodeGenerator {
 
 		}
 
-		public void visitLeave(ReturnStatementNode node) {
-			newValueCode(node);
-			
-			ASMCodeFragment expr = removeValueCode(node.child(0));
-			code.append(expr);
-			code.add(Exchange);
-			code.add(Return);
-			
+		public void visitEnter(ReturnStatementNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
+		public void visitLeave(ReturnStatementNode node) {
+			newValueCode(node);
+
+			ASMCodeFragment expr = removeValueCode(node.child(0));
+			code.append(expr);
+			code.add(Jump, node.getReturnLabel());
+
+		}
+
+		public void visitEnter(UniaryOperatorNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
+		}
 
 		public void visitLeave(UniaryOperatorNode node) {
 
@@ -732,12 +762,15 @@ public class ASMCodeGenerator {
 
 			}
 
-			
+		}
 
+		public void visitEnter(UpdateStatementNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
 		public void visitLeave(UpdateStatementNode node) {
 			newVoidCode(node);
+
 			ASMCodeFragment lvalue = removeAddressCode(node.child(0));
 			ASMCodeFragment rvalue = getAndRemoveCode(node.child(1));
 
@@ -797,7 +830,15 @@ public class ASMCodeGenerator {
 
 		// /////////////////////////////////////////////////////////////////////////
 		// expressions
+
+		public void visitEnter(BinaryOperatorNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
+		}
+
 		public void visitLeave(BinaryOperatorNode node) {
+
+			node.setReturnLabel(node.getParent().getReturnLabel());
+
 			Lextant operator = node.getOperator();
 
 			if ((operator == Punctuator.GREATER)
@@ -819,6 +860,7 @@ public class ASMCodeGenerator {
 
 		public void visitRangeOpertator(BinaryOperatorNode node) {
 			newValueCode(node);
+
 			ASMCodeFragment arg1 = getAndRemoveCode(node.child(0));
 			ASMCodeFragment arg2 = getAndRemoveCode(node.child(1));
 			Type childType = node.child(0).getType();
@@ -860,8 +902,10 @@ public class ASMCodeGenerator {
 
 				if (node.child(0).getType() instanceof RangeType) {
 					code.add(Duplicate); // [... ptr low low]
-					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [... ptr low]
-																																																																												
+					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT); // [...
+																																						// ptr
+																																						// low]
+
 				}
 
 			}
@@ -903,6 +947,7 @@ public class ASMCodeGenerator {
 
 		private void visitBooleanOperator(BinaryOperatorNode node, Lextant operator) {
 			newValueCode(node);
+
 			String startLabel = labeller.newLabel("-boolean-arg1-", "");
 			String arg2Label = labeller.newLabelSameNumber("-boolean-arg2-", "");
 			String endLabel = labeller.newLabel("-boolean-end-", "");
@@ -1023,6 +1068,7 @@ public class ASMCodeGenerator {
 
 		private void visitNormalBinaryOperatorNode(BinaryOperatorNode node) {
 			newValueCode(node);
+
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
 			ASMCodeFragment arg2 = removeValueCode(node.child(1));
 

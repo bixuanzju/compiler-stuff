@@ -15,6 +15,7 @@ public class ParseNode {
 	
 	List<ParseNode>	children;
 	ParseNode parent;
+	String returnLabel;
 
 	protected Token token;
 	Type type;					// used for expressions
@@ -35,6 +36,14 @@ public class ParseNode {
 	}
 	public Token getToken() {
 		return token;
+	}
+	
+	public String getReturnLabel() {
+		return returnLabel;
+	}
+	
+	public void setReturnLabel(String label) {
+		returnLabel = label;
 	}
 	
 	
