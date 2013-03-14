@@ -1,6 +1,7 @@
 package semanticAnalyzer;
 
 import java.util.Arrays;
+import java.util.List;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
@@ -107,9 +108,18 @@ public class JuncoSemanticAnalyzer {
 
 			IdentifierNode name = (IdentifierNode) node.child(0);
 			ParameterListNode parameterList = (ParameterListNode) node.child(1);
+
+			FunctionType funcType = new FunctionType();
+
+			for (ParseNode child : parameterList.getChildren()) {
+				funcType.appendType(child.getType());
+			}
+
+			funcType.appendType(node.getType());
+
 			// binding function name
 			Scope scope = node.getLocalScope();
-			Binding binding = scope.createBinding(name, node.getType());
+			Binding binding = scope.createBinding(name, funcType);
 			name.setBinding(binding);
 
 			enterParameterScope(node);
@@ -124,12 +134,6 @@ public class JuncoSemanticAnalyzer {
 				((IdentifierNode) child).getBinding().getMemoryLocation()
 						.resetOffset(sizeOfParameters);
 			}
-
-			//
-			// for (ParseNode child : parameterList.getChildren()) {
-			// System.out.println(((IdentifierNode)child).getBinding().getMemoryLocation().getOffset());
-			// }
-			//
 
 		}
 
@@ -175,18 +179,33 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitLeave(FunctionDeclNode node) {
-			TypeVariable returnType = ((ValueBodyNode)node.child(2)).getReturnType();
-			
+			TypeVariable returnType = ((ValueBodyNode) node.child(2)).getReturnType();
+
 			returnType.constrain(node.getType());
-			
+
 			if (returnType.getConstraintType() instanceof NoneType) {
-				logError("function signature doesn't match return type");
+				logError("function signature doesn't match return type at" + node.getToken().getLocation());
 			}
-			
+
 		}
 
 		public void visitLeave(FunctionInvocationNode node) {
-			node.setType(node.child(0).getType());
+
+			List<Type> typeList = ((FunctionType) node.child(0).getType()).getList();
+			Type returnType = typeList.get(typeList.size() - 1);
+
+			List<ParseNode> parameterList = node.child(1).getChildren();
+			if (parameterList.size() == typeList.size() - 1) {
+				for (int i = 0; i < parameterList.size(); i++) {
+					if (!parameterList.get(i).getType().infoString().equals(typeList.get(i).infoString())) {
+						logError("parameter doesn't match function declaration at " + node.getToken().getLocation());
+					}
+				}
+			}
+			else {
+				logError("parameter size doesn't match at " + node.getToken().getLocation());
+			}
+			node.setType(returnType);
 		}
 
 		public void visitEnter(ValueBodyNode node) {
@@ -201,7 +220,7 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitLeave(ValueBodyNode node) {
-			
+
 			node.getReturnType().resetType();
 
 			for (ParseNode child : node.getChildren()) {
