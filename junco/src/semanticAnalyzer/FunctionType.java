@@ -14,11 +14,7 @@ public class FunctionType implements Type {
 	
 	@Override
 	public int getSize() {
-		int sum = 0;
-		for (Type child : functionType) {
-			sum+=child.getSize();
-		}
-		return sum;
+		return 4;
 	}
 
 	@Override

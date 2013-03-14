@@ -104,8 +104,10 @@ public class JuncoSemanticAnalyzer {
 			// Scopes.enterStaticScope(node);
 			enterGlobleScope(node);
 		}
+		
 
 		public void visitEnter(FunctionDeclNode node) {
+			
 
 			IdentifierNode name = (IdentifierNode) node.child(0);
 			ParameterListNode parameterList = (ParameterListNode) node.child(1);
@@ -118,10 +120,7 @@ public class JuncoSemanticAnalyzer {
 
 			funcType.appendType(node.getType());
 
-			// binding function name
-			Scope scope = node.getLocalScope();
-			Binding binding = scope.createBinding(name, funcType);
-			name.setBinding(binding);
+			addBinding(name, funcType);
 
 			enterParameterScope(node);
 
@@ -165,7 +164,7 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitLeave(BoxBodyNode node) {
-			// Scopes.leaveScope();
+//			 Scopes.leaveScope();
 		}
 
 		public void visitEnter(BoxBodyNode node) {
@@ -184,13 +183,17 @@ public class JuncoSemanticAnalyzer {
 		}
 		
 		
-		public void visitEnter(FunctionDeclNode node) {
+//		public void visitEnter(FunctionDeclNode node) {
+//			if (!(node.getParent() instanceof BoxBodyNode)) {
+//				logError("no function declaration allowed at " + node.getToken().getLocation());
+//			}
+//		}
+
+		public void visitLeave(FunctionDeclNode node) {
 			if (!(node.getParent() instanceof BoxBodyNode)) {
 				logError("no function declaration allowed at " + node.getToken().getLocation());
 			}
-		}
-
-		public void visitLeave(FunctionDeclNode node) {
+			
 			TypeVariable returnType = ((ValueBodyNode) node.child(2)).getReturnType();
 
 			returnType.constrain(node.getType());
