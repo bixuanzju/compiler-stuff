@@ -2,6 +2,7 @@ package semanticAnalyzer;
 
 import java.util.Arrays;
 import java.util.List;
+import asmCodeGenerator.Labeller;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
@@ -146,6 +147,9 @@ public class JuncoSemanticAnalyzer {
 	}
 
 	private class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
+
+		private Labeller labeller = new Labeller();
+
 		@Override
 		public void visitLeave(ParseNode node) {
 			throw new RuntimeException(
@@ -175,7 +179,15 @@ public class JuncoSemanticAnalyzer {
 
 		public void visitEnter(BodyNode node) {
 			// Scopes.enterStaticScope(node);
+			node.setReturnLabel(node.getParent().getReturnLabel());
 			enterSubscope(node);
+		}
+		
+		
+		public void visitEnter(FunctionDeclNode node) {
+			if (!(node.getParent() instanceof BoxBodyNode)) {
+				logError("no function declaration allowed at " + node.getToken().getLocation());
+			}
 		}
 
 		public void visitLeave(FunctionDeclNode node) {
@@ -184,32 +196,51 @@ public class JuncoSemanticAnalyzer {
 			returnType.constrain(node.getType());
 
 			if (returnType.getConstraintType() instanceof NoneType) {
-				logError("function signature doesn't match return type at" + node.getToken().getLocation());
+				logError("function signature doesn't match return type at"
+						+ node.getToken().getLocation());
 			}
 
 		}
 
 		public void visitLeave(FunctionInvocationNode node) {
 
-			List<Type> typeList = ((FunctionType) node.child(0).getType()).getList();
-			Type returnType = typeList.get(typeList.size() - 1);
-
-			List<ParseNode> parameterList = node.child(1).getChildren();
-			if (parameterList.size() == typeList.size() - 1) {
-				for (int i = 0; i < parameterList.size(); i++) {
-					if (!parameterList.get(i).getType().infoString().equals(typeList.get(i).infoString())) {
-						logError("parameter doesn't match function declaration at " + node.getToken().getLocation());
-					}
-				}
+			if (node.child(0).getType() == PrimitiveType.ERROR) {
+				node.setType(PrimitiveType.ERROR);
 			}
 			else {
-				logError("parameter size doesn't match at " + node.getToken().getLocation());
+				List<Type> typeList = ((FunctionType) node.child(0).getType())
+						.getList();
+				Type returnType = typeList.get(typeList.size() - 1);
+
+				List<ParseNode> parameterList = node.child(1).getChildren();
+				if (parameterList.size() == typeList.size() - 1) {
+					for (int i = 0; i < parameterList.size(); i++) {
+						if (!parameterList.get(i).getType().infoString()
+								.equals(typeList.get(i).infoString())) {
+							logError("parameter doesn't match function declaration at "
+									+ node.getToken().getLocation());
+							node.setType(PrimitiveType.ERROR);
+							break;
+						}
+						if (node.getType() != PrimitiveType.ERROR) {
+							node.setType(returnType);
+						}
+					}
+				}
+				else {
+					logError("parameter size doesn't match at "
+							+ node.getToken().getLocation());
+					node.setType(PrimitiveType.ERROR);
+				}
 			}
-			node.setType(returnType);
 		}
 
 		public void visitEnter(ValueBodyNode node) {
 			// Scopes.enterStaticScope(node);
+
+			String returnlabel = labeller.newLabel("value-body-start", "");
+			node.setReturnLabel(returnlabel);
+
 			if (node.getParent() instanceof FunctionDeclNode) {
 				enterProcedureScope(node);
 			}
@@ -277,8 +308,17 @@ public class JuncoSemanticAnalyzer {
 
 		// /////////////////////////////////////////////////////////////////////////
 		// statements and declarations
+
+		public void visitEnter(PrintStatementNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
+		}
+
 		@Override
 		public void visitLeave(PrintStatementNode node) {
+		}
+
+		public void visitEnter(DeclarationNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
 		@Override
@@ -293,11 +333,19 @@ public class JuncoSemanticAnalyzer {
 			addBinding(identifier, declarationType);
 		}
 
+		public void visitEnter(WhileStatementNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
+		}
+
 		public void visitLeave(WhileStatementNode node) {
 			Token token = node.getToken();
 			if (node.child(0).getType() != PrimitiveType.BOOLEAN) {
 				logError("not boolean expression at " + token.getLocation());
 			}
+		}
+
+		public void visitEnter(IfStatementNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
 		public void visitLeave(IfStatementNode node) {
@@ -307,13 +355,27 @@ public class JuncoSemanticAnalyzer {
 			}
 		}
 
+		public void visitEnter(ReturnStatementNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
+		}
+
 		public void visitLeave(ReturnStatementNode node) {
+
+			if (node.getReturnLabel() == null) {
+				logError("return statement must be in the value body at "
+						+ node.getToken().getLocation());
+			}
 			node.setType(node.child(0).getType());
 
 		}
 
 		// /////////////////////////////////////////////////////////////////////////
 		// expressions
+
+		public void visitEnter(BinaryOperatorNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
+		}
+
 		@Override
 		public void visitLeave(BinaryOperatorNode node) {
 			assert node.nChildren() == 2;
@@ -351,6 +413,10 @@ public class JuncoSemanticAnalyzer {
 		private Lextant operatorFor(BinaryOperatorNode node) {
 			LextantToken token = (LextantToken) node.getToken();
 			return token.getLextant();
+		}
+
+		public void visitEnter(UniaryOperatorNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
 		public void visitLeave(UniaryOperatorNode node) {
@@ -439,6 +505,10 @@ public class JuncoSemanticAnalyzer {
 		@Override
 		public void visit(IntNumberNode node) {
 			node.setType(PrimitiveType.INTEGER);
+		}
+
+		public void visitEnter(UpdateStatementNode node) {
+			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
 		@Override

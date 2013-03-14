@@ -111,10 +111,10 @@ public class JuncoParser {
 
 			box.appendChild(statement);
 
-			if (statement instanceof ReturnStatementNode) {
-				syntaxError(statement.getToken(),
-						"box body node cannot contain return statement");
-			}
+//			if (statement instanceof ReturnStatementNode) {
+//				syntaxError(statement.getToken(),
+//						"box body node cannot contain return statement");
+//			}
 		}
 		expect(Punctuator.CLOSE_BRACE);
 		return box;
@@ -336,9 +336,9 @@ public class JuncoParser {
 		expect(Punctuator.OPEN_BRACE);
 		while (startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
-			if (statement instanceof FunctionDeclNode) {
-				syntaxError(nowReading, "no function declaration allowed");
-			}
+//			if (statement instanceof FunctionDeclNode) {
+//				syntaxError(nowReading, "no function declaration allowed");
+//			}
 			body.appendChild(statement);
 		}
 
@@ -355,9 +355,9 @@ public class JuncoParser {
 		expect(Punctuator.BODY_OPEN);
 		while (startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
-			if (statement instanceof FunctionDeclNode) {
-				syntaxError(nowReading, "no function declaration allowed");
-			}
+//			if (statement instanceof FunctionDeclNode) {
+//				syntaxError(nowReading, "no function declaration allowed");
+//			}
 			body.appendChild(statement);
 		}
 

@@ -241,10 +241,10 @@ public class ASMCodeGenerator {
 
 		}
 		
-		public void visitEnter(ValueBodyNode node) {
-			String returnlabel = labeller.newLabel("value-body-start", "");
-			node.setReturnLabel(returnlabel);
-		}
+//		public void visitEnter(ValueBodyNode node) {
+//			String returnlabel = labeller.newLabel("value-body-start", "");
+//			node.setReturnLabel(returnlabel);
+//		}
 
 		public void visitLeave(ValueBodyNode node) {
 			newValueCode(node);
@@ -292,9 +292,9 @@ public class ASMCodeGenerator {
 			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
 		
-		public void visitEnter(BodyNode node) {
-			node.setReturnLabel(node.getParent().getReturnLabel());
-		}
+//		public void visitEnter(BodyNode node) {
+//			node.setReturnLabel(node.getParent().getReturnLabel());
+//		}
 
 		public void visitLeave(BodyNode node) {
 			newVoidCode(node);
@@ -331,9 +331,9 @@ public class ASMCodeGenerator {
 		// /////////////////////////////////////////////////////////////////////////
 		// statements and declarations
 
-		public void visitEnter(PrintStatementNode node) {
-			node.setReturnLabel(node.getParent().getReturnLabel());
-		}
+//		public void visitEnter(PrintStatementNode node) {
+//			node.setReturnLabel(node.getParent().getReturnLabel());
+//		}
 		
 		public void visitLeave(PrintStatementNode node) {
 			newVoidCode(node);
@@ -574,10 +574,10 @@ public class ASMCodeGenerator {
 				return "";
 			}
 		}
-
-		public void visitEnter(DeclarationNode node) {
-			node.setReturnLabel(node.getParent().getReturnLabel());
-		}
+//
+//		public void visitEnter(DeclarationNode node) {
+//			node.setReturnLabel(node.getParent().getReturnLabel());
+//		}
 
 		public void visitLeave(DeclarationNode node) {
 			newVoidCode(node);
@@ -613,9 +613,9 @@ public class ASMCodeGenerator {
 
 		}
 
-		public void visitEnter(WhileStatementNode node) {
-			node.setReturnLabel(node.getParent().getReturnLabel());
-		}
+//		public void visitEnter(WhileStatementNode node) {
+//			node.setReturnLabel(node.getParent().getReturnLabel());
+//		}
 
 		public void visitLeave(WhileStatementNode node) {
 			newVoidCode(node);
@@ -635,9 +635,9 @@ public class ASMCodeGenerator {
 
 		}
 
-		public void visitEnter(IfStatementNode node) {
-			node.setReturnLabel(node.getParent().getReturnLabel());
-		}
+//		public void visitEnter(IfStatementNode node) {
+//			node.setReturnLabel(node.getParent().getReturnLabel());
+//		}
 
 		public void visitLeave(IfStatementNode node) {
 			newVoidCode(node);
@@ -674,9 +674,9 @@ public class ASMCodeGenerator {
 
 		}
 
-		public void visitEnter(ReturnStatementNode node) {
-			node.setReturnLabel(node.getParent().getReturnLabel());
-		}
+//		public void visitEnter(ReturnStatementNode node) {
+//			node.setReturnLabel(node.getParent().getReturnLabel());
+//		}
 
 		public void visitLeave(ReturnStatementNode node) {
 			newValueCode(node);
@@ -687,9 +687,9 @@ public class ASMCodeGenerator {
 
 		}
 
-		public void visitEnter(UniaryOperatorNode node) {
-			node.setReturnLabel(node.getParent().getReturnLabel());
-		}
+//		public void visitEnter(UniaryOperatorNode node) {
+//			node.setReturnLabel(node.getParent().getReturnLabel());
+//		}
 
 		public void visitLeave(UniaryOperatorNode node) {
 
@@ -764,9 +764,9 @@ public class ASMCodeGenerator {
 
 		}
 
-		public void visitEnter(UpdateStatementNode node) {
-			node.setReturnLabel(node.getParent().getReturnLabel());
-		}
+//		public void visitEnter(UpdateStatementNode node) {
+//			node.setReturnLabel(node.getParent().getReturnLabel());
+//		}
 
 		public void visitLeave(UpdateStatementNode node) {
 			newVoidCode(node);
@@ -831,13 +831,11 @@ public class ASMCodeGenerator {
 		// /////////////////////////////////////////////////////////////////////////
 		// expressions
 
-		public void visitEnter(BinaryOperatorNode node) {
-			node.setReturnLabel(node.getParent().getReturnLabel());
-		}
+//		public void visitEnter(BinaryOperatorNode node) {
+//			node.setReturnLabel(node.getParent().getReturnLabel());
+//		}
 
 		public void visitLeave(BinaryOperatorNode node) {
-
-			node.setReturnLabel(node.getParent().getReturnLabel());
 
 			Lextant operator = node.getOperator();
 
