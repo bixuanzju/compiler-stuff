@@ -12,7 +12,10 @@ import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
+import parseTree.nodeTypes.ExpressionListNode;
 import parseTree.nodeTypes.FloatNumberNode;
+import parseTree.nodeTypes.FunctionDeclNode;
+import parseTree.nodeTypes.FunctionInvocationNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
@@ -220,35 +223,34 @@ public class ASMCodeGenerator {
 				code.append(childCode);
 			}
 
-			for (ParseNode child : node.getChildren()) {
-				if (child instanceof DeclarationNode
-						&& child.child(0).getType() instanceof RangeType) {
-					{
-						IdentifierNode variable = (IdentifierNode) child.child(0);
-						int offset = variable.getBinding().getMemoryLocation().getOffset();
-						String baseAddress = variable.getBinding().getMemoryLocation()
-								.getBaseAddress();
-						code.add(PushD, baseAddress);
-						code.add(PushI, offset);
-						code.add(Add);
-						code.add(LoadI);
-						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
-					}
-				}
-			}
+			// for (ParseNode child : node.getChildren()) {
+			// if (child instanceof DeclarationNode
+			// && child.child(0).getType() instanceof RangeType) {
+			// {
+			// IdentifierNode variable = (IdentifierNode) child.child(0);
+			// int offset = variable.getBinding().getMemoryLocation().getOffset();
+			// String baseAddress = variable.getBinding().getMemoryLocation()
+			// .getBaseAddress();
+			// code.add(PushD, baseAddress);
+			// code.add(PushI, offset);
+			// code.add(Add);
+			// code.add(LoadI);
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+			// }
+			// }
+			// }
 
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
-		
-//		public void visitEnter(ValueBodyNode node) {
-//			String returnlabel = labeller.newLabel("value-body-start", "");
-//			node.setReturnLabel(returnlabel);
-//		}
+
+		// public void visitEnter(ValueBodyNode node) {
+		// String returnlabel = labeller.newLabel("value-body-start", "");
+		// node.setReturnLabel(returnlabel);
+		// }
 
 		public void visitLeave(ValueBodyNode node) {
 			newValueCode(node);
-
 
 			// String endlabel = labeller.newLabelSameNumber("value-body-end", "");
 
@@ -268,33 +270,33 @@ public class ASMCodeGenerator {
 			}
 
 			code.append(removeValueCode(node.child(node.nChildren() - 1)));
-//			code.add(Exchange); // [... val, pc]
-//			code.add(Return);
+			// code.add(Exchange); // [... val, pc]
+			// code.add(Return);
 
 			code.add(Label, node.getReturnLabel());
 
-			for (ParseNode child : node.getChildren()) {
-				if (child instanceof DeclarationNode
-						&& child.child(0).getType() instanceof RangeType) {
-					{
-						IdentifierNode variable = (IdentifierNode) child.child(0);
-						int offset = variable.getBinding().getMemoryLocation().getOffset();
-						String baseAddress = variable.getBinding().getMemoryLocation()
-								.getBaseAddress();
-						code.add(PushD, baseAddress);
-						code.add(PushI, offset);
-						code.add(Add);
-						code.add(LoadI);
-						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
-					}
-				}
-			}
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			// for (ParseNode child : node.getChildren()) {
+			// if (child instanceof DeclarationNode
+			// && child.child(0).getType() instanceof RangeType) {
+			// {
+			// IdentifierNode variable = (IdentifierNode) child.child(0);
+			// int offset = variable.getBinding().getMemoryLocation().getOffset();
+			// String baseAddress = variable.getBinding().getMemoryLocation()
+			// .getBaseAddress();
+			// code.add(PushD, baseAddress);
+			// code.add(PushI, offset);
+			// code.add(Add);
+			// code.add(LoadI);
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+			// }
+			// }
+			// }
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
-		
-//		public void visitEnter(BodyNode node) {
-//			node.setReturnLabel(node.getParent().getReturnLabel());
-//		}
+
+		// public void visitEnter(BodyNode node) {
+		// node.setReturnLabel(node.getParent().getReturnLabel());
+		// }
 
 		public void visitLeave(BodyNode node) {
 			newVoidCode(node);
@@ -308,33 +310,33 @@ public class ASMCodeGenerator {
 
 			}
 
-			for (ParseNode child : node.getChildren()) {
-				if (child instanceof DeclarationNode
-						&& child.child(0).getType() instanceof RangeType) {
-					{
-						IdentifierNode variable = (IdentifierNode) child.child(0);
-						int offset = variable.getBinding().getMemoryLocation().getOffset();
-						String baseAddress = variable.getBinding().getMemoryLocation()
-								.getBaseAddress();
-						code.add(PushD, baseAddress);
-						code.add(PushI, offset);
-						code.add(Add);
-						code.add(LoadI);
-						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
-					}
-				}
-			}
+			// for (ParseNode child : node.getChildren()) {
+			// if (child instanceof DeclarationNode
+			// && child.child(0).getType() instanceof RangeType) {
+			// {
+			// IdentifierNode variable = (IdentifierNode) child.child(0);
+			// int offset = variable.getBinding().getMemoryLocation().getOffset();
+			// String baseAddress = variable.getBinding().getMemoryLocation()
+			// .getBaseAddress();
+			// code.add(PushD, baseAddress);
+			// code.add(PushI, offset);
+			// code.add(Add);
+			// code.add(LoadI);
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+			// }
+			// }
+			// }
 
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
 
 		// /////////////////////////////////////////////////////////////////////////
 		// statements and declarations
 
-//		public void visitEnter(PrintStatementNode node) {
-//			node.setReturnLabel(node.getParent().getReturnLabel());
-//		}
-		
+		// public void visitEnter(PrintStatementNode node) {
+		// node.setReturnLabel(node.getParent().getReturnLabel());
+		// }
+
 		public void visitLeave(PrintStatementNode node) {
 			newVoidCode(node);
 
@@ -574,10 +576,11 @@ public class ASMCodeGenerator {
 				return "";
 			}
 		}
-//
-//		public void visitEnter(DeclarationNode node) {
-//			node.setReturnLabel(node.getParent().getReturnLabel());
-//		}
+
+		//
+		// public void visitEnter(DeclarationNode node) {
+		// node.setReturnLabel(node.getParent().getReturnLabel());
+		// }
 
 		public void visitLeave(DeclarationNode node) {
 			newVoidCode(node);
@@ -609,13 +612,13 @@ public class ASMCodeGenerator {
 				code.add(opcodeForStore(type));
 			}
 
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
 
-//		public void visitEnter(WhileStatementNode node) {
-//			node.setReturnLabel(node.getParent().getReturnLabel());
-//		}
+		// public void visitEnter(WhileStatementNode node) {
+		// node.setReturnLabel(node.getParent().getReturnLabel());
+		// }
 
 		public void visitLeave(WhileStatementNode node) {
 			newVoidCode(node);
@@ -635,9 +638,9 @@ public class ASMCodeGenerator {
 
 		}
 
-//		public void visitEnter(IfStatementNode node) {
-//			node.setReturnLabel(node.getParent().getReturnLabel());
-//		}
+		// public void visitEnter(IfStatementNode node) {
+		// node.setReturnLabel(node.getParent().getReturnLabel());
+		// }
 
 		public void visitLeave(IfStatementNode node) {
 			newVoidCode(node);
@@ -674,9 +677,9 @@ public class ASMCodeGenerator {
 
 		}
 
-//		public void visitEnter(ReturnStatementNode node) {
-//			node.setReturnLabel(node.getParent().getReturnLabel());
-//		}
+		// public void visitEnter(ReturnStatementNode node) {
+		// node.setReturnLabel(node.getParent().getReturnLabel());
+		// }
 
 		public void visitLeave(ReturnStatementNode node) {
 			newValueCode(node);
@@ -687,9 +690,9 @@ public class ASMCodeGenerator {
 
 		}
 
-//		public void visitEnter(UniaryOperatorNode node) {
-//			node.setReturnLabel(node.getParent().getReturnLabel());
-//		}
+		// public void visitEnter(UniaryOperatorNode node) {
+		// node.setReturnLabel(node.getParent().getReturnLabel());
+		// }
 
 		public void visitLeave(UniaryOperatorNode node) {
 
@@ -764,9 +767,9 @@ public class ASMCodeGenerator {
 
 		}
 
-//		public void visitEnter(UpdateStatementNode node) {
-//			node.setReturnLabel(node.getParent().getReturnLabel());
-//		}
+		// public void visitEnter(UpdateStatementNode node) {
+		// node.setReturnLabel(node.getParent().getReturnLabel());
+		// }
 
 		public void visitLeave(UpdateStatementNode node) {
 			newVoidCode(node);
@@ -803,7 +806,7 @@ public class ASMCodeGenerator {
 			Type type = node.getType();
 			code.add(opcodeForStore(type));
 
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
 
@@ -828,12 +831,198 @@ public class ASMCodeGenerator {
 			return null;
 		}
 
+		public void visitLeave(FunctionDeclNode node) {
+			newVoidCode(node);
+			
+			String endlabel = labeller.newLabel("function-decl", "");
+			
+			// don't run the code until invoation enter in
+			code.add(Jump, endlabel);
+			
+			ParseNode id = node.child(0);
+//			ParseNode parameterList = node.child(1);
+			ParseNode valueBody = node.child(2);
+			
+			code.add(Label, id.getToken().getLexeme());
+
+			// enter handshaking
+			
+			// store previous fp
+			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [ ... pc, sp]
+			code.add(Duplicate);
+			code.add(PushI, 4);
+			code.add(Subtract); // [... pc, sp, sp-4]
+			loadIFrom(code, RunTime.GLOBAL_FRAME_POINTER); // [... pc, sp, sp-4, fp]
+			code.add(StoreI); // [... pc, sp]
+
+			// store return address
+			code.add(PushI, 8);
+			code.add(Subtract); // [... pc, sp-8]
+			code.add(Exchange); // [... sp-8, pc]
+			code.add(StoreI); // [...]
+
+			// set fp to be equal to sp
+			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... sp]
+			storeITo(code, RunTime.GLOBAL_FRAME_POINTER); // [...]
+
+			// set sp to the bottom of the frame
+			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);	// [... sp]
+			code.add(PushI, 8);
+			code.add(PushI, valueBody.getScope().getAllocatedSize());
+			code.add(Add);
+			code.add(Subtract);	// [... sp-size]
+			storeITo(code, RunTime.GLOBAL_STACK_POINTER);	// [...]
+			
+			// enter handshaking over
+			
+			//user code
+			code.append(removeValueCode(valueBody));
+			
+			//exit handshaking
+			
+			// now the stack is like [... val], push return address onto stack
+			loadIFrom(code, RunTime.GLOBAL_FRAME_POINTER);
+			code.add(PushI, 8);
+			code.add(Subtract); // [... val, fp-8]
+			code.add(LoadI);	// [... val, pc]
+			//set fp to previous
+			loadIFrom(code, RunTime.GLOBAL_FRAME_POINTER);	// [... val, pc, fp]
+			code.add(PushI, 4);
+			code.add(Subtract);	// [... val, pc, fp-4]
+			code.add(LoadI);	// [... val, pc, previous fp]
+			storeITo(code, RunTime.GLOBAL_FRAME_POINTER);	// [... val, pc]
+			
+			code.add(Exchange);	// [... pc, val]
+			// increase sp
+			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);	// [... pc, val, sp]
+			code.add(PushI, 8);
+			code.add(PushI, valueBody.getScope().getAllocatedSize());
+			code.add(Add);
+			code.add(PushI, node.getScope().getAllocatedSize());
+			code.add(Add);
+			code.add(Add);	// [... pc, val, sp+size]
+			storeITo(code, RunTime.GLOBAL_STACK_POINTER);	// [... pc, val]
+			
+			//store return val to frame
+			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);	// [... pc, val, sp]
+			code.add(PushI, node.getType().getSize());
+			code.add(Subtract);	// [... pc, val, sp-size]
+			code.add(Duplicate);	// [... pc, val, sp-size, sp-size]
+			// set sp to new val
+			storeITo(code, RunTime.GLOBAL_STACK_POINTER);	// [... pc, val, sp-size]
+			code.add(Exchange);	// [... pc, sp-size, val]
+			switch (node.getType().getSize()) {
+			case 1:
+				code.add(StoreC);
+//				code.add(PushI, 1);
+				break;
+			case 4:
+				code.add(StoreI);
+//				code.add(PushI, 4);
+				break;
+			case 8:
+				code.add(StoreF);
+//				code.add(PushI, 8);
+				break;
+			default:
+				break;
+			}	// [... pc]
+			
+//			code.add(Exchange);	// [... val, return], val is the size of return type
+			code.add(Return);
+			
+			code.add(Label, endlabel);
+			
+		}
+		
+//		public void visitLeave(ParameterListNode node) {
+//			newVoidCode(node);
+//			
+//			for (ParseNode child : node.getChildren()) {
+//				code.append(removeAddressCode(child));
+//			}
+//			
+//		}
+
 		// /////////////////////////////////////////////////////////////////////////
 		// expressions
 
-//		public void visitEnter(BinaryOperatorNode node) {
-//			node.setReturnLabel(node.getParent().getReturnLabel());
-//		}
+		public void visitLeave(FunctionInvocationNode node) {
+			newValueCode(node);
+
+			ParseNode exprList = node.child(1);
+			ParseNode id = node.child(0);
+
+			code.append(removeVoidCode(exprList));
+
+			code.add(Call, id.getToken().getLexeme());
+			
+			// we back, stack is [...]
+			// load the return val
+			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);	// [... sp]
+			code.add(Duplicate);	// [... sp, sp]
+			int returnTypeSize = node.getType().getSize();
+			switch (returnTypeSize) {
+			case 1:
+				code.add(LoadC);	// [... sp, val]
+				code.add(Exchange);	// [... val, sp]
+				code.add(PushI, 1);
+				code.add(Add);	// [... val, sp+1]
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER);	//	[... val]
+				break;
+			case 4:
+				code.add(LoadI);
+				code.add(Exchange);	// [... val, sp]
+				code.add(PushI, 4);
+				code.add(Add);	// [... val, sp+4]
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER);	//	[... val]
+				break;
+			case 8:
+				code.add(LoadF);
+				code.add(Exchange);	// [... val, sp]
+				code.add(PushI, 8);
+				code.add(Add);	// [... val, sp+8]
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER);	//	[... val]
+				break;
+			default:
+				break;
+			}	
+						
+		}
+
+		public void visitLeave(ExpressionListNode node) {
+			
+			newVoidCode(node);
+
+			for (ParseNode child : node.getChildren()) {
+
+				// store arguement vlaue to location pointed by stack pointer
+				loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);
+				code.add(PushI, child.getType().getSize());
+				code.add(Subtract); // [... sp-size]
+				code.add(Duplicate); // [... new-sp, new-sp]
+				code.append(removeValueCode(child)); // [... new-sp, new-sp, val]
+
+				switch (child.getType().getSize()) {
+				case 1:
+					code.add(StoreC);
+					break;
+				case 4:
+					code.add(StoreI);
+					break;
+				case 8:
+					code.add(StoreF);
+					break;
+				default:
+					break;
+				} // [... new-sp]
+
+				// store new sp to memory
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER);	// [...]
+
+			}
+			
+		}
 
 		public void visitLeave(BinaryOperatorNode node) {
 

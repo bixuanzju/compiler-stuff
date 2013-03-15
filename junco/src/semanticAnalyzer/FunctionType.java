@@ -37,6 +37,9 @@ public class FunctionType implements Type {
 		return functionType;
 	}
 
+	public Type getReturnType() {
+		return functionType.get(functionType.size() - 1);
+	}
 
 	
 	

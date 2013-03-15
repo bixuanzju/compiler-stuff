@@ -162,10 +162,10 @@ public class JuncoSemanticAnalyzer {
 		public void visitLeave(ProgramNode node) {
 			// Scopes.leaveScope();
 		}
-
-		public void visitLeave(BoxBodyNode node) {
-//			 Scopes.leaveScope();
-		}
+//
+//		public void visitLeave(BoxBodyNode node) {
+////			 Scopes.leaveScope();
+//		}
 
 		public void visitEnter(BoxBodyNode node) {
 			// Scopes.enterStaticScope(node);
@@ -213,7 +213,7 @@ public class JuncoSemanticAnalyzer {
 			else {
 				List<Type> typeList = ((FunctionType) node.child(0).getType())
 						.getList();
-				Type returnType = typeList.get(typeList.size() - 1);
+				Type returnType = ((FunctionType) node.child(0).getType()).getReturnType();
 
 				List<ParseNode> parameterList = node.child(1).getChildren();
 				if (parameterList.size() == typeList.size() - 1) {
