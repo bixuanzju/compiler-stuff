@@ -7,6 +7,7 @@ import parseTree.ParseNode;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import semanticAnalyzer.PrimitiveType;
 import semanticAnalyzer.RangeType;
+import semanticAnalyzer.Type;
 
 public class SetRangeNodeRewriter extends NodeRewriterImp {
 	private ParseNode left;
@@ -26,7 +27,7 @@ public class SetRangeNodeRewriter extends NodeRewriterImp {
 		Lextant operator = operatorNode.getOperator();
 
 		if (operator == Punctuator.SPAN) {
-			if (rangeType.getChildType() == PrimitiveType.BOOLEAN) {
+			if (getPrimitiveType(rangeType) == PrimitiveType.BOOLEAN) {
 				String leftVariable = freshVariableName();
 				String rightVariable = freshVariableName();
 				String resultVariable = freshVariableName();
@@ -54,7 +55,7 @@ public class SetRangeNodeRewriter extends NodeRewriterImp {
 		}
 
 		else if (operator == Punctuator.INTERSECTION) {
-			if (rangeType.getChildType() == PrimitiveType.BOOLEAN) {
+			if (getPrimitiveType(rangeType) == PrimitiveType.BOOLEAN) {
 				String leftVariable = freshVariableName();
 				String rightVariable = freshVariableName();
 				String resultVariable = freshVariableName();
@@ -212,6 +213,15 @@ public class SetRangeNodeRewriter extends NodeRewriterImp {
 																		highEnd(identifier(rightVariable, rangeType)))))))))))))),
 				returnStatement(identifier(resultVariable, rangeType)));
 
+	}
+	
+	private Type getPrimitiveType(Type type) {
+		if (type instanceof RangeType) {
+			return getPrimitiveType(((RangeType) type).getChildType());
+		}
+		else {
+			return type;
+		}
 	}
 
 }
