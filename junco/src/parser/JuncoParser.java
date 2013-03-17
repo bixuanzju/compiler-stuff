@@ -664,24 +664,24 @@ public class JuncoParser {
 			
 			ParseNode typeIdentifier = parseIdentifier();
 
-			String id = typeIdentifier.getToken().getLexeme();
+			String id = typeIdentifier.getToken().getLexeme().toLowerCase();
 
-			if (id.equals("i")) {
+			if (id.equals("i") || id.equals("int") || id.equals("integer")) {
 				left = UniaryOperatorNode
 						.withChildren(left, LextantToken.make(typeIdentifier.getToken()
 								.getLocation(), "i", Punctuator.CASTTOINT));
 			}
-			else if (id.equals("b")) {
+			else if (id.equals("b") || id.equals("bool") || id.equals("boolean")) {
 				left = UniaryOperatorNode.withChildren(left, LextantToken
 						.make(typeIdentifier.getToken().getLocation(), "b",
 								Punctuator.CASTTOBOOL));				
 			}
-			else if (id.equals("f")) {
+			else if (id.equals("f") || id.equals("float") || id.equals("floating")) {
 				left = UniaryOperatorNode.withChildren(left, LextantToken.make(
 						typeIdentifier.getToken().getLocation(), "f",
 						Punctuator.CASTTOFLAOT));
 			}
-			else if (id.equals("c")) {
+			else if (id.equals("c") || id.equals("char") || id.equals("character")) {
 				left = UniaryOperatorNode.withChildren(left, LextantToken
 						.make(typeIdentifier.getToken().getLocation(), "c",
 								Punctuator.CASTTOCHAR));
@@ -723,7 +723,7 @@ public class JuncoParser {
 
 		ParseNode left = parseExpression5();
 
-		if (nowReading.isLextant(Punctuator.LOW, Punctuator.HIGH, Punctuator.EMPTY)) {
+		while (nowReading.isLextant(Punctuator.LOW, Punctuator.HIGH, Punctuator.EMPTY)) {
 			Token memberToken = nowReading;
 			left = UniaryOperatorNode.withChildren(left, memberToken);
 			readToken();

@@ -21,6 +21,7 @@ public class ReferenceCounting {
 	private static final String RCTR_STACK_EMPTY_JOIN              = "-rctr-stack-empy-join";
 
 	public  static final String REF_COUNTER_INCREMENT_REFCOUNT     = "-ref-counter-increment-refcount";
+	private static final String RCTR_PERFORM_DECREMENTS_LOOP 	   = "-rctr-perform-decrements-loop";
 	private static final String RCTR_PERFORM_DECREMENTS_DONE	   = "-rctr-perform-decrements-done";
 	public  static final String REF_COUNTER_PERFORM_DECREMENTS     = "-ref-counter-perform-decrements";
 	private static final String RCTR_PROCESS_ONE_DONE              = "-rctr-process-one-done";
@@ -88,7 +89,10 @@ public class ReferenceCounting {
 
 		declareI(frag, RCTR_PUSH_RETURN_ADDRESS);
 		storeITo(frag, RCTR_PUSH_RETURN_ADDRESS); 			// [... recordPtr]
-
+		if(DEBUGGING) {
+			printRecordPtrAndRefcount(frag, "push: ");
+		}
+		
 		// check if overflowing
 		loadIFrom(frag, RCTR_DECREMENT_STACK_INDEX);		// [... recordPtr index]
 		loadIFrom(frag, RCTR_DECREMENT_STACK_SIZE);			// [... recordPtr index size]
@@ -118,17 +122,18 @@ public class ReferenceCounting {
 		frag.add(Add);											// [... recordPtr addrInStack]
 	}
 	private static void decrementStackSizeExceededError(ASMCodeFragment frag) {
+		
 		frag.add(DLabel, REF_COUNTER_STACK_SIZE_EXCEEDED_MESSAGE);
 		frag.add(DataS, "size of reference-counting decrement stack exceeded");
-		
+
 		frag.add(Label, REF_COUNTER_STACK_SIZE_EXCEEDED_ERROR);
 		frag.add(PushD, REF_COUNTER_STACK_SIZE_EXCEEDED_MESSAGE);
-		
+
 		frag.add(DLabel, RunTime.RUNTIME_ERROR_MESSAGE);
 		frag.add(DataS, "Runtime error: ");
-		
+
 		frag.add(PushD, RunTime.RUNTIME_ERROR_MESSAGE);
-		
+
 		frag.add(Jump, RunTime.GENERAL_RUNTIME_ERROR);
 		// repair the above to print  "Runtime error:" + REF_COUNTER_STACK_SIZE_EXCEEDED_MESSAGE,  and then halt.			
 	}
@@ -147,6 +152,9 @@ public class ReferenceCounting {
 		frag.add(Label, RCTR_STACK_EMPTY_TRUE);
 		frag.add(PushI, 1);									// [... (return) 1]
 		frag.add(Label, RCTR_STACK_EMPTY_JOIN);			    // [... (return) value]
+//		if(DEBUGGING) {
+//			ASMCodeGenerator.ptop(frag, " stack_is_empty: %d\n");
+//		}
 		frag.add(Exchange);									// [... value (return)]
 		frag.add(Return);
 
@@ -159,10 +167,10 @@ public class ReferenceCounting {
 		frag.add(Exchange);									// [... (return) recordAddr]
 		
 		if(DEBUGGING) {
-			frag.add(Duplicate);	
-			addToRefCount(frag, 1);
-			printRecordPtrAndRefcount(frag, "increment refcount:  ");
-			frag.add(Pop);
+			frag.add(Duplicate);										// [... (return) recordAddr recordAddr]
+			addToRefCount(frag, 1);										// [... (return) recordAddr]
+			printRecordPtrAndRefcount(frag, "increment refcount:  ");	// [... (return) recordAddr]
+			frag.add(Pop);												// [... (return)]
 		}
 		else {
 			addToRefCount(frag, 1);							// [... (return)]
@@ -175,15 +183,20 @@ public class ReferenceCounting {
 
 	private static ASMCodeFragment subroutineDecrementAllReferences() {
 		ASMCodeFragment frag = new ASMCodeFragment(GENERATES_VOID);
+
 		// while (!stackEmpty())
 		//     processOneDecrement();
 		frag.add(Label, REF_COUNTER_PERFORM_DECREMENTS);	// [... (return)]
+		if(DEBUGGING) {
+		    pstring(frag, "decrement-all-references\n");
+		}
+		frag.add(Label, RCTR_PERFORM_DECREMENTS_LOOP);
 		frag.add(Call, RCTR_IS_DECREMENT_STACK_EMPTY);			// [... (return) stackEmpty? ]
 		frag.add(JumpTrue, RCTR_PERFORM_DECREMENTS_DONE);	// [... (return)]
 
 		processOneDecrement(frag);
 
-		frag.add(Jump, REF_COUNTER_PERFORM_DECREMENTS);
+		frag.add(Jump, RCTR_PERFORM_DECREMENTS_LOOP);
 		frag.add(Label, RCTR_PERFORM_DECREMENTS_DONE);
 
 		frag.add(Return);									// [...]
@@ -201,13 +214,11 @@ public class ReferenceCounting {
 		frag.add(Duplicate);								// [... recordPtr recordPtr]
 		
 		if(DEBUGGING) {
-			frag.add(Duplicate);							// [... recordPtr recordPtr recordPtr]
-			addToRefCount(frag, -1);						// [... recordPtr recordPtr]
-			printRecordPtrAndRefcount(frag, "process one decrement:  ");
-			frag.add(Pop);									// [... recordPtr]
+			addToRefCount(frag, -1);										// [... recordPtr]
+			printRecordPtrAndRefcount(frag, "process one decrement:  ");	// [... recordPtr]
 		}
 		else {
-			addToRefCount(frag, -1);						// [... recordPtr recordPtr]
+			addToRefCount(frag, -1);						// [... recordPtr]
 		}
 		
 		
@@ -224,18 +235,20 @@ public class ReferenceCounting {
 		frag.add(Label, RCTR_PROCESS_ONE_DONE);
 	}
 
+	// [... ptr] -> [... ptr]  (does not disturb stack)
 	private static void printRecordPtrAndRefcount(ASMCodeFragment frag, String s) {
-		ptop(frag, s + "record ptr %d ");
-		frag.add(Duplicate);
-		frag.add(PushI, 4);
-		frag.add(Add);
-		frag.add(LoadI);
-		ptop(frag,  " typecode %d ");
-		frag.add(Pop);
-		frag.add(Duplicate);
-		frag.add(LoadI);
-		ptop(frag, "refCount now %d\n");
-		frag.add(Pop);
+																// [... ptr]
+		ptop(frag, s + "record ptr %d ");		// [... ptr]
+		frag.add(Duplicate);									// [... ptr ptr]
+		frag.add(PushI, 4);										// [... ptr ptr 4]
+		frag.add(Add);											// [... ptr ptr+4]
+		frag.add(LoadI);										// [... ptr typecode]
+		ptop(frag,  " typecode %d ");			// [... ptr typecode]
+		frag.add(Pop);											// [... ptr ]
+		frag.add(Duplicate);									// [... ptr ptr ]
+		frag.add(LoadI);										// [... ptr refCount]
+		ptop(frag, "refCount now %d\n");		// [... ptr refCount]
+		frag.add(Pop);											// [... ptr]
 	}
 
 	// [... recordPtr] -> [...]
@@ -308,5 +321,15 @@ public class ReferenceCounting {
 		code.add(PushD, stringLabel);
 		code.add(Printf);
 	}
+	
+	public static void pstring(ASMCodeFragment code, String string) {
+		String label = labeller.newLabel("pstring", "");
+		code.add(DLabel, label);
+		code.add(DataS, string);
+		code.add(PushD, label);
+		code.add(Printf);
+	}
 }
+
+
 

@@ -72,7 +72,7 @@ public class RunTime {
 		frag.add(DLabel, PRINT_SPACER_STRING);
 		frag.add(DataS, " ");
 		frag.add(DLabel, ERROR_MESSAGE_IF_DIVIDE_BY_ZERO);
-		frag.add(DataS, "Runtime error, divided by zero!\n");
+		frag.add(DataS, "Runtime error: divided by zero!\n");
 		
 //		frag.add(DLabel, RunTime.RUNTIME_ERROR_MESSAGE);
 //		frag.add(DataS, "Runtime error: ");

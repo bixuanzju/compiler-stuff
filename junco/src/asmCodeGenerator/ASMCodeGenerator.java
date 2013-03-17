@@ -1,6 +1,7 @@
 package asmCodeGenerator;
 
 import static asmCodeGenerator.ASMOpcode.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import lexicalAnalyzer.Lextant;
@@ -223,41 +224,30 @@ public class ASMCodeGenerator {
 				code.append(childCode);
 			}
 
-			// for (ParseNode child : node.getChildren()) {
-			// if (child instanceof DeclarationNode
-			// && child.child(0).getType() instanceof RangeType) {
-			// {
-			// IdentifierNode variable = (IdentifierNode) child.child(0);
-			// int offset = variable.getBinding().getMemoryLocation().getOffset();
-			// String baseAddress = variable.getBinding().getMemoryLocation()
-			// .getBaseAddress();
-			// code.add(PushD, baseAddress);
-			// code.add(PushI, offset);
-			// code.add(Add);
-			// code.add(LoadI);
-			// code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
-			// }
-			// }
-			// }
-
-			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			cleanReference(node.getScope());
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
 
-		// public void visitEnter(ValueBodyNode node) {
-		// String returnlabel = labeller.newLabel("value-body-start", "");
-		// node.setReturnLabel(returnlabel);
-		// }
+		private void cleanReference(Scope scope) {
+			Collection<Binding> allNames = scope.getSymbolTable().values();
+
+			for (Binding binding : allNames) {
+				if (binding.getType() instanceof RangeType) {
+					int offset = binding.getMemoryLocation().getOffset();
+					String baseAddress = binding.getMemoryLocation().getBaseAddress();
+					code.add(PushD, baseAddress);
+					code.add(PushI, offset);
+					code.add(Add);
+					code.add(LoadI);
+					code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+				}
+			}
+		}
 
 		public void visitLeave(ValueBodyNode node) {
 			newValueCode(node);
 
-			// String endlabel = labeller.newLabelSameNumber("value-body-end", "");
-
-			// code.add(Call, startlabel);
-			// code.add(Jump, endlabel);
-
-			// code.add(Label, startlabel);
 			for (int i = 0; i < node.nChildren() - 1; i++) {
 				ParseNode child = node.child(i);
 
@@ -270,33 +260,12 @@ public class ASMCodeGenerator {
 			}
 
 			code.append(removeValueCode(node.child(node.nChildren() - 1)));
-			// code.add(Exchange); // [... val, pc]
-			// code.add(Return);
 
 			code.add(Label, node.getReturnLabel());
 
-			// for (ParseNode child : node.getChildren()) {
-			// if (child instanceof DeclarationNode
-			// && child.child(0).getType() instanceof RangeType) {
-			// {
-			// IdentifierNode variable = (IdentifierNode) child.child(0);
-			// int offset = variable.getBinding().getMemoryLocation().getOffset();
-			// String baseAddress = variable.getBinding().getMemoryLocation()
-			// .getBaseAddress();
-			// code.add(PushD, baseAddress);
-			// code.add(PushI, offset);
-			// code.add(Add);
-			// code.add(LoadI);
-			// code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
-			// }
-			// }
-			// }
-			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			cleanReference(node.getScope());
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
-
-		// public void visitEnter(BodyNode node) {
-		// node.setReturnLabel(node.getParent().getReturnLabel());
-		// }
 
 		public void visitLeave(BodyNode node) {
 			newVoidCode(node);
@@ -310,32 +279,12 @@ public class ASMCodeGenerator {
 
 			}
 
-			// for (ParseNode child : node.getChildren()) {
-			// if (child instanceof DeclarationNode
-			// && child.child(0).getType() instanceof RangeType) {
-			// {
-			// IdentifierNode variable = (IdentifierNode) child.child(0);
-			// int offset = variable.getBinding().getMemoryLocation().getOffset();
-			// String baseAddress = variable.getBinding().getMemoryLocation()
-			// .getBaseAddress();
-			// code.add(PushD, baseAddress);
-			// code.add(PushI, offset);
-			// code.add(Add);
-			// code.add(LoadI);
-			// code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
-			// }
-			// }
-			// }
-
-			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			cleanReference(node.getScope());
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
 
 		// /////////////////////////////////////////////////////////////////////////
 		// statements and declarations
-
-		// public void visitEnter(PrintStatementNode node) {
-		// node.setReturnLabel(node.getParent().getReturnLabel());
-		// }
 
 		public void visitLeave(PrintStatementNode node) {
 			newVoidCode(node);
@@ -345,6 +294,8 @@ public class ASMCodeGenerator {
 				appendSpacerCode(node);
 			}
 			appendNewlineCode(node);
+
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
 
 		private void appendNewlineCode(PrintStatementNode node) {
@@ -366,92 +317,52 @@ public class ASMCodeGenerator {
 			if (node.getType() instanceof RangeType) {
 				RangeType type = (RangeType) node.getType();
 
-				if (type.getChildType() == PrimitiveType.BOOLEAN) {
-					code.append(removeValueCode(node)); // [... ptr]
-					code.add(Duplicate); // [... ptr ptr]
-					code.add(PushI, 12);
-					code.add(Add);
-					code.add(LoadC); // [... ptr low]
-					code.add(PushD, RunTime.OPEN_SQUARE_STRING);
-					code.add(Printf);
+				String startlabel = labeller.newLabel("-range-start-", "");
+				String falselabel = labeller
+						.newLabelSameNumber("-range-false-end-", "");
+				String endlabel = labeller.newLabelSameNumber("-range-end-", "");
 
-					convertToBoolean();
+				code.append(removeValueCode(node));
 
-					code.add(PushD, RunTime.BOOLEAN_PRINT_FORMAT);
-					code.add(Printf);
-					code.add(PushD, RunTime.SPLICE_STRING); // [... ptr]
-					code.add(Printf);
-					code.add(PushI, 13);
-					code.add(Add);
-					code.add(LoadC);
+				code.add(Call, startlabel);
+				code.add(Jump, endlabel);
 
-					convertToBoolean();
+				code.add(Label, startlabel);
+				code.add(Exchange); // [... pc ptr]
+				code.add(PushD, RunTime.OPEN_SQUARE_STRING);
+				code.add(Printf);
 
-					code.add(PushD, RunTime.BOOLEAN_PRINT_FORMAT);
-					code.add(Printf);
-					code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
-					code.add(Printf);
+				// I need to know the type identifier
+				code.add(Duplicate);
+				code.add(PushI, 4); // [... ptr ptr 4]
+				code.add(Add); // [... ptr ptr+4]
+				code.add(LoadI); // [... ptr id]
+				code.add(PushI, 2); // [... ptr id 2]
+				code.add(Subtract); // [... ptr id-2]
+				code.add(JumpFalse, falselabel); // [... ptr]
+				// god, it's range type, how can I print
+				code.add(Duplicate); // [... ptr ptr]
+				code.add(PushI, 12); // [... ptr ptr 12]
+				code.add(Add); // [... ptr ptr+12]
+				code.add(LoadI); // [... ptr lptr]
+				code.add(Exchange); // [... lptr ptr]
+				code.add(PushI, 16);
+				code.add(Add);
+				code.add(LoadI); // [... lptr hptr]
+				code.add(Exchange); // [... hptr lptr]
+				// what to do?
+				code.add(Call, startlabel);
+				code.add(PushD, RunTime.SPLICE_STRING);
+				code.add(Printf); // [... htpr]
+				code.add(Call, startlabel);
+				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
+				code.add(Printf);
+				code.add(Return);
 
-				}
-				else {
-					String startlabel = labeller.newLabel("-range-start-", "");
-					String falselabel = labeller.newLabelSameNumber("-range-false-end-",
-							"");
-					String notfloatlabel = labeller.newLabelSameNumber(
-							"-range-notfloat-end-", "");
-					String charlabel = labeller
-							.newLabelSameNumber("-range-char-end-", "");
-					String endlabel = labeller.newLabelSameNumber("-range-end-", "");
+				// ok, it's primitive type, now I need to know what type size actually
+				code.add(Label, falselabel);
 
-					code.append(removeValueCode(node));
-
-					code.add(Call, startlabel);
-					code.add(Jump, endlabel);
-
-					code.add(Label, startlabel);
-					code.add(Exchange); // [... pc ptr]
-					code.add(PushD, RunTime.OPEN_SQUARE_STRING);
-					code.add(Printf);
-
-					// I need to know the type identifier
-					code.add(Duplicate);
-					code.add(PushI, 4); // [... ptr ptr 4]
-					code.add(Add); // [... ptr ptr+4]
-					code.add(LoadI); // [... ptr id]
-					code.add(PushI, 2); // [... ptr id 2]
-					code.add(Subtract); // [... ptr id-2]
-					code.add(JumpFalse, falselabel); // [... ptr]
-					// god, it's range type, how can I print
-					code.add(Duplicate); // [... ptr ptr]
-					code.add(PushI, 12); // [... ptr ptr 12]
-					code.add(Add); // [... ptr ptr+12]
-					code.add(LoadI); // [... ptr lptr]
-					code.add(Exchange); // [... lptr ptr]
-					code.add(PushI, 16);
-					code.add(Add);
-					code.add(LoadI); // [... lptr hptr]
-					code.add(Exchange); // [... hptr lptr]
-					// what to do?
-					code.add(Call, startlabel);
-					code.add(PushD, RunTime.SPLICE_STRING);
-					code.add(Printf); // [... htpr]
-					code.add(Call, startlabel);
-					code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
-					code.add(Printf);
-					code.add(Return);
-
-					// ok, it's primitive type, now I need to know what type size actually
-					code.add(Label, falselabel);
-					code.add(Duplicate);
-					code.add(PushI, 11); // [... ptr ptr 11]
-					code.add(Add); // [... ptr ptr+11]
-					code.add(LoadC); // [... ptr size]
-					code.add(Duplicate); // [... ptr size size]
-					code.add(PushI, 8); // [... ptr size size 8]
-					code.add(Subtract); // [.. ptr size size-8]
-					code.add(JumpNeg, notfloatlabel); // [... ptr size]
-					// yeah, it's float type, let's print
-					code.add(Pop); // [... ptr]
+				if (getPrimitiveType(type) == PrimitiveType.FLOATNUM) {
 					code.add(Duplicate); // [...ptr ptr]
 					code.add(PushI, 12); // [... ptr ptr 12]
 					code.add(Add); // [... ptr ptr+12]
@@ -465,17 +376,9 @@ public class ASMCodeGenerator {
 					code.add(LoadF); // [... float]
 					code.add(PushD, RunTime.FLOAT_PRINT_FORMAT);
 					code.add(Printf);
-					code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
-					code.add(Printf);
-					code.add(Return);
 
-					// ok, it's not float, so it is int or char?
-					code.add(Label, notfloatlabel);
-					// code.add(Duplicate); // [... ptr size size]
-					code.add(PushI, 4); // [... ptr size 4]
-					code.add(Subtract); // [... ptr size-4]
-					code.add(JumpNeg, charlabel); // [... ptr]
-					// it's int type, let's print
+				}
+				else if (getPrimitiveType(type) == PrimitiveType.INTEGER) {
 					code.add(Duplicate); // [...ptr ptr]
 					code.add(PushI, 12); // [... ptr ptr 12]
 					code.add(Add); // [... ptr ptr+12]
@@ -490,20 +393,32 @@ public class ASMCodeGenerator {
 					code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
 					code.add(Printf);
 
-					code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
+				}
+				else if (getPrimitiveType(type) == PrimitiveType.BOOLEAN) {
+					code.add(Duplicate); // [...ptr ptr]
+					code.add(PushI, 12); // [... ptr ptr 12]
+					code.add(Add); // [... ptr ptr+12]
+					code.add(LoadC); // [... ptr char]
+					convertToBoolean();
 					code.add(Printf);
-					code.add(Return);
 
-					// finally, it is char type, let's print!!
-					code.add(Label, charlabel);
+					code.add(PushD, RunTime.SPLICE_STRING);
+					code.add(Printf); // [... ptr]
+					code.add(PushI, 13); // [... ptr 13]
+					code.add(Add); // [... ptr+13]
+					code.add(LoadC); // [... char]
+					convertToBoolean();
+					code.add(Printf);
+
+				}
+				else if (getPrimitiveType(type) == PrimitiveType.CHARACTER) {
 					code.add(Duplicate); // [...ptr ptr]
 					code.add(PushI, 12); // [... ptr ptr 12]
 					code.add(Add); // [... ptr ptr+12]
 					code.add(LoadC); // [... ptr char]
 					code.add(PushD, RunTime.CHARACTER_PRINT_FORMAT);
-					// code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
-
 					code.add(Printf); // [... ptr]
+
 					code.add(PushD, RunTime.SPLICE_STRING);
 					code.add(Printf); // [... ptr]
 					code.add(PushI, 13); // [... ptr 13]
@@ -513,12 +428,14 @@ public class ASMCodeGenerator {
 					// code.add(PushD, RunTime.INTEGER_PRINT_FORMAT);
 					code.add(Printf);
 
-					code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
-					code.add(Printf);
-					code.add(Return);
-
-					code.add(Label, endlabel);
 				}
+
+				code.add(PushD, RunTime.CLOSE_SQUARE_STRING);
+				code.add(Printf);
+				code.add(Return);
+
+				code.add(Label, endlabel);
+
 			}
 			else {
 				String format = printFormat(node.getType());
@@ -526,6 +443,15 @@ public class ASMCodeGenerator {
 				convertToStringIfBoolean(node);
 				code.add(PushD, format);
 				code.add(Printf);
+			}
+		}
+
+		private Type getPrimitiveType(Type type) {
+			if (type instanceof RangeType) {
+				return getPrimitiveType(((RangeType) type).getChildType());
+			}
+			else {
+				return type;
 			}
 		}
 
@@ -577,11 +503,6 @@ public class ASMCodeGenerator {
 			}
 		}
 
-		//
-		// public void visitEnter(DeclarationNode node) {
-		// node.setReturnLabel(node.getParent().getReturnLabel());
-		// }
-
 		public void visitLeave(DeclarationNode node) {
 			newVoidCode(node);
 
@@ -612,13 +533,9 @@ public class ASMCodeGenerator {
 				code.add(opcodeForStore(type));
 			}
 
-			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
-
-		// public void visitEnter(WhileStatementNode node) {
-		// node.setReturnLabel(node.getParent().getReturnLabel());
-		// }
 
 		public void visitLeave(WhileStatementNode node) {
 			newVoidCode(node);
@@ -637,10 +554,6 @@ public class ASMCodeGenerator {
 			code.add(Label, endlabel);
 
 		}
-
-		// public void visitEnter(IfStatementNode node) {
-		// node.setReturnLabel(node.getParent().getReturnLabel());
-		// }
 
 		public void visitLeave(IfStatementNode node) {
 			newVoidCode(node);
@@ -677,22 +590,18 @@ public class ASMCodeGenerator {
 
 		}
 
-		// public void visitEnter(ReturnStatementNode node) {
-		// node.setReturnLabel(node.getParent().getReturnLabel());
-		// }
-
 		public void visitLeave(ReturnStatementNode node) {
 			newValueCode(node);
 
 			ASMCodeFragment expr = removeValueCode(node.child(0));
 			code.append(expr);
+			if (node.child(0).getType() instanceof RangeType) {
+				code.add(Duplicate);
+				code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+			}
 			code.add(Jump, node.getReturnLabel());
 
 		}
-
-		// public void visitEnter(UniaryOperatorNode node) {
-		// node.setReturnLabel(node.getParent().getReturnLabel());
-		// }
 
 		public void visitLeave(UniaryOperatorNode node) {
 
@@ -767,10 +676,6 @@ public class ASMCodeGenerator {
 
 		}
 
-		// public void visitEnter(UpdateStatementNode node) {
-		// node.setReturnLabel(node.getParent().getReturnLabel());
-		// }
-
 		public void visitLeave(UpdateStatementNode node) {
 			newVoidCode(node);
 
@@ -806,7 +711,7 @@ public class ASMCodeGenerator {
 			Type type = node.getType();
 			code.add(opcodeForStore(type));
 
-			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
 
@@ -833,20 +738,20 @@ public class ASMCodeGenerator {
 
 		public void visitLeave(FunctionDeclNode node) {
 			newVoidCode(node);
-			
+
 			String endlabel = labeller.newLabel("function-decl", "");
-			
+
 			// don't run the code until invoation enter in
 			code.add(Jump, endlabel);
-			
+
 			ParseNode id = node.child(0);
-//			ParseNode parameterList = node.child(1);
+			// ParseNode parameterList = node.child(1);
 			ParseNode valueBody = node.child(2);
-			
+
 			code.add(Label, id.getToken().getLexeme());
 
 			// enter handshaking
-			
+
 			// store previous fp
 			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [ ... pc, sp]
 			code.add(Duplicate);
@@ -866,83 +771,84 @@ public class ASMCodeGenerator {
 			storeITo(code, RunTime.GLOBAL_FRAME_POINTER); // [...]
 
 			// set sp to the bottom of the frame
-			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);	// [... sp]
+			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... sp]
 			code.add(PushI, 8);
 			code.add(PushI, valueBody.getScope().getAllocatedSize());
 			code.add(Add);
-			code.add(Subtract);	// [... sp-size]
-			storeITo(code, RunTime.GLOBAL_STACK_POINTER);	// [...]
-			
+			code.add(Subtract); // [... sp-size]
+			storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [...]
+
 			// enter handshaking over
-			
-			//user code
+
+			// user code
 			code.append(removeValueCode(valueBody));
-			
-			//exit handshaking
-			
+
+			// exit handshaking
+
 			// now the stack is like [... val], push return address onto stack
 			loadIFrom(code, RunTime.GLOBAL_FRAME_POINTER);
 			code.add(PushI, 8);
 			code.add(Subtract); // [... val, fp-8]
-			code.add(LoadI);	// [... val, pc]
-			//set fp to previous
-			loadIFrom(code, RunTime.GLOBAL_FRAME_POINTER);	// [... val, pc, fp]
+			code.add(LoadI); // [... val, pc]
+			// set fp to previous
+			loadIFrom(code, RunTime.GLOBAL_FRAME_POINTER); // [... val, pc, fp]
 			code.add(PushI, 4);
-			code.add(Subtract);	// [... val, pc, fp-4]
-			code.add(LoadI);	// [... val, pc, previous fp]
-			storeITo(code, RunTime.GLOBAL_FRAME_POINTER);	// [... val, pc]
-			
-			code.add(Exchange);	// [... pc, val]
+			code.add(Subtract); // [... val, pc, fp-4]
+			code.add(LoadI); // [... val, pc, previous fp]
+			storeITo(code, RunTime.GLOBAL_FRAME_POINTER); // [... val, pc]
+
+			code.add(Exchange); // [... pc, val]
 			// increase sp
-			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);	// [... pc, val, sp]
+			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... pc, val, sp]
 			code.add(PushI, 8);
 			code.add(PushI, valueBody.getScope().getAllocatedSize());
 			code.add(Add);
 			code.add(PushI, node.getScope().getAllocatedSize());
 			code.add(Add);
-			code.add(Add);	// [... pc, val, sp+size]
-			storeITo(code, RunTime.GLOBAL_STACK_POINTER);	// [... pc, val]
-			
-			//store return val to frame
-			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);	// [... pc, val, sp]
+			code.add(Add); // [... pc, val, sp+size]
+			storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [... pc, val]
+
+			// store return val to frame
+			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... pc, val, sp]
 			code.add(PushI, node.getType().getSize());
-			code.add(Subtract);	// [... pc, val, sp-size]
-			code.add(Duplicate);	// [... pc, val, sp-size, sp-size]
+			code.add(Subtract); // [... pc, val, sp-size]
+			code.add(Duplicate); // [... pc, val, sp-size, sp-size]
 			// set sp to new val
-			storeITo(code, RunTime.GLOBAL_STACK_POINTER);	// [... pc, val, sp-size]
-			code.add(Exchange);	// [... pc, sp-size, val]
+			storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [... pc, val, sp-size]
+			code.add(Exchange); // [... pc, sp-size, val]
 			switch (node.getType().getSize()) {
 			case 1:
 				code.add(StoreC);
-//				code.add(PushI, 1);
+				// code.add(PushI, 1);
 				break;
 			case 4:
 				code.add(StoreI);
-//				code.add(PushI, 4);
+				// code.add(PushI, 4);
 				break;
 			case 8:
 				code.add(StoreF);
-//				code.add(PushI, 8);
+				// code.add(PushI, 8);
 				break;
 			default:
 				break;
-			}	// [... pc]
-			
-//			code.add(Exchange);	// [... val, return], val is the size of return type
+			} // [... pc]
+
+			// code.add(Exchange); // [... val, return], val is the size of return
+			// type
 			code.add(Return);
-			
+
 			code.add(Label, endlabel);
-			
+
 		}
-		
-//		public void visitLeave(ParameterListNode node) {
-//			newVoidCode(node);
-//			
-//			for (ParseNode child : node.getChildren()) {
-//				code.append(removeAddressCode(child));
-//			}
-//			
-//		}
+
+		// public void visitLeave(ParameterListNode node) {
+		// newVoidCode(node);
+		//
+		// for (ParseNode child : node.getChildren()) {
+		// code.append(removeAddressCode(child));
+		// }
+		//
+		// }
 
 		// /////////////////////////////////////////////////////////////////////////
 		// expressions
@@ -956,42 +862,47 @@ public class ASMCodeGenerator {
 			code.append(removeVoidCode(exprList));
 
 			code.add(Call, id.getToken().getLexeme());
-			
+
 			// we back, stack is [...]
 			// load the return val
-			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);	// [... sp]
-			code.add(Duplicate);	// [... sp, sp]
+			loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... sp]
+			code.add(Duplicate); // [... sp, sp]
 			int returnTypeSize = node.getType().getSize();
 			switch (returnTypeSize) {
 			case 1:
-				code.add(LoadC);	// [... sp, val]
-				code.add(Exchange);	// [... val, sp]
+				code.add(LoadC); // [... sp, val]
+				code.add(Exchange); // [... val, sp]
 				code.add(PushI, 1);
-				code.add(Add);	// [... val, sp+1]
-				storeITo(code, RunTime.GLOBAL_STACK_POINTER);	//	[... val]
+				code.add(Add); // [... val, sp+1]
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [... val]
 				break;
 			case 4:
 				code.add(LoadI);
-				code.add(Exchange);	// [... val, sp]
+				code.add(Exchange); // [... val, sp]
 				code.add(PushI, 4);
-				code.add(Add);	// [... val, sp+4]
-				storeITo(code, RunTime.GLOBAL_STACK_POINTER);	//	[... val]
+				code.add(Add); // [... val, sp+4]
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [... val]
 				break;
 			case 8:
 				code.add(LoadF);
-				code.add(Exchange);	// [... val, sp]
+				code.add(Exchange); // [... val, sp]
 				code.add(PushI, 8);
-				code.add(Add);	// [... val, sp+8]
-				storeITo(code, RunTime.GLOBAL_STACK_POINTER);	//	[... val]
+				code.add(Add); // [... val, sp+8]
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [... val]
 				break;
 			default:
 				break;
-			}	
-						
+			}
+
+			if (node.getType() instanceof RangeType) {
+				code.add(Duplicate);
+				code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+			}
+
 		}
 
 		public void visitLeave(ExpressionListNode node) {
-			
+
 			newVoidCode(node);
 
 			for (ParseNode child : node.getChildren()) {
@@ -1018,10 +929,10 @@ public class ASMCodeGenerator {
 				} // [... new-sp]
 
 				// store new sp to memory
-				storeITo(code, RunTime.GLOBAL_STACK_POINTER);	// [...]
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [...]
 
 			}
-			
+
 		}
 
 		public void visitLeave(BinaryOperatorNode node) {

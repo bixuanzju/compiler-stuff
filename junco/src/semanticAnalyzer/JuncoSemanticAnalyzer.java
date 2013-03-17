@@ -183,11 +183,6 @@ public class JuncoSemanticAnalyzer {
 		}
 		
 		
-//		public void visitEnter(FunctionDeclNode node) {
-//			if (!(node.getParent() instanceof BoxBodyNode)) {
-//				logError("no function declaration allowed at " + node.getToken().getLocation());
-//			}
-//		}
 
 		public void visitLeave(FunctionDeclNode node) {
 			if (!(node.getParent() instanceof BoxBodyNode)) {
