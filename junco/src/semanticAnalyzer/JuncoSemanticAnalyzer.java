@@ -262,12 +262,16 @@ public class JuncoSemanticAnalyzer {
 
 				}
 			}
+			
 
 			if (node.getReturnType().getConstraintType() instanceof NoneType) {
 				logError("All return statements must return the same type");
 			}
 			else if (node.getReturnType().getConstraintType() instanceof AnyType) {
 				logError("Value body must have at least one return statement");
+			}
+			else if (!(node.child(node.nChildren() - 1) instanceof ReturnStatementNode)) {
+				logError("The last statement of value body must be return statememt");
 			}
 
 			node.setType(node.child(node.nChildren() - 1).getType());
