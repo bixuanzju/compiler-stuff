@@ -34,7 +34,7 @@ public class RangeOperatorRewritingVisitor extends ASTRewritingVisitor {
 			NodeRewriter rewriter = new RangeInRewriter();
 			registerReplacement(node, rewriter.rewriteNode(node));
 		}
-		// else span, intersect, in ?
+
 	}
 
 	public void visitLeave(UniaryOperatorNode node) {
@@ -53,7 +53,6 @@ public class RangeOperatorRewritingVisitor extends ASTRewritingVisitor {
 	}
 
 	private boolean isIsEmptyMemberOperator(UniaryOperatorNode node) {
-		// 
 		if (node.getToken().isLextant(Punctuator.EMPTY)) {
 			return true;
 		}

@@ -264,7 +264,7 @@ public class ASMCodeGenerator {
 			code.add(Label, node.getReturnLabel());
 
 			cleanReference(node.getScope());
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+//			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
 
 		public void visitLeave(BodyNode node) {
@@ -533,7 +533,7 @@ public class ASMCodeGenerator {
 				code.add(opcodeForStore(type));
 			}
 
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+//			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
 
@@ -711,7 +711,7 @@ public class ASMCodeGenerator {
 			Type type = node.getType();
 			code.add(opcodeForStore(type));
 
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+//			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
 

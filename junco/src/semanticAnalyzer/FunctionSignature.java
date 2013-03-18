@@ -69,22 +69,21 @@ class FunctionSignature {
 			}
 		
 		else return true;
+		case EQUAL:
+		case UNEQUAL:
 		case GREATEREQ:
 		case GREATER:
 		case LESSEQ:
 		case LESS:
-			if (paramTypes[0].getConstraintType() == PrimitiveType.BOOLEAN) {
+			if (getPrimitiveType(paramTypes[0].getConstraintType()) == PrimitiveType.BOOLEAN) {
 				return false;
 			}
 			else return true;
 		case AND:
 		case OR:
-		case EQUAL:
-		case UNEQUAL:
 			return true;
 		case SPAN:
 		case INTERSECTION:
-			//if (resultType.getConstraintType() instanceof RangeType && resultType.getConstraintType().isComparable()) {
 				if (resultType.getConstraintType() instanceof RangeType) {
 				return true;
 			}
@@ -142,6 +141,15 @@ class FunctionSignature {
 	// TODO Type variable
 	public Boolean RangeSignature(Type type1, Type type2) {
 		return true;
+	}
+	
+	private Type getPrimitiveType(Type type) {
+		if (type instanceof RangeType) {
+			return getPrimitiveType(((RangeType) type).getChildType());
+		}
+		else {
+			return type;
+		}
 	}
 
 }

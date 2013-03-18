@@ -1,6 +1,5 @@
 package semanticAnalyzer.rewriters;
 
-import static semanticAnalyzer.PrimitiveType.BOOLEAN;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 import parseTree.ParseNode;
@@ -35,20 +34,14 @@ public class SetRangeNodeRewriter extends NodeRewriterImp {
 				return valueBodyNode(
 						declareConst(leftVariable, left, rangeType),
 						declareConst(rightVariable, right, rangeType),
-						declareInit(resultVariable, left, rangeType),
+						declareInit(resultVariable, identifier(leftVariable, rangeType), rangeType),
 
-						ifStatement(
-								isEmpty(identifier(rightVariable, rangeType)),
-								bodyNode(update(
-										identifier(resultVariable, rangeType),
-										rangeNode(lowEnd(identifier(leftVariable, rangeType)),
-												highEnd(identifier(leftVariable, rangeType))))),
-								bodyNode(update(
-										identifier(resultVariable, rangeType),
-										rangeNode(lowEnd(identifier(rightVariable, rangeType)),
-												highEnd(identifier(rightVariable, rangeType)))))),
+						update(
+								identifier(resultVariable, rangeType),
+								rangeNode(lowEnd(identifier(leftVariable, rangeType)),
+										highEnd(identifier(leftVariable, rangeType)))),
+										
 						returnStatement(identifier(resultVariable, rangeType)));
-
 			}
 
 			return rewriteSpan(node);
@@ -64,20 +57,14 @@ public class SetRangeNodeRewriter extends NodeRewriterImp {
 
 						declareConst(leftVariable, left, rangeType),
 						declareConst(rightVariable, right, rangeType),
-						declareInit(resultVariable, left, rangeType),
-
-						ifStatement(
-								isEmpty(identifier(rightVariable, rangeType)),
-								bodyNode(update(
-										identifier(resultVariable, rangeType),
-										rangeNode(lowEnd(identifier(rightVariable, rangeType)),
-												highEnd(identifier(rightVariable, rangeType))))),
-								bodyNode(update(
-										identifier(resultVariable, rangeType),
-										rangeNode(lowEnd(identifier(leftVariable, rangeType)),
-												highEnd(identifier(leftVariable, rangeType)))))),
-
-						returnStatement(identifier(resultVariable, BOOLEAN)));
+						declareInit(resultVariable, identifier(leftVariable, rangeType), rangeType),
+						
+						update(
+								identifier(resultVariable, rangeType),
+								rangeNode(lowEnd(identifier(rightVariable, rangeType)),
+										highEnd(identifier(rightVariable, rangeType)))),
+										
+						returnStatement(identifier(resultVariable, rangeType)));
 
 			}
 
@@ -95,7 +82,7 @@ public class SetRangeNodeRewriter extends NodeRewriterImp {
 		return valueBodyNode(
 				declareConst(leftVariable, left, rangeType),
 				declareConst(rightVariable, right, rangeType),
-				declareInit(resultVariable, left, rangeType),
+				declareInit(resultVariable, identifier(leftVariable, rangeType), rangeType),
 
 				ifStatement(
 						isEmpty(identifier(rightVariable, rangeType)),
@@ -159,7 +146,7 @@ public class SetRangeNodeRewriter extends NodeRewriterImp {
 		return valueBodyNode(
 				declareConst(leftVariable, left, rangeType),
 				declareConst(rightVariable, right, rangeType),
-				declareInit(resultVariable, left, rangeType),
+				declareInit(resultVariable, identifier(leftVariable, rangeType), rangeType),
 
 				ifStatement(
 						isEmpty(identifier(rightVariable, rangeType)),
