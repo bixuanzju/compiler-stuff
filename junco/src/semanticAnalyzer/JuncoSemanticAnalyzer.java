@@ -104,10 +104,8 @@ public class JuncoSemanticAnalyzer {
 			// Scopes.enterStaticScope(node);
 			enterGlobleScope(node);
 		}
-		
 
 		public void visitEnter(FunctionDeclNode node) {
-			
 
 			IdentifierNode name = (IdentifierNode) node.child(0);
 			ParameterListNode parameterList = (ParameterListNode) node.child(1);
@@ -162,10 +160,11 @@ public class JuncoSemanticAnalyzer {
 		public void visitLeave(ProgramNode node) {
 			// Scopes.leaveScope();
 		}
-//
-//		public void visitLeave(BoxBodyNode node) {
-////			 Scopes.leaveScope();
-//		}
+
+		//
+		// public void visitLeave(BoxBodyNode node) {
+		// // Scopes.leaveScope();
+		// }
 
 		public void visitEnter(BoxBodyNode node) {
 			// Scopes.enterStaticScope(node);
@@ -181,14 +180,13 @@ public class JuncoSemanticAnalyzer {
 			node.setReturnLabel(node.getParent().getReturnLabel());
 			enterSubscope(node);
 		}
-		
-		
 
 		public void visitLeave(FunctionDeclNode node) {
 			if (!(node.getParent() instanceof BoxBodyNode)) {
-				logError("no function declaration allowed at " + node.getToken().getLocation());
+				logError("no function declaration allowed at "
+						+ node.getToken().getLocation());
 			}
-			
+
 			TypeVariable returnType = ((ValueBodyNode) node.child(2)).getReturnType();
 
 			returnType.constrain(node.getType());
@@ -202,13 +200,13 @@ public class JuncoSemanticAnalyzer {
 
 		public void visitLeave(FunctionInvocationNode node) {
 
-			if (node.child(0).getType() == PrimitiveType.ERROR) {
-				node.setType(PrimitiveType.ERROR);
-			}
-			else {
+			if (node.child(0).getType() instanceof FunctionType) {
 				List<Type> typeList = ((FunctionType) node.child(0).getType())
 						.getList();
-				Type returnType = ((FunctionType) node.child(0).getType()).getReturnType();
+
+				Type returnType = ((FunctionType) node.child(0).getType())
+						.getReturnType();
+				node.setType(returnType);
 
 				List<ParseNode> parameterList = node.child(1).getChildren();
 				if (parameterList.size() == typeList.size() - 1) {
@@ -220,9 +218,7 @@ public class JuncoSemanticAnalyzer {
 							node.setType(PrimitiveType.ERROR);
 							break;
 						}
-						if (node.getType() != PrimitiveType.ERROR) {
-							node.setType(returnType);
-						}
+
 					}
 				}
 				else {
@@ -230,6 +226,10 @@ public class JuncoSemanticAnalyzer {
 							+ node.getToken().getLocation());
 					node.setType(PrimitiveType.ERROR);
 				}
+			}
+			else {
+				logError("no valid function name at " + node.getToken().getLocation());
+				node.setType(PrimitiveType.ERROR);
 			}
 		}
 

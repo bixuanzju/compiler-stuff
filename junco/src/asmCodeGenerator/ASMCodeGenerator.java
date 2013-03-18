@@ -295,7 +295,7 @@ public class ASMCodeGenerator {
 			}
 			appendNewlineCode(node);
 
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+//			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
 
 		private void appendNewlineCode(PrintStatementNode node) {
@@ -595,10 +595,10 @@ public class ASMCodeGenerator {
 
 			ASMCodeFragment expr = removeValueCode(node.child(0));
 			code.append(expr);
-			if (node.child(0).getType() instanceof RangeType) {
-				code.add(Duplicate);
-				code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
-			}
+//			if (node.child(0).getType() instanceof RangeType) {
+//				code.add(Duplicate);
+//				code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+//			}
 			code.add(Jump, node.getReturnLabel());
 
 		}
@@ -711,7 +711,7 @@ public class ASMCodeGenerator {
 			Type type = node.getType();
 			code.add(opcodeForStore(type));
 
-//			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
 
@@ -894,10 +894,10 @@ public class ASMCodeGenerator {
 				break;
 			}
 
-			if (node.getType() instanceof RangeType) {
-				code.add(Duplicate);
-				code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
-			}
+//			if (node.getType() instanceof RangeType) {
+//				code.add(Duplicate);
+//				code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+//			}
 
 		}
 
