@@ -88,8 +88,10 @@ public class ASMCodeGenerator {
 		code.add(Memtop);
 		declareI(code, RunTime.GLOBAL_STACK_POINTER);
 		storeITo(code, RunTime.GLOBAL_STACK_POINTER);
-
+		
+		code.add(Jump, RunTime.BOX_MAIN_LABEL);
 		code.append(programCode());
+		code.add(Label, RunTime.BOX_MAIN_END_LABEL);
 		code.add(Halt);
 
 		code.add(Label, RunTime.DIVIDE_BY_ZERO);
@@ -212,7 +214,15 @@ public class ASMCodeGenerator {
 			newVoidCode(node);
 			for (ParseNode child : node.getChildren()) {
 				ASMCodeFragment childCode = removeVoidCode(child);
-				code.append(childCode);
+				if (child.getToken().getLexeme().equals("main")) {
+					code.add(Label, RunTime.BOX_MAIN_LABEL);
+					code.append(childCode);
+					code.add(Jump, RunTime.BOX_MAIN_END_LABEL);
+				}
+				else {
+					code.append(childCode);
+				}
+				
 			}
 
 		}

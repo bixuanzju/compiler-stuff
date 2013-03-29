@@ -33,6 +33,7 @@ import semanticAnalyzer.rewriters.ASTRewriter;
 import semanticAnalyzer.rewriters.RangeOperatorRewritingVisitor;
 import symbolTable.Binding;
 import symbolTable.Scope;
+import tokens.IdentifierToken;
 import tokens.LextantToken;
 import tokens.Token;
 
@@ -53,17 +54,17 @@ public class JuncoSemanticAnalyzer {
 		ASTree.accept(new FunctionVistor());
 
 		ASTree.accept(new SemanticAnalysisVisitor());
-		
+
 		ASTree.getScope().resetAllocatedSize();
-		
+
 		if (logging.JuncoLogger.hasErrors()) {
 			return ASTree;
 		}
 
 		ASTree = iterateRewriting(ASTree);
-//		System.out.println(ASTree.getScope().getAllocatedSize());
+		// System.out.println(ASTree.getScope().getAllocatedSize());
 		ASTree.accept(new SemanticAnalysisVisitor());
-//		System.out.println(ASTree.getScope().getAllocatedSize());
+		// System.out.println(ASTree.getScope().getAllocatedSize());
 
 		return ASTree;
 	}
@@ -109,10 +110,17 @@ public class JuncoSemanticAnalyzer {
 			enterGlobleScope(node);
 		}
 
+		public void visitEnter(BoxBodyNode node) {
+			IdentifierNode boxName = new IdentifierNode(IdentifierToken.make(node
+					.getToken().getLocation(), node.getToken().getLexeme()));
+			Scope scope = node.getParent().getScope();
+			scope.createBinding(boxName, PrimitiveType.NO_TYPE);
+		}
+
 		public void visitEnter(FunctionDeclNode node) {
 
 			IdentifierNode name = (IdentifierNode) node.child(0);
-			name.getToken().setLexeme();
+
 			ParameterListNode parameterList = (ParameterListNode) node.child(1);
 
 			FunctionType funcType = new FunctionType();
@@ -163,16 +171,18 @@ public class JuncoSemanticAnalyzer {
 		// constructs larger than statements
 
 		public void visitEnter(BoxBodyNode node) {
-			// Scopes.enterStaticScope(node);
 			enterSubscope(node);
 		}
 
-		public void visitLeave(BodyNode node) {
-			// Scopes.leaveScope();
+		public void visitLeave(ProgramNode node) {
+			if (!node.getScope().getSymbolTable().containsKey("main")) {
+				logError("no main box detected");
+			}
+			
 		}
 
 		public void visitEnter(BodyNode node) {
-			// Scopes.enterStaticScope(node);
+
 			node.setReturnLabel(node.getParent().getReturnLabel());
 			enterSubscope(node);
 		}
@@ -258,7 +268,6 @@ public class JuncoSemanticAnalyzer {
 
 				}
 			}
-			
 
 			if (node.getReturnType().getConstraintType() instanceof NoneType) {
 				logError("All return statements must return the same type");
