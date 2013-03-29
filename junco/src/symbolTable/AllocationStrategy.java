@@ -8,4 +8,5 @@ public interface AllocationStrategy {
 	public void saveState();
 	public void restoreState();
 	public int getMaxAllocatedSize();
+	public void resetOffset();
 }

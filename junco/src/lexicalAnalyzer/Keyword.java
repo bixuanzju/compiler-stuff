@@ -11,7 +11,7 @@ public enum Keyword implements Lextant {
 	TRUE("true"),
 	FALSE("false"),
 	BOX("box"),
-	MAIN("main"),
+//	MAIN("main"),
 	NULL_KEYWORD(""),
 	INIT("init"),
 	IF("if"),
@@ -20,6 +20,7 @@ public enum Keyword implements Lextant {
 	IN("in"),
 	RETURN("return"),
 	FUNC("func"),
+	THIS("this"),
 	UPDATE("update");
 	private String lexeme;
 	private Token prototype;

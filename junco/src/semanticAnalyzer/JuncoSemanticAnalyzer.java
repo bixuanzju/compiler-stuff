@@ -53,13 +53,17 @@ public class JuncoSemanticAnalyzer {
 		ASTree.accept(new FunctionVistor());
 
 		ASTree.accept(new SemanticAnalysisVisitor());
-
+		
+		ASTree.getScope().resetAllocatedSize();
+		
 		if (logging.JuncoLogger.hasErrors()) {
 			return ASTree;
 		}
 
 		ASTree = iterateRewriting(ASTree);
+//		System.out.println(ASTree.getScope().getAllocatedSize());
 		ASTree.accept(new SemanticAnalysisVisitor());
+//		System.out.println(ASTree.getScope().getAllocatedSize());
 
 		return ASTree;
 	}
@@ -108,6 +112,7 @@ public class JuncoSemanticAnalyzer {
 		public void visitEnter(FunctionDeclNode node) {
 
 			IdentifierNode name = (IdentifierNode) node.child(0);
+			name.getToken().setLexeme();
 			ParameterListNode parameterList = (ParameterListNode) node.child(1);
 
 			FunctionType funcType = new FunctionType();
@@ -156,15 +161,6 @@ public class JuncoSemanticAnalyzer {
 
 		// /////////////////////////////////////////////////////////////////////////
 		// constructs larger than statements
-		@Override
-		public void visitLeave(ProgramNode node) {
-			// Scopes.leaveScope();
-		}
-
-		//
-		// public void visitLeave(BoxBodyNode node) {
-		// // Scopes.leaveScope();
-		// }
 
 		public void visitEnter(BoxBodyNode node) {
 			// Scopes.enterStaticScope(node);

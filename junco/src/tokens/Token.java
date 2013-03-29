@@ -8,5 +8,6 @@ public interface Token {
 	public TextLocation getLocation();
 	public String fullString();
 	public boolean isLextant(Lextant ...lextants);
+	public void setLexeme();
 }
 

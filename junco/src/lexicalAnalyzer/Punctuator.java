@@ -39,6 +39,7 @@ public enum Punctuator implements Lextant {
 	HIGH(".high"),
 	EMPTY(".isEmpty"),
 	SPAN("|"),
+	AT("@"),
 	INTERSECTION("&"),
 	NULL_PUNCTUATOR("");
 	

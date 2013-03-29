@@ -14,7 +14,7 @@ public class FunctionType implements Type {
 	
 	@Override
 	public int getSize() {
-		return 4;
+		return 0;
 	}
 
 	@Override

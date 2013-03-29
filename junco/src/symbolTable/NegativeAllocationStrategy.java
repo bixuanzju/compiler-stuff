@@ -55,4 +55,8 @@ public class NegativeAllocationStrategy implements AllocationStrategy {
 		int bookmarkIndex = bookmarks.size()-1;
 		currentOffset = (int) bookmarks.remove(bookmarkIndex);
 	}
+	@Override
+	public void resetOffset() {
+		currentOffset = startingOffset;
+	}
 }

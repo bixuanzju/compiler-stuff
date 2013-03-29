@@ -13,36 +13,6 @@ public class Scope {
 	private SymbolTable symbolTable;
 	
 //////////////////////////////////////////////////////////////////////
-// factories
-//	public static Scope createDynamicScope(int staticNestingLevel, Scope baseScope) {
-//		AllocationStrategy allocator = baseStrategyOr(dynamicScopeStrategy, baseScope);
-//		return new Scope(staticNestingLevel, allocator, baseScope);
-//	}
-//	public static Scope createStaticScope(int staticNestingLevel, Scope baseScope) {
-//		AllocationStrategy allocator = baseStrategyOr(staticScopeStrategy, baseScope);
-//		return new Scope(staticNestingLevel, allocator, baseScope);
-//	}	
-//	private static AllocationStrategy baseStrategyOr(AllocationStrategyFactory allocatorFactory, Scope baseScope) {
-//		if (baseScope != null) {
-//			return baseScope.getAllocationStrategy();
-//		}
-//		return allocatorFactory.make();
-//	}
-//
-//	private static AllocationStrategyFactory staticScopeStrategy = new AllocationStrategyFactory() {
-//		public AllocationStrategy make() {
-//			return new PositiveAllocationStrategy(
-//					MemoryAccessMethod.DIRECT_ACCESS_BASE, 
-//					MemoryLocation.GLOBAL_VARIABLE_BLOCK);
-//		}
-//	};	
-//	private static AllocationStrategyFactory dynamicScopeStrategy = new AllocationStrategyFactory() {
-//		public AllocationStrategy make() {
-//			return new NegativeAllocationStrategy(
-//					MemoryAccessMethod.INDIRECT_ACCESS_BASE,
-//					MemoryLocation.FRAME_POINTER);
-//		}
-//	};
 	
 	public Scope createSubscope() {
 		return new Scope(staticNestingLevel+1, allocator, this);
@@ -102,9 +72,6 @@ public class Scope {
 	public Scope getBaseScope() {
 		return baseScope;
 	}
-//	private AllocationStrategy getAllocationStrategy() {
-//		return allocator;
-//	}
 	public SymbolTable getSymbolTable() {
 		return symbolTable;
 	}
@@ -117,6 +84,9 @@ public class Scope {
 	}
 	public int getAllocatedSize() {
 		return allocator.getMaxAllocatedSize();
+	}
+	public void resetAllocatedSize() {
+		 allocator.resetOffset();
 	}
 
 ///////////////////////////////////////////////////////////////////////
