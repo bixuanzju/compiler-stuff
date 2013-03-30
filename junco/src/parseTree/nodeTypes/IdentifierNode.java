@@ -46,7 +46,7 @@ public class IdentifierNode extends ParseNode {
 	}
 
 	// //////////////////////////////////////////////////////////
-	// Speciality functions
+	// Specialty functions
 
 	public Binding findVariableBinding() {
 		String identifier = token.getLexeme();
