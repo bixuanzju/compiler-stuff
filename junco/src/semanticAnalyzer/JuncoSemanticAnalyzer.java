@@ -109,6 +109,7 @@ public class JuncoSemanticAnalyzer {
 	}
 
 	private class FunctionVistor extends ParseNodeVisitor.Default {
+		private int boxTypeIdentifier = 128;
 
 		public void visitEnter(ProgramNode node) {
 			// Scopes.enterStaticScope(node);
@@ -119,8 +120,9 @@ public class JuncoSemanticAnalyzer {
 			IdentifierNode boxName = new IdentifierNode(IdentifierToken.make(node
 					.getToken().getLocation(), node.getToken().getLexeme()));
 			Scope scope = node.getParent().getScope();
-			BoxType type = new BoxType(node.getToken().getLexeme());
+			BoxType type = new BoxType(node.getToken().getLexeme(), boxTypeIdentifier++);
 			scope.createBinding(boxName, type);
+			node.setType(type);
 		}
 
 		public void visitEnter(FunctionDeclNode node) {
@@ -184,6 +186,11 @@ public class JuncoSemanticAnalyzer {
 				enterBoxBodyScope(node);
 			}
 
+		}
+		
+		public void visitLeave(BoxBodyNode node) {
+				BoxType type = (BoxType) node.getType();
+				type.setScopeSize(node.getScope().getAllocatedSize());
 		}
 
 		public void visitLeave(ProgramNode node) {

@@ -27,6 +27,7 @@ import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
 import parseTree.nodeTypes.ValueBodyNode;
 import parseTree.nodeTypes.WhileStatementNode;
+import semanticAnalyzer.BoxType;
 import semanticAnalyzer.PrimitiveType;
 import semanticAnalyzer.RangeType;
 import semanticAnalyzer.Type;
@@ -88,7 +89,7 @@ public class ASMCodeGenerator {
 		code.add(Memtop);
 		declareI(code, RunTime.GLOBAL_STACK_POINTER);
 		storeITo(code, RunTime.GLOBAL_STACK_POINTER);
-		
+
 		code.add(Jump, RunTime.BOX_MAIN_LABEL);
 		code.append(programCode());
 		code.add(Label, RunTime.BOX_MAIN_END_LABEL);
@@ -192,7 +193,8 @@ public class ASMCodeGenerator {
 			else if (node.getType() == PrimitiveType.CHARACTER) {
 				code.add(LoadC);
 			}
-			else if (node.getType() instanceof RangeType) {
+			else if ((node.getType() instanceof RangeType)
+					|| (node.getType() instanceof BoxType)) {
 				code.add(LoadI);
 			}
 			else {
@@ -220,9 +222,11 @@ public class ASMCodeGenerator {
 					code.add(Jump, RunTime.BOX_MAIN_END_LABEL);
 				}
 				else {
+					code.add(Label, child.getToken().getLexeme());
 					code.append(childCode);
+					code.add(Return);
 				}
-				
+
 			}
 
 		}
@@ -234,9 +238,10 @@ public class ASMCodeGenerator {
 				code.append(childCode);
 			}
 
-			cleanReference(node.getScope());
-			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
-
+			if (node.getToken().getLexeme().equals("main")) {
+				cleanReference(node.getScope());
+				code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			}
 		}
 
 		private void cleanReference(Scope scope) {
@@ -274,7 +279,7 @@ public class ASMCodeGenerator {
 			code.add(Label, node.getReturnLabel());
 
 			cleanReference(node.getScope());
-//			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
 
 		public void visitLeave(BodyNode node) {
@@ -305,7 +310,7 @@ public class ASMCodeGenerator {
 			}
 			appendNewlineCode(node);
 
-//			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 		}
 
 		private void appendNewlineCode(PrintStatementNode node) {
@@ -543,7 +548,7 @@ public class ASMCodeGenerator {
 				code.add(opcodeForStore(type));
 			}
 
-//			code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PERFORM_DECREMENTS);
 
 		}
 
@@ -605,10 +610,10 @@ public class ASMCodeGenerator {
 
 			ASMCodeFragment expr = removeValueCode(node.child(0));
 			code.append(expr);
-//			if (node.child(0).getType() instanceof RangeType) {
-//				code.add(Duplicate);
-//				code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
-//			}
+			// if (node.child(0).getType() instanceof RangeType) {
+			// code.add(Duplicate);
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+			// }
 			code.add(Jump, node.getReturnLabel());
 
 		}
@@ -617,70 +622,91 @@ public class ASMCodeGenerator {
 
 			if (node.getToken().isLextant(Punctuator.LOW, Punctuator.HIGH)) {
 				newAddressCode(node);
-
 			}
 			else {
 				newValueCode(node);
-
 			}
 
-			ASMCodeFragment value = getAndRemoveCode(node.child(0));
-			// ASMCodeFragment value = removeValueCode(node.child(0));
-			// code.append(value);
+			if (!(node.getToken().isLextant(Punctuator.AT))) {
 
-			if (!value.isAddress()) {
-				code.append(value); // [... val]
-				if (node.child(0).getType() instanceof RangeType) {
-					code.add(Duplicate); // [... val val]
-					code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD); // [...
-																																			// val]
+				ASMCodeFragment value = getAndRemoveCode(node.child(0));
+				// ASMCodeFragment value = removeValueCode(node.child(0));
+				// code.append(value);
+
+				if (!value.isAddress()) {
+					code.append(value); // [... val]
+					if (node.child(0).getType() instanceof RangeType) {
+						code.add(Duplicate); // [... val val]
+						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD); // [...
+																																				// val]
+					}
+
 				}
 
-			}
-			else {
 				turnAddressIntoValue(value, node.child(0));
 				code.append(value); // [... val]
+
+				if (node.getToken().isLextant(Punctuator.NOT)) {
+
+					String startLabel = labeller.newLabel("-not-arg1-", "");
+					String notendLabel = labeller.newLabelSameNumber("-not-end-", "");
+					code.add(Label, startLabel);
+
+					code.add(BNegate);
+					code.add(Duplicate);
+					code.add(JumpFalse, notendLabel);
+					code.add(Pop);
+					code.add(PushI, 1);
+					code.add(Label, notendLabel);
+				}
+				else if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
+
+					code.add(ConvertF);
+				}
+				else if (node.getToken().isLextant(Punctuator.CASTTOINT)) {
+
+					if (node.child(0).getType() == PrimitiveType.FLOATNUM)
+						code.add(ConvertI);
+
+				}
+				else if (node.getToken().isLextant(Punctuator.CASTTOCHAR)) {
+
+					code.add(PushI, 127);
+					code.add(BTAnd);
+				}
+				else if (node.getToken().isLextant(Punctuator.LOW)) {
+
+					code.add(PushI, 12);
+					code.add(Add);
+
+				}
+				else if (node.getToken().isLextant(Punctuator.HIGH)) {
+
+					code.add(PushI, 12 + ((RangeType) node.child(0).getType())
+							.getChildType().getSize());
+					code.add(Add);
+
+				}
 			}
+			else {
+				ParseNode child = node.child(0);
+				BoxType type = (BoxType) child.getType();
+				code.add(PushI, 12 + type.getScopeSize());
+				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
+				code.add(Duplicate); // [... ptr ptr]
 
-			if (node.getToken().isLextant(Punctuator.NOT)) {
-
-				String startLabel = labeller.newLabel("-not-arg1-", "");
-				String notendLabel = labeller.newLabelSameNumber("-not-end-", "");
-				code.add(Label, startLabel);
-
-				code.add(BNegate);
-				code.add(Duplicate);
-				code.add(JumpFalse, notendLabel);
-				code.add(Pop);
+				// for reference count
 				code.add(PushI, 1);
-				code.add(Label, notendLabel);
-			}
-			else if (node.getToken().isLextant(Punctuator.CASTTOFLAOT)) {
+				code.add(StoreI); // [... ptr]
 
-				code.add(ConvertF);
-			}
-			else if (node.getToken().isLextant(Punctuator.CASTTOINT)) {
+				code.add(Duplicate); // [... ptr, ptr]
+				// for type identifier
+				code.add(PushI, 4);
+				code.add(Add); // [... ptr, ptr+4]
+				code.add(PushI, type.getBoxIdentifier());
+				code.add(StoreI); // [... ptr]
 
-				if (node.child(0).getType() == PrimitiveType.FLOATNUM)
-					code.add(ConvertI);
-
-			}
-			else if (node.getToken().isLextant(Punctuator.CASTTOCHAR)) {
-
-				code.add(PushI, 127);
-				code.add(BTAnd);
-			}
-			else if (node.getToken().isLextant(Punctuator.LOW)) {
-
-				code.add(PushI, 12);
-				code.add(Add);
-
-			}
-			else if (node.getToken().isLextant(Punctuator.HIGH)) {
-
-				code.add(PushI, 12 + ((RangeType) node.child(0).getType())
-						.getChildType().getSize());
-				code.add(Add);
+				code.add(Call, child.getToken().getLexeme());
 
 			}
 
@@ -738,7 +764,7 @@ public class ASMCodeGenerator {
 			if (type == PrimitiveType.CHARACTER) {
 				return StoreC;
 			}
-			if (type instanceof RangeType) {
+			if ((type instanceof RangeType) || (type instanceof BoxType)) {
 				return StoreI;
 			}
 
@@ -904,10 +930,10 @@ public class ASMCodeGenerator {
 				break;
 			}
 
-//			if (node.getType() instanceof RangeType) {
-//				code.add(Duplicate);
-//				code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
-//			}
+			// if (node.getType() instanceof RangeType) {
+			// code.add(Duplicate);
+			// code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+			// }
 
 		}
 
