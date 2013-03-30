@@ -28,6 +28,11 @@ public class Scope {
 		return new Scope(0, allocator, null);
 	}
 	
+	public static Scope createBoxBodyScope() {
+		AllocationStrategy allocator = BoxScopeStrategy();
+		return new Scope(0, allocator, null);
+	}
+	
 	public static Scope createGlobalScope() {
 		AllocationStrategy allocator = globalScopeStrategy();
 		return new Scope(0, allocator, null);
@@ -37,6 +42,13 @@ public class Scope {
 		return new PositiveAllocationStrategy(
 				MemoryAccessMethod.DIRECT_ACCESS_BASE,
 				MemoryLocation.GLOBAL_VARIABLE_BLOCK);
+	}
+	
+	private static AllocationStrategy BoxScopeStrategy() {
+		return new PositiveAllocationStrategy(
+				MemoryAccessMethod.DIRECT_ACCESS_BASE,
+				MemoryLocation.GLOBAL_VARIABLE_BLOCK,
+				12);
 	}
 	
 	private static AllocationStrategy procedureScopeStrategy() {

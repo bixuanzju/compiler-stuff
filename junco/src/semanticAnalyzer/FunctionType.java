@@ -24,7 +24,7 @@ public class FunctionType implements Type {
 	}
 
 	@Override
-	public Boolean isComparable() {
+	public boolean isComparable() {
 		return false;
 	}
 	

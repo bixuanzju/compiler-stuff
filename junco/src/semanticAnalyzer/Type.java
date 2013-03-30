@@ -15,5 +15,5 @@ public interface Type {
 	 */
 	public String infoString();
 	
-	public Boolean isComparable();
+	public boolean isComparable();
 }

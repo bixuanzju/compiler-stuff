@@ -54,7 +54,7 @@ public class TypeVariable implements Type {
 	}
 
 	@Override
-	public Boolean isComparable() {
+	public boolean isComparable() {
 		
 		return constraitType.isComparable();
 	}

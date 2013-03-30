@@ -26,7 +26,7 @@ public enum PrimitiveType implements Type {
 		return infoString;
 	}
 	@Override
-	public Boolean isComparable() {
+	public boolean isComparable() {
 		if (equals(PrimitiveType.INTEGER) || equals(PrimitiveType.FLOATNUM) || equals(PrimitiveType.CHARACTER)) {
 			return true;
 		}

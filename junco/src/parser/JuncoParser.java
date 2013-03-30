@@ -723,7 +723,7 @@ public class JuncoParser {
 			return syntaxErrorNode("expression<menber>");
 		}
 
-		ParseNode left = parseExpression5();
+		ParseNode left = parseBoxCreation();
 
 		while (nowReading.isLextant(Punctuator.LOW, Punctuator.HIGH,
 				Punctuator.EMPTY)) {
@@ -734,7 +734,26 @@ public class JuncoParser {
 
 		return left;
 	}
-
+	
+	private ParseNode parseBoxCreation() {
+		if (!startsExpression5(nowReading)) {
+			return syntaxErrorNode("expression<box creation>");
+		}
+		Token token = nowReading;
+		ParseNode right = null;
+		
+		if (nowReading.isLextant(Punctuator.AT)) {
+			readToken();
+			right = parseExpression5();
+			right = UniaryOperatorNode.withChildren(right, token);
+		}
+		else {
+			right = parseExpression5();
+		}
+		
+		return right;
+	}
+	
 	// expr4 -> literal
 	private ParseNode parseExpression5() {
 		if (!startsExpression5(nowReading)) {
@@ -785,31 +804,6 @@ public class JuncoParser {
 		}
 	}
 
-	// private ParseNode parseExpressionList() {
-	//
-	// ParseNode exprList = new ExpressionListNode(nowReading);
-	//
-	// expect(Punctuator.OPEN_BRACKET);
-	//
-	// if (!startsExpression(nowReading)) {
-	// return syntaxErrorNode("expression");
-	// }
-	//
-	// ParseNode expr = parseExpression();
-	// exprList.appendChild(expr);
-	//
-	// while (nowReading.isLextant(Punctuator.SPLICE)) {
-	// expect(Punctuator.SPLICE);
-	//
-	// exprList.appendChild(parseExpression());
-	// }
-	//
-	// expect(Punctuator.CLOSE_BRACKET);
-	//
-	// return exprList;
-	//
-	// }
-
 	private boolean startsExpression5(Token token) {
 		return startsLiteralOrBracket(token);
 	}
@@ -844,7 +838,7 @@ public class JuncoParser {
 				|| startsBooleanConstant(token)
 				|| startsCharacterConstant(token)
 				|| (token.isLextant(Punctuator.OPEN_BRACKET, Punctuator.NOT,
-						Punctuator.OPEN_SQUARE, Punctuator.BODY_OPEN));
+						Punctuator.OPEN_SQUARE, Punctuator.BODY_OPEN, Punctuator.AT));
 	}
 
 	// number (terminal)

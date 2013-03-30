@@ -102,6 +102,11 @@ public class JuncoSemanticAnalyzer {
 		Scope scope = Scope.createParameterScope();
 		node.setScope(scope);
 	}
+	
+	private static void enterBoxBodyScope(ParseNode node) {
+		Scope scope = Scope.createBoxBodyScope();
+		node.setScope(scope);
+	}
 
 	private class FunctionVistor extends ParseNodeVisitor.Default {
 
@@ -114,7 +119,8 @@ public class JuncoSemanticAnalyzer {
 			IdentifierNode boxName = new IdentifierNode(IdentifierToken.make(node
 					.getToken().getLocation(), node.getToken().getLexeme()));
 			Scope scope = node.getParent().getScope();
-			scope.createBinding(boxName, PrimitiveType.NO_TYPE);
+			BoxType type = new BoxType(node.getToken().getLexeme());
+			scope.createBinding(boxName, type);
 		}
 
 		public void visitEnter(FunctionDeclNode node) {
@@ -171,9 +177,15 @@ public class JuncoSemanticAnalyzer {
 		// constructs larger than statements
 
 		public void visitEnter(BoxBodyNode node) {
-			enterSubscope(node);
+			if (node.getToken().getLexeme().equals("main")) {
+				enterSubscope(node);
+			}
+			else {
+				enterBoxBodyScope(node);
+			}
+			
 		}
-
+		
 		public void visitLeave(ProgramNode node) {
 			if (!node.getScope().getSymbolTable().containsKey("main")) {
 				logError("no main box detected");
@@ -182,7 +194,6 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitEnter(BodyNode node) {
-
 			node.setReturnLabel(node.getParent().getReturnLabel());
 			enterSubscope(node);
 		}
@@ -485,6 +496,16 @@ public class JuncoSemanticAnalyzer {
 				}
 
 			}
+			else if (token.isLextant(Punctuator.AT)) {
+				if (!(child instanceof IdentifierNode)) {
+					logError("@boxNameIdentifier at " + node.getToken().getLocation());
+				}
+				
+				if (child.getToken().getLexeme().equals("main")) {
+					logError("main box cannot be initialized at "+ node.getToken().getLocation());
+				}
+				
+			}
 		}
 
 		// /////////////////////////////////////////////////////////////////////////
@@ -573,9 +594,19 @@ public class JuncoSemanticAnalyzer {
 				Binding binding = node.findVariableBinding();
 				node.setType(binding.getType());
 				node.setBinding(binding);
-				// System.out.println(node.getBinding().getMemoryLocation().getOffset());
+				
 			}
-			// else parent DeclarationNode does the processing.
+			else if (isBoxname(node)) {
+				Binding binding = node.findGlobalBinding();
+				node.setType(binding.getType());
+				node.setBinding(binding);
+			}
+		}
+
+		
+		private boolean isBoxname(ParseNode node) {
+			ParseNode parent = node.getParent();
+			return parent.getToken().isLextant(Punctuator.AT);
 		}
 
 		private boolean isParameter(ParseNode node) {

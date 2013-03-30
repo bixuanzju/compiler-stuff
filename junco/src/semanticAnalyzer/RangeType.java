@@ -23,8 +23,7 @@ public class RangeType implements Type {
 	}
 	
 	@Override
-	public Boolean isComparable() {
-	
+	public boolean isComparable() {
 		return childType.isComparable();
 	}
 }
