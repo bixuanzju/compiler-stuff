@@ -120,14 +120,18 @@ public class JuncoSemanticAnalyzer {
 			IdentifierNode boxName = new IdentifierNode(IdentifierToken.make(node
 					.getToken().getLocation(), node.getToken().getLexeme()));
 			Scope scope = node.getParent().getScope();
-			BoxType type = new BoxType(node.getToken().getLexeme(), boxTypeIdentifier++);
+			BoxType type = new BoxType(node.getToken().getLexeme(),
+					boxTypeIdentifier++);
 			scope.createBinding(boxName, type);
 			node.setType(type);
+			node.setBoxName(node.getToken().getLexeme());
 		}
 
 		public void visitEnter(FunctionDeclNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
 
 			IdentifierNode name = (IdentifierNode) node.child(0);
+			name.getToken().setLexeme(node.returnBoxName());
 
 			ParameterListNode parameterList = (ParameterListNode) node.child(1);
 
@@ -187,10 +191,10 @@ public class JuncoSemanticAnalyzer {
 			}
 
 		}
-		
+
 		public void visitLeave(BoxBodyNode node) {
-				BoxType type = (BoxType) node.getType();
-				type.setScopeSize(node.getScope().getAllocatedSize());
+			BoxType type = (BoxType) node.getType();
+			type.setScopeSize(node.getScope().getAllocatedSize());
 		}
 
 		public void visitLeave(ProgramNode node) {
@@ -201,6 +205,7 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitEnter(BodyNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
 			enterSubscope(node);
 		}
@@ -218,6 +223,16 @@ public class JuncoSemanticAnalyzer {
 			if (returnType.getConstraintType() instanceof NoneType) {
 				logError("function signature doesn't match return type at"
 						+ node.getToken().getLocation());
+			}
+
+		}
+
+		public void visitEnter(FunctionInvocationNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
+			ParseNode child = node.child(0);
+
+			if (!(child.getToken().getLexeme().contains("$"))) {
+				node.child(0).getToken().setLexeme(node.returnBoxName());
 			}
 
 		}
@@ -258,8 +273,7 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitEnter(ValueBodyNode node) {
-			// Scopes.enterStaticScope(node);
-
+			node.setBoxName(node.getParent().returnBoxName());
 			String returnlabel = labeller.newLabel("value-body-start", "");
 			node.setReturnLabel(returnlabel);
 
@@ -298,7 +312,6 @@ public class JuncoSemanticAnalyzer {
 			}
 
 			node.setType(node.child(node.nChildren() - 1).getType());
-			// Scopes.leaveScope();
 
 		}
 
@@ -335,14 +348,12 @@ public class JuncoSemanticAnalyzer {
 		// statements and declarations
 
 		public void visitEnter(PrintStatementNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
-		@Override
-		public void visitLeave(PrintStatementNode node) {
-		}
-
 		public void visitEnter(DeclarationNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
@@ -359,6 +370,7 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitEnter(WhileStatementNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
@@ -370,6 +382,7 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitEnter(IfStatementNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
@@ -381,6 +394,7 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitEnter(ReturnStatementNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
@@ -398,6 +412,7 @@ public class JuncoSemanticAnalyzer {
 		// expressions
 
 		public void visitEnter(BinaryOperatorNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
@@ -441,6 +456,7 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitEnter(UniaryOperatorNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
@@ -552,6 +568,7 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		public void visitEnter(UpdateStatementNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 

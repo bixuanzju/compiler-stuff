@@ -49,7 +49,7 @@ public abstract class TokenImp implements Token {
 	
 	@Override
 	public void setLexeme(String lexeme) {
-		this.lexeme = lexeme + "." + this.lexeme;
+		this.lexeme = "$" + lexeme + this.lexeme;
 	}
 	
 }
