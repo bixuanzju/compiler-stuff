@@ -693,8 +693,23 @@ public class ASMCodeGenerator {
 				BoxType type = (BoxType) child.getType();
 				code.add(PushI, 12 + type.getScopeSize());
 				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
-				code.add(Duplicate); // [... ptr ptr]
-
+				code.add(Duplicate); // [... ptr, ptr]
+				
+				// I need to store ptr to sp
+				loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... ptr, ptr, sp]
+				code.add(PushI, 4);
+				code.add(Subtract);	// [... ptr, ptr, sp-4]
+				code.add(Exchange);	// [... ptr, sp-4, ptr]
+				code.add(StoreI);	// [... ptr]
+				
+				// update sp
+				loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... ptr, sp]
+				code.add(PushI, 4);
+				code.add(Subtract);	// [... ptr, sp-4]
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER);	// [... ptr]
+				
+				code.add(Duplicate);	//	[... ptr, ptr]
+				
 				// for reference count
 				code.add(PushI, 1);
 				code.add(StoreI); // [... ptr]
@@ -707,6 +722,15 @@ public class ASMCodeGenerator {
 				code.add(StoreI); // [... ptr]
 
 				code.add(Call, child.getToken().getLexeme());
+				
+				//testing
+//				code.add(Duplicate);
+//				code.add(PushI, 12);
+//				code.add(Add);
+//				code.add(LoadI);
+//				String format = printFormat(PrimitiveType.INTEGER);
+//				code.add(PushD, format);
+//				code.add(Printf);
 
 			}
 

@@ -35,6 +35,7 @@ public enum Punctuator implements Lextant {
 	CASTTOFLAOT("::f"),
 	CASTTOCHAR("::c"),
 	CASTTOBOOL("::b"),
+	DOT("."),
 	LOW(".low"),
 	HIGH(".high"),
 	EMPTY(".isEmpty"),

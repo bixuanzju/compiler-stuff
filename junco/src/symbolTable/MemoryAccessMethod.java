@@ -23,7 +23,16 @@ public enum MemoryAccessMethod {
 			code.add(PushD, baseAddress);
 			code.add(LoadI);
 		}
-	};	
+	},
+	
+	DOUBLE_INDIRECT_ACCESS_BASE() {
+		protected void generateBaseAddress(ASMCodeFragment code, String baseAddress) {
+			code.add(PushD, baseAddress);
+			code.add(LoadI);
+			code.add(LoadI);
+		}
+	};
+	
 	
 
 	public void generateAddress(ASMCodeFragment code, String baseAddress, int offset, String comment) {
