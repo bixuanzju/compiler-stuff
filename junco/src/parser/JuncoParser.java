@@ -63,7 +63,7 @@ public class JuncoParser {
 			return syntaxErrorNode("program");
 		}
 		ParseNode program = new ProgramNode(nowReading);
-		
+
 		while (nowReading.isLextant(Keyword.BOX)) {
 			ParseNode box = parseBox();
 			program.appendChild(box);
@@ -90,7 +90,7 @@ public class JuncoParser {
 		}
 
 		expect(Keyword.BOX);
-//		expect(Keyword.MAIN);
+		// expect(Keyword.MAIN);
 		ParseNode box = parseBoxBody();
 
 		return box;
@@ -338,9 +338,6 @@ public class JuncoParser {
 		expect(Punctuator.OPEN_BRACE);
 		while (startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
-			// if (statement instanceof FunctionDeclNode) {
-			// syntaxError(nowReading, "no function declaration allowed");
-			// }
 			body.appendChild(statement);
 		}
 
@@ -357,9 +354,6 @@ public class JuncoParser {
 		expect(Punctuator.BODY_OPEN);
 		while (startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
-			// if (statement instanceof FunctionDeclNode) {
-			// syntaxError(nowReading, "no function declaration allowed");
-			// }
 			body.appendChild(statement);
 		}
 
@@ -734,14 +728,14 @@ public class JuncoParser {
 
 		return left;
 	}
-	
+
 	private ParseNode parseBoxCreation() {
 		if (!startsExpression5(nowReading)) {
 			return syntaxErrorNode("expression<box creation>");
 		}
 		Token token = nowReading;
 		ParseNode right = null;
-		
+
 		if (nowReading.isLextant(Punctuator.AT)) {
 			readToken();
 			right = parseExpression5();
@@ -750,14 +744,14 @@ public class JuncoParser {
 		else {
 			right = parseExpression5();
 		}
-		
+
 		return right;
 	}
-	
+
 	// expr4 -> literal
 	private ParseNode parseExpression5() {
 		if (!startsExpression5(nowReading)) {
-			return syntaxErrorNode("expression<4>");
+			return syntaxErrorNode("expression<5>");
 		}
 		if (nowReading.isLextant(Punctuator.OPEN_BRACKET)) {
 			readToken();
@@ -788,6 +782,8 @@ public class JuncoParser {
 				expect(Punctuator.OPEN_BRACKET);
 				if (!nowReading.isLextant(Punctuator.CLOSE_BRACKET)) {
 					expressionList = parseExpressionList(expressionList);
+					expressionList.appendChild(new IdentifierNode(IdentifierToken.make(
+							nowReading.getLocation(), Keyword.THIS.getLexeme())));
 				}
 				expect(Punctuator.CLOSE_BRACKET);
 
@@ -826,6 +822,9 @@ public class JuncoParser {
 		if (startsCharacterConstant(nowReading)) {
 			return parseCharacterConstant();
 		}
+		if (startsThisKeyword(nowReading)) {
+			return parseThisKeyWord();
+		}
 
 		assert false : "bad token " + nowReading + " in parseLiteral()";
 		return null;
@@ -838,7 +837,22 @@ public class JuncoParser {
 				|| startsBooleanConstant(token)
 				|| startsCharacterConstant(token)
 				|| (token.isLextant(Punctuator.OPEN_BRACKET, Punctuator.NOT,
-						Punctuator.OPEN_SQUARE, Punctuator.BODY_OPEN, Punctuator.AT));
+						Punctuator.OPEN_SQUARE, Punctuator.BODY_OPEN, Punctuator.AT))
+				|| startsThisKeyword(token);
+	}
+
+	private ParseNode parseThisKeyWord() {
+		if (!startsThisKeyword(nowReading)) {
+			return syntaxErrorNode("this keyword");
+		}
+		readToken();
+		return new IdentifierNode(IdentifierToken.make(
+				previouslyRead.getLocation(), Keyword.THIS.getLexeme()));
+	}
+
+	// this keyword
+	private boolean startsThisKeyword(Token token) {
+		return token.isLextant(Keyword.THIS);
 	}
 
 	// number (terminal)

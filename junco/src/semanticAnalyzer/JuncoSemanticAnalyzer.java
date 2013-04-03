@@ -151,7 +151,7 @@ public class JuncoSemanticAnalyzer {
 				addBinding((IdentifierNode) child, child.getType());
 			}
 
-			int sizeOfParameters = node.getScope().getAllocatedSize();
+			int sizeOfParameters = node.getScope().getAllocatedSize() + 4;
 
 			for (ParseNode child : parameterList.getChildren()) {
 				((IdentifierNode) child).getBinding().getMemoryLocation()
@@ -185,9 +185,17 @@ public class JuncoSemanticAnalyzer {
 		public void visitEnter(BoxBodyNode node) {
 			if (node.getToken().getLexeme().equals("main")) {
 				enterSubscope(node);
+				IdentifierNode thisPtr = new IdentifierNode(IdentifierToken.make(node
+						.getToken().getLocation(), Keyword.THIS.getLexeme()));
+				Scope scope = node.getScope();
+				scope.createBinding(thisPtr, node.getType());
 			}
 			else {
 				enterBoxBodyScope(node);
+				IdentifierNode thisPtr = new IdentifierNode(IdentifierToken.make(node
+						.getToken().getLocation(), Keyword.THIS.getLexeme()));
+				Scope scope = node.getScope();
+				scope.createBinding(thisPtr, node.getType());
 			}
 
 		}
@@ -248,8 +256,8 @@ public class JuncoSemanticAnalyzer {
 				node.setType(returnType);
 
 				List<ParseNode> parameterList = node.child(1).getChildren();
-				if (parameterList.size() == typeList.size() - 1) {
-					for (int i = 0; i < parameterList.size(); i++) {
+				if (parameterList.size() == typeList.size()) {
+					for (int i = 0; i < parameterList.size() - 1; i++) {
 						if (!parameterList.get(i).getType().infoString()
 								.equals(typeList.get(i).infoString())) {
 							logError("parameter doesn't match function declaration at "

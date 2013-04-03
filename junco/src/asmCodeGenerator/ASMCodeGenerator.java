@@ -694,43 +694,83 @@ public class ASMCodeGenerator {
 				code.add(PushI, 12 + type.getScopeSize());
 				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
 				code.add(Duplicate); // [... ptr, ptr]
-				
-				// I need to store ptr to sp
+
+				// store ptr frame
 				loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... ptr, ptr, sp]
 				code.add(PushI, 4);
-				code.add(Subtract);	// [... ptr, ptr, sp-4]
-				code.add(Exchange);	// [... ptr, sp-4, ptr]
-				code.add(StoreI);	// [... ptr]
-				
+				code.add(Subtract); // [... ptr, ptr, sp-4]
+				code.add(Exchange); // [... ptr, sp-4, ptr]
+				code.add(StoreI); // [... ptr]
+
 				// update sp
 				loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... ptr, sp]
 				code.add(PushI, 4);
-				code.add(Subtract);	// [... ptr, sp-4]
-				storeITo(code, RunTime.GLOBAL_STACK_POINTER);	// [... ptr]
-				
-				code.add(Duplicate);	//	[... ptr, ptr]
-				
+				code.add(Subtract); // [... ptr, sp-4]
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [... ptr]
+
+				// store pre fp
+				loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... ptr, sp]
+				code.add(PushI, 4);
+				code.add(Subtract); // [... ptr, sp-4]
+				loadIFrom(code, RunTime.GLOBAL_FRAME_POINTER); // [... ptr, sp-4, fp]
+				code.add(StoreI); // [... ptr]
+
+				// set fp to equal to sp
+				loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);
+				storeITo(code, RunTime.GLOBAL_FRAME_POINTER);
+
+				// update sp
+				loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... ptr, sp]
+				code.add(PushI, 4);
+				code.add(Subtract); // [... ptr, sp-4]
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [... ptr]
+
+				code.add(Duplicate); // [... ptr, ptr]
+
 				// for reference count
 				code.add(PushI, 1);
 				code.add(StoreI); // [... ptr]
 
-				code.add(Duplicate); // [... ptr, ptr]
 				// for type identifier
+				code.add(Duplicate); // [... ptr, ptr]
 				code.add(PushI, 4);
 				code.add(Add); // [... ptr, ptr+4]
 				code.add(PushI, type.getBoxIdentifier());
 				code.add(StoreI); // [... ptr]
 
+				// set this pointer
+				// TODO I may put this pointer in offset 8 to avoid geting trouble in
+				// referencing counting
+				code.add(Duplicate); // [... ptr, ptr]
+				code.add(Duplicate); // [... ptr, ptr, ptr]
+				code.add(PushI, 12);
+				code.add(Add); // [... ptr, ptr, ptr+12]
+				code.add(Exchange); // [... ptr, ptr+12, ptr]
+				code.add(StoreI); // [... ptr]
+
 				code.add(Call, child.getToken().getLexeme());
-				
-				//testing
-//				code.add(Duplicate);
-//				code.add(PushI, 12);
-//				code.add(Add);
-//				code.add(LoadI);
-//				String format = printFormat(PrimitiveType.INTEGER);
-//				code.add(PushD, format);
-//				code.add(Printf);
+
+				// restore fp
+				loadIFrom(code, RunTime.GLOBAL_FRAME_POINTER);
+				code.add(PushI, 4);
+				code.add(Subtract);
+				code.add(LoadI);
+				storeITo(code, RunTime.GLOBAL_FRAME_POINTER);
+
+				// restore sp
+				loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);
+				code.add(PushI, 8);
+				code.add(Add);
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER);
+
+				// testing
+				// code.add(Duplicate);
+				// code.add(PushI, 12);
+				// code.add(Add);
+				// code.add(LoadI);
+				// String format = printFormat(PrimitiveType.INTEGER);
+				// code.add(PushD, format);
+				// code.add(Printf);
 
 			}
 
@@ -893,22 +933,11 @@ public class ASMCodeGenerator {
 				break;
 			} // [... pc]
 
-			// code.add(Exchange); // [... val, return], val is the size of return
-			// type
 			code.add(Return);
 
 			code.add(Label, endlabel);
 
 		}
-
-		// public void visitLeave(ParameterListNode node) {
-		// newVoidCode(node);
-		//
-		// for (ParseNode child : node.getChildren()) {
-		// code.append(removeAddressCode(child));
-		// }
-		//
-		// }
 
 		// /////////////////////////////////////////////////////////////////////////
 		// expressions

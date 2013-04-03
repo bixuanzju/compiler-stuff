@@ -17,7 +17,7 @@ public class BoxType implements Type {
 	}
 
 	public String infoString() {
-		return "box:" + boxName;
+		return "x:" + boxName;
 	}
 
 	@Override

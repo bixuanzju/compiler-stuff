@@ -47,7 +47,7 @@ public class Scope {
 	private static AllocationStrategy BoxScopeStrategy() {
 		return new PositiveAllocationStrategy(
 				MemoryAccessMethod.DOUBLE_INDIRECT_ACCESS_BASE,
-				MemoryLocation.STACK_POINTER,
+				MemoryLocation.FRAME_POINTER,
 				12);
 	}
 	

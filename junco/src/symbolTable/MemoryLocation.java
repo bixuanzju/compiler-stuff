@@ -6,7 +6,6 @@ import asmCodeGenerator.RunTime;
 public class MemoryLocation {
 	public static final String GLOBAL_VARIABLE_BLOCK = RunTime.GLOBAL_MEMORY_BLOCK;
 	public static final String FRAME_POINTER = RunTime.GLOBAL_FRAME_POINTER;
-	public static final String STACK_POINTER = RunTime.GLOBAL_STACK_POINTER;
 	
 	private MemoryAccessMethod accessor;
 	private String baseAddress;
