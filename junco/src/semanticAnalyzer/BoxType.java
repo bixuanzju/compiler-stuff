@@ -36,4 +36,8 @@ public class BoxType implements Type {
 	public int getBoxIdentifier() {
 		return boxIdentifier;
 	}
+	
+	public String getBoxName() {
+		return boxName;
+	}
 }

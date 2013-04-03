@@ -22,6 +22,7 @@ import parseTree.nodeTypes.FunctionInvocationNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
+import parseTree.nodeTypes.MemberAccessNode;
 import parseTree.nodeTypes.ParameterListNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
@@ -235,14 +236,22 @@ public class JuncoSemanticAnalyzer {
 			}
 
 		}
-		
+
 		public void visitEnter(CallStatementNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
+			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
-		
+
 		public void visitLeave(CallStatementNode node) {
-			if (!(node.child(0) instanceof FunctionInvocationNode)) {
-				logError("call function invocation at " + node.getToken().getLocation());
+			ParseNode child = node.child(0);
+			
+			if (child instanceof MemberAccessNode) {
+				if (!(child.child(0).getType() instanceof BoxType)) {
+					logError("need function invocation at " + node.getToken().getLocation());
+				}
+			}
+			else if (!(child instanceof FunctionInvocationNode)) {
+				logError("need function invocation at " + node.getToken().getLocation());
 			}
 		}
 
@@ -250,10 +259,15 @@ public class JuncoSemanticAnalyzer {
 			node.setBoxName(node.getParent().returnBoxName());
 			ParseNode child = node.child(0);
 
-			if (!(child.getToken().getLexeme().contains("$"))) {
-				node.child(0).getToken().setLexeme(node.returnBoxName());
+			if (node.getParent() instanceof MemberAccessNode) {
+				if (node.getParent().child(0).getType() instanceof BoxType) {
+					BoxType type = (BoxType) node.getParent().child(0).getType();
+					child.getToken().setLexeme(type.getBoxName());
+				}
 			}
-
+			else {
+				child.getToken().setLexeme(node.returnBoxName());
+			}
 		}
 
 		public void visitLeave(FunctionInvocationNode node) {
@@ -472,6 +486,32 @@ public class JuncoSemanticAnalyzer {
 		private Lextant operatorFor(BinaryOperatorNode node) {
 			LextantToken token = (LextantToken) node.getToken();
 			return token.getLextant();
+		}
+
+		public void visitEnter(MemberAccessNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
+			node.setReturnLabel(node.getParent().getReturnLabel());
+		}
+
+		public void visitLeave(MemberAccessNode node) {
+			ParseNode left = node.child(0);
+			ParseNode right = node.child(1);
+
+			if (left.getType() instanceof BoxType) {
+				if (!(right instanceof FunctionInvocationNode)) {
+					logError("not function invocation at "
+							+ node.getToken().getLocation());
+				}
+				else {
+					node.setType(right.getType());
+				}
+			}
+			else if (left.getType() instanceof RangeType) {
+
+			}
+			else {
+				logError("member access not appled at " + node.getToken().getLocation());
+			}
 		}
 
 		public void visitEnter(UniaryOperatorNode node) {

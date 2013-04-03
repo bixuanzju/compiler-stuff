@@ -18,6 +18,7 @@ import parseTree.nodeTypes.FunctionInvocationNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
+import parseTree.nodeTypes.MemberAccessNode;
 import parseTree.nodeTypes.ParameterListNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
@@ -182,7 +183,7 @@ public class JuncoParser {
 				
 		readToken();
 		
-		result.appendChild(parseExpression5());
+		result.appendChild(parseMemberAccess());
 						
 		expect(Punctuator.TERMINATOR);
 		
@@ -738,11 +739,13 @@ public class JuncoParser {
 
 		ParseNode left = parseBoxCreation();
 
-		while (nowReading.isLextant(Punctuator.LOW, Punctuator.HIGH,
-				Punctuator.EMPTY)) {
-			Token memberToken = nowReading;
-			left = UniaryOperatorNode.withChildren(left, memberToken);
+		while (nowReading.isLextant(Punctuator.DOT)) {
+			Token operatorToken = nowReading;
 			readToken();
+			
+			ParseNode right = parseExpression5();
+
+			left = MemberAccessNode.withChildren(operatorToken, left, right);
 		}
 
 		return left;
