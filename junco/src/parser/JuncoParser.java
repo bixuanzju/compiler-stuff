@@ -7,6 +7,7 @@ import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
+import parseTree.nodeTypes.CallStatementNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
@@ -111,13 +112,7 @@ public class JuncoParser {
 
 		while (startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
-
 			box.appendChild(statement);
-
-			// if (statement instanceof ReturnStatementNode) {
-			// syntaxError(statement.getToken(),
-			// "box body node cannot contain return statement");
-			// }
 		}
 		expect(Punctuator.CLOSE_BRACE);
 		return box;
@@ -159,6 +154,9 @@ public class JuncoParser {
 		if (startsFunctionDecl(nowReading)) {
 			return parseFunctionDecl();
 		}
+		if (startsCallStatement(nowReading)) {
+			return parseCallStatement();
+		}
 		assert false : "bad token " + nowReading + " in parseStatement()";
 		return null;
 	}
@@ -167,7 +165,28 @@ public class JuncoParser {
 		return startsPrintStatement(token) || startsDeclaration(token)
 				|| startsUpdateStatement(token) || startsIfStatement(token)
 				|| startsWhileStatement(token) || startsBody(token)
-				|| startsReturnStatement(token) || startsFunctionDecl(token);
+				|| startsReturnStatement(token) || startsFunctionDecl(token)
+				|| startsCallStatement(token);
+	}
+	
+	private boolean startsCallStatement(Token token) {
+		return token.isLextant(Keyword.CALL);
+	}
+	
+	private ParseNode parseCallStatement() {
+		if (!startsCallStatement(nowReading)) {
+			syntaxErrorNode("call statement");
+		}
+		
+		CallStatementNode result = new CallStatementNode(nowReading);
+				
+		readToken();
+		
+		result.appendChild(parseExpression5());
+						
+		expect(Punctuator.TERMINATOR);
+		
+		return result;
 	}
 
 	private ParseNode parseIfStatement() {

@@ -12,6 +12,7 @@ import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
+import parseTree.nodeTypes.CallStatementNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
@@ -233,6 +234,16 @@ public class JuncoSemanticAnalyzer {
 						+ node.getToken().getLocation());
 			}
 
+		}
+		
+		public void visitEnter(CallStatementNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
+		}
+		
+		public void visitLeave(CallStatementNode node) {
+			if (!(node.child(0) instanceof FunctionInvocationNode)) {
+				logError("call function invocation at " + node.getToken().getLocation());
+			}
 		}
 
 		public void visitEnter(FunctionInvocationNode node) {
