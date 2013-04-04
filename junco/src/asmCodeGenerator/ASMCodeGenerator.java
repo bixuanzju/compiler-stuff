@@ -21,6 +21,7 @@ import parseTree.nodeTypes.FunctionInvocationNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntNumberNode;
+import parseTree.nodeTypes.MemberAccessNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.ReturnStatementNode;
@@ -617,6 +618,12 @@ public class ASMCodeGenerator {
 			// }
 			code.add(Jump, node.getReturnLabel());
 
+		}
+		
+		public void visitLeave(MemberAccessNode node) {
+			newValueCode(node);
+			
+			code.append(removeValueCode(node.child(1)));
 		}
 
 		public void visitLeave(UniaryOperatorNode node) {

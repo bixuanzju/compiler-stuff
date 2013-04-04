@@ -804,8 +804,6 @@ public class JuncoParser {
 				expect(Punctuator.OPEN_BRACKET);
 				if (!nowReading.isLextant(Punctuator.CLOSE_BRACKET)) {
 					expressionList = parseExpressionList(expressionList);
-					expressionList.appendChild(new IdentifierNode(IdentifierToken.make(
-							nowReading.getLocation(), Keyword.THIS.getLexeme())));
 				}
 				expect(Punctuator.CLOSE_BRACKET);
 

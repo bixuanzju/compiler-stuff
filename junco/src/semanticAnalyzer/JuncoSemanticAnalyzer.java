@@ -16,6 +16,7 @@ import parseTree.nodeTypes.CallStatementNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
+import parseTree.nodeTypes.ExpressionListNode;
 import parseTree.nodeTypes.FloatNumberNode;
 import parseTree.nodeTypes.FunctionDeclNode;
 import parseTree.nodeTypes.FunctionInvocationNode;
@@ -162,6 +163,24 @@ public class JuncoSemanticAnalyzer {
 
 		}
 
+		public void visitEnter(FunctionInvocationNode node) {
+
+			ParseNode expressionList = node.child(1);
+
+			if (node.getParent() instanceof MemberAccessNode) {
+				// add pointer
+				ParseNode name = node.getParent().child(0);
+				expressionList.appendChild(new IdentifierNode(IdentifierToken.make(node
+						.getToken().getLocation(), name.getToken().getLexeme())));
+			}
+			else {
+				// add pointer
+				expressionList.appendChild(new IdentifierNode(IdentifierToken.make(node
+						.getToken().getLocation(), Keyword.THIS.getLexeme())));
+
+			}
+		}
+
 		private void addBinding(IdentifierNode identifierNode, Type type) {
 			Scope scope = identifierNode.getLocalScope();
 			Binding binding = scope.createBinding(identifierNode, type);
@@ -244,10 +263,11 @@ public class JuncoSemanticAnalyzer {
 
 		public void visitLeave(CallStatementNode node) {
 			ParseNode child = node.child(0);
-			
+
 			if (child instanceof MemberAccessNode) {
 				if (!(child.child(0).getType() instanceof BoxType)) {
-					logError("need function invocation at " + node.getToken().getLocation());
+					logError("need function invocation at "
+							+ node.getToken().getLocation());
 				}
 			}
 			else if (!(child instanceof FunctionInvocationNode)) {
@@ -257,6 +277,8 @@ public class JuncoSemanticAnalyzer {
 
 		public void visitEnter(FunctionInvocationNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
+			node.setReturnLabel(node.getParent().getReturnLabel());
+
 			ParseNode child = node.child(0);
 
 			if (node.getParent() instanceof MemberAccessNode) {
@@ -424,6 +446,11 @@ public class JuncoSemanticAnalyzer {
 			if (node.child(0).getType() != PrimitiveType.BOOLEAN) {
 				logError("not boolean expression at " + token.getLocation());
 			}
+		}
+
+		public void visitEnter(ExpressionListNode node) {
+			node.setBoxName(node.getParent().returnBoxName());
+			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
 
 		public void visitEnter(ReturnStatementNode node) {
