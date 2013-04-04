@@ -534,10 +534,21 @@ public class JuncoSemanticAnalyzer {
 				}
 			}
 			else if (left.getType() instanceof RangeType) {
-
+				if (right.getToken().getLexeme().equals("low")
+						|| right.getToken().getLexeme().equals("high")) {
+					node.setType(((RangeType) left.getType()).getChildType());
+				}
+				else if (right.getToken().getLexeme().equals("isEmpty")) {
+					node.setType(PrimitiveType.BOOLEAN);
+				}
+				else {
+					logError("unindentified member at " + node.getToken().getLocation());
+					node.setType(PrimitiveType.ERROR);
+				}
 			}
 			else {
 				logError("member access not appled at " + node.getToken().getLocation());
+				node.setType(PrimitiveType.ERROR);
 			}
 		}
 
@@ -590,20 +601,6 @@ public class JuncoSemanticAnalyzer {
 				}
 				else
 					node.setType(PrimitiveType.INTEGER);
-			}
-			else if (token.isLextant(Punctuator.LOW, Punctuator.HIGH,
-					Punctuator.EMPTY)) {
-				if (!(child.getType() instanceof RangeType)) {
-					logError("must be range type at " + token.getLocation());
-					node.setType(PrimitiveType.ERROR);
-				}
-				else if (token.isLextant(Punctuator.EMPTY)) {
-					node.setType(PrimitiveType.BOOLEAN);
-				}
-				else {
-					node.setType(((RangeType) child.getType()).getChildType());
-				}
-
 			}
 			else if (token.isLextant(Punctuator.AT)) {
 				if (!(child instanceof IdentifierNode)) {
@@ -709,11 +706,18 @@ public class JuncoSemanticAnalyzer {
 		// IdentifierNodes, with helper methods
 		@Override
 		public void visit(IdentifierNode node) {
-			if (!isBeingDeclared(node) && !isParameter(node) && !isBoxname(node)) {
+			if (!isBeingDeclared(node) && !isParameter(node) && !isBoxname(node)
+					&& !isMember(node)) {
 				Binding binding = node.findVariableBinding();
 				node.setType(binding.getType());
 				node.setBinding(binding);
 			}
+		}
+
+		private boolean isMember(ParseNode node) {
+			return node.getToken().getLexeme().equals("low")
+					|| node.getToken().getLexeme().equals("high")
+					|| node.getToken().getLexeme().equals("isEmpty");
 		}
 
 		private boolean isBoxname(ParseNode node) {

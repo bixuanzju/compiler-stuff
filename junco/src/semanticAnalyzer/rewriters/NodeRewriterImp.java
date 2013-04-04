@@ -11,6 +11,7 @@ import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
+import parseTree.nodeTypes.MemberAccessNode;
 import parseTree.nodeTypes.ReturnStatementNode;
 import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
@@ -93,16 +94,18 @@ abstract public class NodeRewriterImp implements NodeRewriter {
 	////////////////////////////////////////////////////////////////////////////////////////
 	// low end, high end, identifier	
 	protected ParseNode lowEnd(ParseNode child) {
-		Token operatorToken = lextantToken(Punctuator.LOW);	//TODO use binary node
-		ParseNode result = UniaryOperatorNode.withChildren(child, operatorToken);
+		Token operatorToken = lextantToken(Punctuator.DOT);
+		ParseNode low = new IdentifierNode(identifierToken("low"));
+		ParseNode result = MemberAccessNode.withChildren(operatorToken, child, low);
 		
 		RangeType childType = (RangeType)child.getType();
 		result.setType(childType.getChildType());
 		return result;
 	}
 	protected ParseNode highEnd(ParseNode child) {
-		Token operatorToken = lextantToken(Punctuator.HIGH);
-		ParseNode result = UniaryOperatorNode.withChildren(child, operatorToken);
+		Token operatorToken = lextantToken(Punctuator.DOT);
+		ParseNode high = new IdentifierNode(identifierToken("high"));
+		ParseNode result = MemberAccessNode.withChildren(operatorToken, child, high);
 		
 		RangeType childType = (RangeType)child.getType();
 		result.setType(childType.getChildType());
@@ -129,7 +132,10 @@ abstract public class NodeRewriterImp implements NodeRewriter {
 		return binaryOperatorNode(Punctuator.EQUAL, arg1, arg2);
 	}		
 	protected ParseNode isEmpty(ParseNode arg1) {
-		return uniaryOperatorNode(Punctuator.EMPTY, arg1);
+		Token operatorToken = lextantToken(Punctuator.DOT);
+		ParseNode empty = new IdentifierNode(identifierToken("isEmpty"));
+		
+		return MemberAccessNode.withChildren(operatorToken, arg1, empty);
 	}	
 	protected ParseNode and(ParseNode arg1, ParseNode arg2) {
 		return binaryOperatorNode(Punctuator.AND, arg1, arg2);

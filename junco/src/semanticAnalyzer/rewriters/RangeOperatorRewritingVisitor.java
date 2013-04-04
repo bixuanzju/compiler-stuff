@@ -4,7 +4,7 @@ import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Punctuator;
 import parseTree.ParseNode;
 import parseTree.nodeTypes.BinaryOperatorNode;
-import parseTree.nodeTypes.UniaryOperatorNode;
+import parseTree.nodeTypes.MemberAccessNode;
 import semanticAnalyzer.RangeType;
 import semanticAnalyzer.Type;
 
@@ -37,9 +37,9 @@ public class RangeOperatorRewritingVisitor extends ASTRewritingVisitor {
 
 	}
 
-	public void visitLeave(UniaryOperatorNode node) {
+	public void visitLeave(MemberAccessNode node) {
 		if (isIsEmptyMemberOperator(node)) { // range.isEmpty
-			assert node.nChildren() == 1;
+			assert node.nChildren() == 2;
 
 			NodeRewriter rewriter = new IsEmptyNodeRewriter();
 			registerReplacement(node, rewriter.rewriteNode(node));
@@ -52,8 +52,8 @@ public class RangeOperatorRewritingVisitor extends ASTRewritingVisitor {
 		return type instanceof RangeType;
 	}
 
-	private boolean isIsEmptyMemberOperator(UniaryOperatorNode node) {
-		if (node.getToken().isLextant(Punctuator.EMPTY)) {
+	private boolean isIsEmptyMemberOperator(MemberAccessNode node) {
+		if (node.child(1).getToken().getLexeme().equals("isEmpty")) {
 			return true;
 		}
 		return false;

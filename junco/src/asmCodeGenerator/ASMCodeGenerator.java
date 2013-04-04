@@ -619,27 +619,57 @@ public class ASMCodeGenerator {
 			code.add(Jump, node.getReturnLabel());
 
 		}
-		
+
 		public void visitLeave(MemberAccessNode node) {
-			newValueCode(node);
-			
-			code.append(removeValueCode(node.child(1)));
+			ParseNode left = node.child(0);
+			ParseNode right = node.child(1);
+
+			if (right.getToken().getLexeme().equals("low")
+					|| right.getToken().getLexeme().equals("high")) {
+
+				newAddressCode(node);
+
+				ASMCodeFragment value = getAndRemoveCode(left);
+
+				if (!value.isAddress()) {
+					code.append(value); // [... val]
+					if (left.getType() instanceof RangeType) {
+						code.add(Duplicate); // [... val val]
+						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
+					}
+				}
+				else {
+					turnAddressIntoValue(value, node.child(0));
+					code.append(value); // [... val]
+				}
+
+				if (right.getToken().getLexeme().equals("low")) {
+
+					code.add(PushI, 12);
+					code.add(Add);
+
+				}
+				else {
+
+					code.add(PushI, 12 + ((RangeType) left.getType()).getChildType()
+							.getSize());
+					code.add(Add);
+
+				}
+			}
+			else {
+				newValueCode(node);
+				code.append(removeValueCode(right));
+			}
 		}
 
 		public void visitLeave(UniaryOperatorNode node) {
 
-			if (node.getToken().isLextant(Punctuator.LOW, Punctuator.HIGH)) {
-				newAddressCode(node);
-			}
-			else {
-				newValueCode(node);
-			}
+			newValueCode(node);
 
 			if (!(node.getToken().isLextant(Punctuator.AT))) {
 
 				ASMCodeFragment value = getAndRemoveCode(node.child(0));
-				// ASMCodeFragment value = removeValueCode(node.child(0));
-				// code.append(value);
 
 				if (!value.isAddress()) {
 					code.append(value); // [... val]
@@ -648,11 +678,11 @@ public class ASMCodeGenerator {
 						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD); // [...
 																																				// val]
 					}
-
 				}
-
-				turnAddressIntoValue(value, node.child(0));
-				code.append(value); // [... val]
+				else {
+					turnAddressIntoValue(value, node.child(0));
+					code.append(value); // [... val]
+				}
 
 				if (node.getToken().isLextant(Punctuator.NOT)) {
 
@@ -681,19 +711,6 @@ public class ASMCodeGenerator {
 
 					code.add(PushI, 127);
 					code.add(BTAnd);
-				}
-				else if (node.getToken().isLextant(Punctuator.LOW)) {
-
-					code.add(PushI, 12);
-					code.add(Add);
-
-				}
-				else if (node.getToken().isLextant(Punctuator.HIGH)) {
-
-					code.add(PushI, 12 + ((RangeType) node.child(0).getType())
-							.getChildType().getSize());
-					code.add(Add);
-
 				}
 			}
 			else {
@@ -946,12 +963,12 @@ public class ASMCodeGenerator {
 			code.add(Label, endlabel);
 
 		}
-		
+
 		public void visitLeave(CallStatementNode node) {
 			newVoidCode(node);
-			
+
 			code.append(removeValueCode(node.child(0)));
-			
+
 			code.add(Pop);
 		}
 
@@ -1338,10 +1355,13 @@ public class ASMCodeGenerator {
 		}
 
 		public void visit(IdentifierNode node) {
-			newAddressCode(node);
-			Binding binding = node.getBinding();
+			if (!(node.getToken().getLexeme().equals("low"))
+					&& !(node.getToken().getLexeme().equals("high"))) {
+				newAddressCode(node);
+				Binding binding = node.getBinding();
 
-			binding.generateAddress(code);
+				binding.generateAddress(code);
+			}
 		}
 
 		public void visit(IntNumberNode node) {

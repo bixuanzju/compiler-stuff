@@ -490,8 +490,7 @@ public class JuncoParser {
 
 		ParseNode target = parseExpression();
 
-		if (!(target instanceof IdentifierNode || target.getToken().isLextant(
-				Punctuator.HIGH, Punctuator.LOW))) {
+		if (!(target instanceof IdentifierNode || target instanceof MemberAccessNode)) {
 			syntaxError(updateToken, "can't be targeted");
 		}
 
