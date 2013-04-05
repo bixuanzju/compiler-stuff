@@ -170,24 +170,24 @@ public class JuncoParser {
 				|| startsReturnStatement(token) || startsFunctionDecl(token)
 				|| startsCallStatement(token);
 	}
-	
+
 	private boolean startsCallStatement(Token token) {
 		return token.isLextant(Keyword.CALL);
 	}
-	
+
 	private ParseNode parseCallStatement() {
 		if (!startsCallStatement(nowReading)) {
 			syntaxErrorNode("call statement");
 		}
-		
+
 		CallStatementNode result = new CallStatementNode(nowReading);
-				
+
 		readToken();
-		
+
 		result.appendChild(parseMemberAccess());
-						
+
 		expect(Punctuator.TERMINATOR);
-		
+
 		return result;
 	}
 
@@ -277,7 +277,15 @@ public class JuncoParser {
 
 	private Type parseTypeSpec() {
 
-		ParseNode result = parseIdentifier();
+		ParseNode result;
+		if (nowReading.isLextant(Keyword.BOX)) {
+			result = new IdentifierNode(IdentifierToken.make(
+					nowReading.getLocation(), "x"));
+			readToken();
+		}
+		else {
+			result = parseIdentifier();
+		}
 
 		String id = result.getToken().getLexeme().toLowerCase();
 
@@ -746,7 +754,7 @@ public class JuncoParser {
 		while (nowReading.isLextant(Punctuator.DOT)) {
 			Token operatorToken = nowReading;
 			readToken();
-			
+
 			ParseNode right = parseExpression5();
 
 			left = MemberAccessNode.withChildren(operatorToken, left, right);
