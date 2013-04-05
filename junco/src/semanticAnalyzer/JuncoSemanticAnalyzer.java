@@ -136,10 +136,11 @@ public class JuncoSemanticAnalyzer {
 			IdentifierNode name = (IdentifierNode) node.child(0);
 			ParameterListNode parameterList = (ParameterListNode) node.child(1);
 			FunctionType funcType = new FunctionType();
-			
+
 			if (name.getToken().getLexeme().equals("printx")) {
 				if (parameterList.nChildren() == 0) {
-					((BoxType) node.getParent().getType()).setFlag(node.getType().getSize());
+					((BoxType) node.getParent().getType()).setFlag(node.getType()
+							.getSize());
 				}
 			}
 
@@ -148,11 +149,10 @@ public class JuncoSemanticAnalyzer {
 			}
 
 			funcType.appendType(node.getType());
-			
+
 			name.getToken().setLexeme(node.returnBoxName());
 			addBinding(name, funcType);
 
-			
 			enterParameterScope(node);
 
 			for (ParseNode child : parameterList.getChildren()) {
@@ -169,19 +169,33 @@ public class JuncoSemanticAnalyzer {
 
 		public void visitEnter(FunctionInvocationNode node) {
 
-			ParseNode expressionList = node.child(1);
+			if (!(node.getParent() instanceof MemberAccessNode)) {
 
-			if (node.getParent() instanceof MemberAccessNode) {
-				// add pointer
-				ParseNode name = node.getParent().child(0);
-				expressionList.appendChild(new IdentifierNode(IdentifierToken.make(node
-						.getToken().getLocation(), name.getToken().getLexeme())));
+				Token token = LextantToken.make(node.getToken().getLocation(),
+						Punctuator.DOT.getLexeme(), Punctuator.DOT);
+
+				ParseNode thisPtr = new IdentifierNode(IdentifierToken.make(node
+						.getToken().getLocation(), "this"));
+
+				ParseNode parent = node.getParent();
+
+				ParseNode member = MemberAccessNode.withChildren(token, thisPtr, node);
+
+				parent.replaceChild(node, member);
 			}
-			else {
-				// add pointer
-				expressionList.appendChild(new IdentifierNode(IdentifierToken.make(node
-						.getToken().getLocation(), Keyword.THIS.getLexeme())));
+			else if ((node.getParent() instanceof MemberAccessNode)
+					&& (node.getParent().child(0).equals(node))) {
+				Token token = LextantToken.make(node.getToken().getLocation(),
+						Punctuator.DOT.getLexeme(), Punctuator.DOT);
 
+				ParseNode thisPtr = new IdentifierNode(IdentifierToken.make(node
+						.getToken().getLocation(), "this"));
+
+				ParseNode parent = node.getParent();
+
+				ParseNode member = MemberAccessNode.withChildren(token, thisPtr, node);
+
+				parent.replaceChild(node, member);
 			}
 		}
 
@@ -258,7 +272,10 @@ public class JuncoSemanticAnalyzer {
 				logError("function signature doesn't match return type at"
 						+ node.getToken().getLocation());
 			}
-			
+			else if (node.getType() instanceof BoxType) {
+				node.setType(returnType.getConstraintType());
+			}
+
 		}
 
 		public void visitEnter(CallStatementNode node) {
@@ -286,14 +303,9 @@ public class JuncoSemanticAnalyzer {
 
 			ParseNode child = node.child(0);
 
-			if (node.getParent() instanceof MemberAccessNode) {
-				if (node.getParent().child(0).getType() instanceof BoxType) {
-					BoxType type = (BoxType) node.getParent().child(0).getType();
-					child.getToken().setLexeme(type.getBoxName());
-				}
-			}
-			else {
-				child.getToken().setLexeme(node.returnBoxName());
+			if (node.getParent().child(0).getType() instanceof BoxType) {
+				BoxType type = (BoxType) node.getParent().child(0).getType();
+				child.getToken().setLexeme(type.getBoxName());
 			}
 		}
 
@@ -308,8 +320,8 @@ public class JuncoSemanticAnalyzer {
 				node.setType(returnType);
 
 				List<ParseNode> parameterList = node.child(1).getChildren();
-				if (parameterList.size() == typeList.size()) {
-					for (int i = 0; i < parameterList.size() - 1; i++) {
+				if (parameterList.size() == typeList.size() - 1) {
+					for (int i = 0; i < parameterList.size(); i++) {
 						if (!parameterList.get(i).getType().infoString()
 								.equals(typeList.get(i).infoString())) {
 							logError("parameter doesn't match function declaration at "
@@ -411,7 +423,7 @@ public class JuncoSemanticAnalyzer {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
-		
+
 		public void visitEnter(DeclarationNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());

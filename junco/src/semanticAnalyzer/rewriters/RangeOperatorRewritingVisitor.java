@@ -36,7 +36,7 @@ public class RangeOperatorRewritingVisitor extends ASTRewritingVisitor {
 		}
 
 	}
-
+	
 	public void visitLeave(MemberAccessNode node) {
 		if (isIsEmptyMemberOperator(node)) { // range.isEmpty
 			assert node.nChildren() == 2;
@@ -45,7 +45,7 @@ public class RangeOperatorRewritingVisitor extends ASTRewritingVisitor {
 			registerReplacement(node, rewriter.rewriteNode(node));
 		}
 	}
-
+	
 	private boolean isRangeOperation(BinaryOperatorNode node) {
 		ParseNode child = node.child(0);
 		Type type = child.getType();

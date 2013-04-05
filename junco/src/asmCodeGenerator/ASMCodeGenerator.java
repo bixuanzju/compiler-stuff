@@ -985,7 +985,7 @@ public class ASMCodeGenerator {
 			code.add(PushI, 8);
 			code.add(PushI, valueBody.getScope().getAllocatedSize());
 			code.add(Add);
-			code.add(PushI, node.getScope().getAllocatedSize());
+			code.add(PushI, node.getScope().getAllocatedSize() + 4);	//lambda lifting
 			code.add(Add);
 			code.add(Add); // [... pc, val, sp+size]
 			storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [... pc, val]
@@ -1039,7 +1039,19 @@ public class ASMCodeGenerator {
 			ParseNode id = node.child(0);
 
 			code.append(removeVoidCode(exprList));
-
+			
+			// lambda lifting
+			if (node.getParent() instanceof MemberAccessNode) {
+				ParseNode left = node.getParent().child(0);
+				loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);	// [... sp]
+				code.add(PushI, 4);	
+				code.add(Subtract);	// [... sp-4]
+				code.add(Duplicate);	// [... sp-4, sp-4]
+				code.append(removeValueCode(left));	// [... sp-4, sp-4, val]
+				code.add(StoreI);	// [... sp-4]
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER);	// [...]
+			}
+			
 			code.add(Call, id.getToken().getLexeme());
 
 			// we back, stack is [...]

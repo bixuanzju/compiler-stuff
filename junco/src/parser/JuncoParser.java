@@ -27,6 +27,7 @@ import parseTree.nodeTypes.UniaryOperatorNode;
 import parseTree.nodeTypes.UpdateStatementNode;
 import parseTree.nodeTypes.ValueBodyNode;
 import parseTree.nodeTypes.WhileStatementNode;
+import semanticAnalyzer.BoxType;
 import semanticAnalyzer.PrimitiveType;
 import semanticAnalyzer.RangeType;
 import semanticAnalyzer.Type;
@@ -295,7 +296,11 @@ public class JuncoParser {
 		else if (id.equals("r") || id.equals("range")) {
 			expect(Punctuator.COLON);
 			return new RangeType(parseTypeSpec());
-
+		}
+		else if (id.equals("x") || id.equals("box")) {
+			expect(Punctuator.COLON);
+			ParseNode boxType = parseIdentifier();
+			return new BoxType(boxType.getToken().getLexeme(), 0);
 		}
 		return null;
 	}

@@ -139,9 +139,8 @@ public class ParseNode {
 	
 	public void replaceChild(ParseNode old, ParseNode replacement) {
 		for (int i = 0; i < nChildren(); i++) {
-			if (children.get(i) == old) {
-				children.remove(i);
-				children.add(i, replacement);
+			if (children.get(i).equals(old)) {
+				children.set(i, replacement);
 				replacement.setParent(this);
 				break;
 			}
