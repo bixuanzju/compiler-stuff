@@ -6,7 +6,8 @@ public class BoxType implements Type {
 	private int scopeSize;
 	private int boxIdentifier;	
 	private String boxName;
-
+	private int hasPrint = 0;
+	
 	public BoxType(String boxName, int identifier) {
 		this.boxName = boxName;
 		boxIdentifier = identifier;
@@ -39,5 +40,13 @@ public class BoxType implements Type {
 	
 	public String getBoxName() {
 		return boxName;
+	}
+	
+	public void setFlag(int size) {
+		hasPrint = size;
+	}
+	
+	public int getFlag() {
+		return hasPrint;
 	}
 }

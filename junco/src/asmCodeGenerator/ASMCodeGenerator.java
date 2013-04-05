@@ -454,6 +454,63 @@ public class ASMCodeGenerator {
 				code.add(Label, endlabel);
 
 			}
+			else if (node.getType() instanceof BoxType) {
+				BoxType type = (BoxType) node.getType();
+				if (type.getFlag() > 0) {
+										
+					loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);	// [... sp]
+					code.add(PushI, 4);
+					code.add(Subtract);	// [... sp-4]
+					code.add(Duplicate);
+					code.append(removeValueCode(node));	// [... sp-4, sp-4, val]
+					code.add(StoreI);	// [... sp-4]
+					storeITo(code, RunTime.GLOBAL_STACK_POINTER);
+					
+					code.add(Call, "$" + type.getBoxName() + "printx");
+					
+					// we back, stack is [...]
+					// load the return value
+
+					loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... sp]
+					code.add(Duplicate); // [... sp, sp]
+					int returnTypeSize = type.getFlag();
+					switch (returnTypeSize) {
+					case 1:
+						code.add(LoadC); // [... sp, val]
+						code.add(Exchange); // [... val, sp]
+						code.add(PushI, 1);
+						code.add(Add); // [... val, sp+1]
+						storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [... val]
+						break;
+					case 4:
+						code.add(LoadI);
+						code.add(Exchange); // [... val, sp]
+						code.add(PushI, 4);
+						code.add(Add); // [... val, sp+4]
+						storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [... val]
+						break;
+					case 8:
+						code.add(LoadF);
+						code.add(Exchange); // [... val, sp]
+						code.add(PushI, 8);
+						code.add(Add); // [... val, sp+8]
+						storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [... val]
+						break;
+					default:
+						break;
+					}
+					// get rid of retutn value
+					code.add(Pop);
+				}
+				else {
+					String label = labeller.newLabel("print-box-", "");
+					code.add(DLabel, label);
+					code.add(DataS, type.getBoxName());
+					code.add(PushD, label);
+					code.add(Printf);
+				}
+
+			}
 			else {
 				String format = printFormat(node.getType());
 				code.append(removeValueCode(node));

@@ -134,20 +134,25 @@ public class JuncoSemanticAnalyzer {
 			node.setBoxName(node.getParent().returnBoxName());
 
 			IdentifierNode name = (IdentifierNode) node.child(0);
-			name.getToken().setLexeme(node.returnBoxName());
-
 			ParameterListNode parameterList = (ParameterListNode) node.child(1);
-
 			FunctionType funcType = new FunctionType();
+			
+			if (name.getToken().getLexeme().equals("printx")) {
+				if (parameterList.nChildren() == 0) {
+					((BoxType) node.getParent().getType()).setFlag(node.getType().getSize());
+				}
+			}
 
 			for (ParseNode child : parameterList.getChildren()) {
 				funcType.appendType(child.getType());
 			}
 
 			funcType.appendType(node.getType());
-
+			
+			name.getToken().setLexeme(node.returnBoxName());
 			addBinding(name, funcType);
 
+			
 			enterParameterScope(node);
 
 			for (ParseNode child : parameterList.getChildren()) {
@@ -160,7 +165,6 @@ public class JuncoSemanticAnalyzer {
 				((IdentifierNode) child).getBinding().getMemoryLocation()
 						.resetOffset(sizeOfParameters);
 			}
-
 		}
 
 		public void visitEnter(FunctionInvocationNode node) {
@@ -224,6 +228,7 @@ public class JuncoSemanticAnalyzer {
 		public void visitLeave(BoxBodyNode node) {
 			BoxType type = (BoxType) node.getType();
 			type.setScopeSize(node.getScope().getAllocatedSize());
+
 		}
 
 		public void visitLeave(ProgramNode node) {
@@ -253,7 +258,7 @@ public class JuncoSemanticAnalyzer {
 				logError("function signature doesn't match return type at"
 						+ node.getToken().getLocation());
 			}
-
+			
 		}
 
 		public void visitEnter(CallStatementNode node) {
@@ -406,7 +411,7 @@ public class JuncoSemanticAnalyzer {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
 		}
-
+		
 		public void visitEnter(DeclarationNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
