@@ -169,7 +169,8 @@ public class JuncoSemanticAnalyzer {
 
 		public void visitEnter(FunctionInvocationNode node) {
 
-			if (!(node.getParent() instanceof MemberAccessNode)) {
+			if (!(node.getParent() instanceof MemberAccessNode)
+					|| (node.getParent().child(0).equals(node))) {
 
 				Token token = LextantToken.make(node.getToken().getLocation(),
 						Punctuator.DOT.getLexeme(), Punctuator.DOT);
@@ -183,20 +184,7 @@ public class JuncoSemanticAnalyzer {
 
 				parent.replaceChild(node, member);
 			}
-			else if ((node.getParent() instanceof MemberAccessNode)
-					&& (node.getParent().child(0).equals(node))) {
-				Token token = LextantToken.make(node.getToken().getLocation(),
-						Punctuator.DOT.getLexeme(), Punctuator.DOT);
 
-				ParseNode thisPtr = new IdentifierNode(IdentifierToken.make(node
-						.getToken().getLocation(), "this"));
-
-				ParseNode parent = node.getParent();
-
-				ParseNode member = MemberAccessNode.withChildren(token, thisPtr, node);
-
-				parent.replaceChild(node, member);
-			}
 		}
 
 		private void addBinding(IdentifierNode identifierNode, Type type) {
