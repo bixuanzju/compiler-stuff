@@ -143,7 +143,8 @@ public class JuncoSemanticAnalyzer {
 							.getSize());
 				}
 			}
-
+			
+			
 			for (ParseNode child : parameterList.getChildren()) {
 				funcType.appendType(child.getType());
 			}
@@ -263,7 +264,19 @@ public class JuncoSemanticAnalyzer {
 			else if (node.getType() instanceof BoxType) {
 				node.setType(returnType.getConstraintType());
 			}
-
+			
+			ParameterListNode parameterList = (ParameterListNode) node.child(1);
+			Scope global = node.getTopScope();
+			
+			for (ParseNode child : parameterList.getChildren()) {
+				if (child.getType() instanceof BoxType) {
+					BoxType type = (BoxType) child.getType();
+					if (!(global.getSymbolTable().containsKey(type.getBoxName()))) {
+						logError("unknown box name at " + child.getToken().getLocation());
+					}
+				}
+			}
+			
 		}
 
 		public void visitEnter(CallStatementNode node) {

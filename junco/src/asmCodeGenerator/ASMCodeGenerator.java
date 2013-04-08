@@ -250,12 +250,9 @@ public class ASMCodeGenerator {
 			Collection<Binding> allNames = scope.getSymbolTable().values();
 
 			for (Binding binding : allNames) {
-				if (binding.getType() instanceof RangeType) {
-					int offset = binding.getMemoryLocation().getOffset();
-					String baseAddress = binding.getMemoryLocation().getBaseAddress();
-					code.add(PushD, baseAddress);
-					code.add(PushI, offset);
-					code.add(Add);
+				if ((binding.getType() instanceof RangeType)
+						|| (binding.getType() instanceof BoxType)) {
+					binding.generateAddress(code);
 					code.add(LoadI);
 					code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
 				}
@@ -457,17 +454,17 @@ public class ASMCodeGenerator {
 			else if (node.getType() instanceof BoxType) {
 				BoxType type = (BoxType) node.getType();
 				if (type.getFlag() > 0) {
-										
-					loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);	// [... sp]
+
+					loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... sp]
 					code.add(PushI, 4);
-					code.add(Subtract);	// [... sp-4]
+					code.add(Subtract); // [... sp-4]
 					code.add(Duplicate);
-					code.append(removeValueCode(node));	// [... sp-4, sp-4, val]
-					code.add(StoreI);	// [... sp-4]
+					code.append(removeValueCode(node)); // [... sp-4, sp-4, val]
+					code.add(StoreI); // [... sp-4]
 					storeITo(code, RunTime.GLOBAL_STACK_POINTER);
-					
+
 					code.add(Call, "$" + type.getBoxName() + "printx");
-					
+
 					// we back, stack is [...]
 					// load the return value
 
@@ -499,7 +496,7 @@ public class ASMCodeGenerator {
 					default:
 						break;
 					}
-					// get rid of retutn value
+					// get rid of return value
 					code.add(Pop);
 				}
 				else {
@@ -586,8 +583,8 @@ public class ASMCodeGenerator {
 			if (rvalue.isAddress()) {
 				turnAddressIntoValue(rvalue, node.child(1));
 				code.append(rvalue); // [... ptr]
-				if (node.child(1).getType() instanceof RangeType) {
-
+				if ((node.child(1).getType() instanceof RangeType)
+						|| (node.child(1).getType() instanceof BoxType)) {
 					code.add(Duplicate); // [... ptr ptr]
 					code.add(Call, ReferenceCounting.REF_COUNTER_INCREMENT_REFCOUNT);
 
@@ -690,10 +687,8 @@ public class ASMCodeGenerator {
 
 				if (!value.isAddress()) {
 					code.append(value); // [... val]
-					if (left.getType() instanceof RangeType) {
-						code.add(Duplicate); // [... val val]
-						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
-					}
+					code.add(Duplicate); // [... val val]
+					code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD);
 				}
 				else {
 					turnAddressIntoValue(value, node.child(0));
@@ -726,20 +721,8 @@ public class ASMCodeGenerator {
 
 			if (!(node.getToken().isLextant(Punctuator.AT))) {
 
-				ASMCodeFragment value = getAndRemoveCode(node.child(0));
-
-				if (!value.isAddress()) {
-					code.append(value); // [... val]
-					if (node.child(0).getType() instanceof RangeType) {
-						code.add(Duplicate); // [... val val]
-						code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD); // [...
-																																				// val]
-					}
-				}
-				else {
-					turnAddressIntoValue(value, node.child(0));
-					code.append(value); // [... val]
-				}
+				ASMCodeFragment value = removeValueCode(node.child(0));
+				code.append(value); // [... val]
 
 				if (node.getToken().isLextant(Punctuator.NOT)) {
 
@@ -821,8 +804,6 @@ public class ASMCodeGenerator {
 				code.add(StoreI); // [... ptr]
 
 				// set this pointer
-				// TODO I may put this pointer in offset 8 to avoid geting trouble in
-				// referencing counting
 				code.add(Duplicate); // [... ptr, ptr]
 				code.add(Duplicate); // [... ptr, ptr, ptr]
 				code.add(PushI, 12);
@@ -845,15 +826,6 @@ public class ASMCodeGenerator {
 				code.add(Add);
 				storeITo(code, RunTime.GLOBAL_STACK_POINTER);
 
-				// testing
-				// code.add(Duplicate);
-				// code.add(PushI, 12);
-				// code.add(Add);
-				// code.add(LoadI);
-				// String format = printFormat(PrimitiveType.INTEGER);
-				// code.add(PushD, format);
-				// code.add(Printf);
-
 			}
 
 		}
@@ -867,7 +839,8 @@ public class ASMCodeGenerator {
 			code.append(lvalue); // [... addr]
 
 			// reference counting
-			if (node.child(0).getType() instanceof RangeType) {
+			if ((node.child(0).getType() instanceof RangeType)
+					|| (node.child(0).getType() instanceof BoxType)) {
 				code.add(Duplicate); // [... addr addr]
 				code.add(LoadI); // [... addr lptr]
 				code.add(Call, ReferenceCounting.REF_COUNTER_PUSH_RECORD); // [... addr]
@@ -985,7 +958,7 @@ public class ASMCodeGenerator {
 			code.add(PushI, 8);
 			code.add(PushI, valueBody.getScope().getAllocatedSize());
 			code.add(Add);
-			code.add(PushI, node.getScope().getAllocatedSize() + 4);	//lambda lifting
+			code.add(PushI, node.getScope().getAllocatedSize() + 4); // lambda lifting
 			code.add(Add);
 			code.add(Add); // [... pc, val, sp+size]
 			storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [... pc, val]
@@ -1039,19 +1012,19 @@ public class ASMCodeGenerator {
 			ParseNode id = node.child(0);
 
 			code.append(removeVoidCode(exprList));
-			
+
 			// lambda lifting
 			if (node.getParent() instanceof MemberAccessNode) {
 				ParseNode left = node.getParent().child(0);
-				loadIFrom(code, RunTime.GLOBAL_STACK_POINTER);	// [... sp]
-				code.add(PushI, 4);	
-				code.add(Subtract);	// [... sp-4]
-				code.add(Duplicate);	// [... sp-4, sp-4]
-				code.append(removeValueCode(left));	// [... sp-4, sp-4, val]
-				code.add(StoreI);	// [... sp-4]
-				storeITo(code, RunTime.GLOBAL_STACK_POINTER);	// [...]
+				loadIFrom(code, RunTime.GLOBAL_STACK_POINTER); // [... sp]
+				code.add(PushI, 4);
+				code.add(Subtract); // [... sp-4]
+				code.add(Duplicate); // [... sp-4, sp-4]
+				code.append(removeValueCode(left)); // [... sp-4, sp-4, val]
+				code.add(StoreI); // [... sp-4]
+				storeITo(code, RunTime.GLOBAL_STACK_POINTER); // [...]
 			}
-			
+
 			code.add(Call, id.getToken().getLexeme());
 
 			// we back, stack is [...]

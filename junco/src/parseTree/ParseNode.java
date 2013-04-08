@@ -2,6 +2,7 @@ package parseTree;
 
 import java.util.ArrayList;
 import java.util.List;
+import parseTree.nodeTypes.ProgramNode;
 
 import semanticAnalyzer.PrimitiveType;
 import semanticAnalyzer.Type;
@@ -100,6 +101,14 @@ public class ParseNode {
 		}
 		SymbolTable symbolTable = scope.getSymbolTable();
 		return symbolTable.lookup(identifier);
+	}
+	public Scope getTopScope() {
+		ParseNode parent = this.getParent();
+
+		while (!(parent instanceof ProgramNode)) {
+			parent = parent.getParent();
+		}
+		return parent.getScope();
 	}
 	
 ////////////////////////////////////////////////////////////////////////////////////
