@@ -3,6 +3,9 @@ package asmCodeGenerator;
 import static asmCodeGenerator.ASMHelper.*;
 import static asmCodeGenerator.ASMCodeFragment.CodeType.*;
 import static asmCodeGenerator.ASMOpcode.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import asmCodeGenerator.ASMCodeFragment;
 
 public class ReferenceCounting {
@@ -30,7 +33,9 @@ public class ReferenceCounting {
 
 	private static final String REF_COUNTER_STACK_SIZE_EXCEEDED_MESSAGE = "$errors-decrement-stack-size-exceeded";
 	private static final String REF_COUNTER_STACK_SIZE_EXCEEDED_ERROR   = "-ref-counter-stack_size_exceeded_error";
-
+		
+	public static Map<Integer, List<Integer>> table = new HashMap<Integer, List<Integer>>();
+	
 	// to-decrement stack information.  We never grow the stack, but give an error if it overflows.
 	// a more-robust implementation would grow the stack on overflow.  We keep the simple implementation
 	// because stack overflow in testing may indicate an error.

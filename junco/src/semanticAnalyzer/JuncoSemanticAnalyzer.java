@@ -1,8 +1,10 @@
 package semanticAnalyzer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import asmCodeGenerator.Labeller;
+import asmCodeGenerator.ReferenceCounting;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
@@ -42,7 +44,7 @@ import tokens.Token;
 
 public class JuncoSemanticAnalyzer {
 	ParseNode ASTree;
-
+	
 	public static ParseNode analyze(ParseNode ASTree) {
 		JuncoSemanticAnalyzer analyzer = new JuncoSemanticAnalyzer(ASTree);
 		return analyzer.analyze();
@@ -65,9 +67,7 @@ public class JuncoSemanticAnalyzer {
 		}
 
 		ASTree = iterateRewriting(ASTree);
-		// System.out.println(ASTree.getScope().getAllocatedSize());
 		ASTree.accept(new SemanticAnalysisVisitor());
-		// System.out.println(ASTree.getScope().getAllocatedSize());
 
 		return ASTree;
 	}
@@ -231,7 +231,15 @@ public class JuncoSemanticAnalyzer {
 		public void visitLeave(BoxBodyNode node) {
 			BoxType type = (BoxType) node.getType();
 			type.setScopeSize(node.getScope().getAllocatedSize());
-
+			//TODO
+			List<Integer> list = new ArrayList<Integer>();
+			for (Binding binding : node.getScope().getSymbolTable().values()) {
+				if (binding.getType() instanceof BoxType || binding.getType() instanceof RangeType) {
+					list.add(binding.getMemoryLocation().getOffset());
+				}
+			}
+			
+			ReferenceCounting.table.put(type.getBoxIdentifier(), list);
 		}
 
 		public void visitLeave(ProgramNode node) {
