@@ -1,7 +1,11 @@
-My Projects at School
-====================
+Junco Compiler
+==============
 
-Here are my projects during my school day.
+## Introduction ##
 
-Right now I am working on _Compiler Design_ (a toy compiler called
-Junco). Hope the instructor don't find here and get me into trouble.
+Junco is a toy language invented by my professor at SFU while I was
+taking CMPT 379 - Compilers.
+
+## Language Design ##
+
+Todo
