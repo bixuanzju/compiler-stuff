@@ -7,6 +7,7 @@ import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
+import parseTree.nodeTypes.BreakStatementNode;
 import parseTree.nodeTypes.CallStatementNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
@@ -153,6 +154,9 @@ public class JuncoParser {
 		if (startsReturnStatement(nowReading)) {
 			return parseReturnStatement();
 		}
+		if (startsBreakStatement(nowReading)) {
+			return parseBreakStatement();
+		}
 		if (startsFunctionDecl(nowReading)) {
 			return parseFunctionDecl();
 		}
@@ -168,7 +172,7 @@ public class JuncoParser {
 				|| startsUpdateStatement(token) || startsIfStatement(token)
 				|| startsWhileStatement(token) || startsBody(token)
 				|| startsReturnStatement(token) || startsFunctionDecl(token)
-				|| startsCallStatement(token);
+				|| startsCallStatement(token) || startsBreakStatement(token);
 	}
 
 	private boolean startsCallStatement(Token token) {
@@ -488,10 +492,29 @@ public class JuncoParser {
 
 		return ReturnStatementNode.withChildren(returnToken, expression);
 	}
+	
 
 	private boolean startsReturnStatement(Token token) {
 		return token.isLextant(Keyword.RETURN);
 	}
+	
+	private ParseNode parseBreakStatement() {
+		if (!startsBreakStatement(nowReading)) {
+			return syntaxErrorNode("break");
+		}
+		
+		Token returnToken = nowReading;
+		readToken();
+		
+		expect(Punctuator.TERMINATOR);
+		return new BreakStatementNode(returnToken);
+	
+	}
+	
+	private boolean startsBreakStatement(Token token) {
+		return token.isLextant(Keyword.BREAK);
+	}
+
 
 	// updateStmt -> UPDATE identifier <- expression ;
 	private ParseNode parseUpdateStatement() {

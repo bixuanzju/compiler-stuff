@@ -21,6 +21,8 @@ public enum Keyword implements Lextant {
 	RETURN("return"),
 	FUNC("func"),
 	THIS("this"),
+	BREAK("break"),
+	CONTINUE("continue"),
 	UPDATE("update");
 	private String lexeme;
 	private Token prototype;
