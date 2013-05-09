@@ -4,6 +4,7 @@ import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
+import parseTree.nodeTypes.BreakStatementNode;
 import parseTree.nodeTypes.CallStatementNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
@@ -56,6 +57,10 @@ public interface ParseNodeVisitor {
 	void visitEnter(ReturnStatementNode node);
 	
 	void visitLeave(ReturnStatementNode node);
+	
+	void visitEnter(BreakStatementNode node);
+	
+	void visitLeave(BreakStatementNode node);
 	
 	void visitEnter(CallStatementNode node);
 	
@@ -232,6 +237,14 @@ public interface ParseNodeVisitor {
 
 		public void visitLeave(ReturnStatementNode node) {
 			defaultVisitLeave(node);		
+		}
+		
+		public void visitEnter(BreakStatementNode node) {
+			defaultVisitEnter(node);
+		}
+
+		public void visitLeave(BreakStatementNode node) {
+			defaultVisitLeave(node);
 		}
 		
 		public void visitEnter(ProgramNode node) {

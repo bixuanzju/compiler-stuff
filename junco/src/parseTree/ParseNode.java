@@ -17,6 +17,7 @@ public class ParseNode {
 	List<ParseNode>	children;
 	ParseNode parent;
 	String returnLabel;
+	String loopLabel;
 	String boxName;
 
 	protected Token token;
@@ -56,7 +57,13 @@ public class ParseNode {
 		boxName = label;
 	}
 	
+	public void setLoopLabel(String label) {
+		loopLabel = label;
+	}
 	
+	public String returnLoopLabel() {
+		return loopLabel;
+	}
 	
 ////////////////////////////////////////////////////////////////////////////////////
 // attributes

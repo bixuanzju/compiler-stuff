@@ -14,6 +14,7 @@ import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
+import parseTree.nodeTypes.BreakStatementNode;
 import parseTree.nodeTypes.CallStatementNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
@@ -231,7 +232,7 @@ public class JuncoSemanticAnalyzer {
 		public void visitLeave(BoxBodyNode node) {
 			BoxType type = (BoxType) node.getType();
 			type.setScopeSize(node.getScope().getAllocatedSize());
-			//TODO
+			//TODO reference counting for box
 			List<Integer> list = new ArrayList<Integer>();
 			for (Binding binding : node.getScope().getSymbolTable().values()) {
 				if (binding.getType() instanceof BoxType || binding.getType() instanceof RangeType) {
@@ -252,6 +253,7 @@ public class JuncoSemanticAnalyzer {
 		public void visitEnter(BodyNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
+			node.setLoopLabel(node.getParent().returnLoopLabel());
 			enterSubscope(node);
 		}
 
@@ -290,6 +292,7 @@ public class JuncoSemanticAnalyzer {
 		public void visitEnter(CallStatementNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
+			node.setLoopLabel(node.getParent().returnLoopLabel());
 		}
 
 		public void visitLeave(CallStatementNode node) {
@@ -309,7 +312,8 @@ public class JuncoSemanticAnalyzer {
 		public void visitEnter(FunctionInvocationNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
-
+			node.setLoopLabel(node.getParent().returnLoopLabel());
+			
 			ParseNode child = node.child(0);
 
 			if (node.getParent().child(0).getType() instanceof BoxType) {
@@ -355,8 +359,11 @@ public class JuncoSemanticAnalyzer {
 
 		public void visitEnter(ValueBodyNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
+			node.setLoopLabel(node.getParent().returnLoopLabel());
+			
 			String returnlabel = labeller.newLabel("value-body-start", "");
 			node.setReturnLabel(returnlabel);
+			
 
 			if (node.getParent() instanceof FunctionDeclNode) {
 				enterProcedureScope(node);
@@ -431,11 +438,13 @@ public class JuncoSemanticAnalyzer {
 		public void visitEnter(PrintStatementNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
+			node.setLoopLabel(node.getParent().returnLoopLabel());
 		}
 
 		public void visitEnter(DeclarationNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
+			node.setLoopLabel(node.getParent().returnLoopLabel());
 		}
 
 		@Override
@@ -453,6 +462,9 @@ public class JuncoSemanticAnalyzer {
 		public void visitEnter(WhileStatementNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
+			
+			String looplabel = labeller.newLabel("loop-body-start", "");
+			node.setLoopLabel(looplabel);
 		}
 
 		public void visitLeave(WhileStatementNode node) {
@@ -465,6 +477,7 @@ public class JuncoSemanticAnalyzer {
 		public void visitEnter(IfStatementNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
+			node.setLoopLabel(node.getParent().returnLoopLabel());
 		}
 
 		public void visitLeave(IfStatementNode node) {
@@ -477,11 +490,13 @@ public class JuncoSemanticAnalyzer {
 		public void visitEnter(ExpressionListNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
+			node.setLoopLabel(node.getParent().returnLoopLabel());
 		}
 
 		public void visitEnter(ReturnStatementNode node) {
 			node.setBoxName(node.getParent().returnBoxName());
 			node.setReturnLabel(node.getParent().getReturnLabel());
+			node.setLoopLabel(node.getParent().returnLoopLabel());
 		}
 
 		public void visitLeave(ReturnStatementNode node) {
@@ -494,6 +509,16 @@ public class JuncoSemanticAnalyzer {
 
 		}
 
+		public void visitEnter(BreakStatementNode node) {
+			node.setLoopLabel(node.getParent().returnLoopLabel());
+		}
+		
+		public void visitLeave(BreakStatementNode node) {
+			if (node.returnLoopLabel() == null) {
+				logError("break statement must be in the value body at "
+						+ node.getToken().getLocation());
+			}
+		}
 		// /////////////////////////////////////////////////////////////////////////
 		// expressions
 
