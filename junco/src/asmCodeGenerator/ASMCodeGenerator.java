@@ -11,6 +11,7 @@ import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BodyNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BoxBodyNode;
+import parseTree.nodeTypes.BreakStatementNode;
 import parseTree.nodeTypes.CallStatementNode;
 import parseTree.nodeTypes.CharacterNode;
 import parseTree.nodeTypes.DeclarationNode;
@@ -621,9 +622,16 @@ public class ASMCodeGenerator {
 			ASMCodeFragment body = removeVoidCode(node.child(1));
 			code.append(body);
 			code.add(Jump, startlabel);
-
+			
+			code.add(Label, node.returnLoopLabel());
 			code.add(Label, endlabel);
 
+		}
+		
+		public void visitLeave(BreakStatementNode node) {
+			newVoidCode(node);
+			
+			code.add(Jump, node.returnLoopLabel());
 		}
 
 		public void visitLeave(IfStatementNode node) {
